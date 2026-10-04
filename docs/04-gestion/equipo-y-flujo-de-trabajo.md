@@ -126,7 +126,7 @@ La carga por rol y las tareas están en [Equipo §3](#3-distribución-de-carga-y
 
 | Rol | Issues (total / F1 / F2) | Observación |
 |:---|:-:|:---|
-| **R1 Tech Lead / SM** | 31 / 16 / 15 | Informes, presentación 2 y Auth backend; delega revisión de PR |
+| **R1 Tech Lead / SM** | 29 / 14 / 15 | Informes, presentación 2 y Auth backend; delega revisión de PR |
 | **R2 Backend 1** | 33 / 24 / 9 | Camino crítico del MVP (Registro y Gestión); en la Fase 2 sigue con comentarios y observabilidad de backend |
 | **R3 Backend 2 / DBA** | 38 / 18 / 20 | Poca carga al inicio de la Fase 1 (09–12/10): adelantar `DashboardRepository` y pruebas de índices; asume parte del backend de Registro; Dashboard y Administración en la Fase 2 |
 | **R4 Frontend 1** | 27 / 20 / 7 | Pico en la Fase 1 (diseño + login): R5 absorbe la maqueta; asume presentación y UAT |

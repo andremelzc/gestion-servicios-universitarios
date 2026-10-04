@@ -6,7 +6,7 @@
 
 ## Archivos
 
-**Empieza por [`milestones.md`](milestones.md)**: agrupa los 193 issues en las 2 fases vigentes y sus 14 sub-milestones (`1.1`…`1.6`, `2.1`…`2.8`).
+**Empieza por [`milestones.md`](milestones.md)**: agrupa los 191 issues en las 2 fases vigentes y sus 14 sub-milestones (`1.1`…`1.6`, `2.1`…`2.8`).
 
 | Archivo | Épica / prefijo | Issues |
 |:---|:---|:---:|
@@ -17,9 +17,9 @@
 | [05-administracion.md](05-administracion.md) | `ADM` (Módulo 5) | 22 |
 | [07-devops-seguridad.md](07-devops-seguridad.md) | `OPS` (Docker, CI/CD, cloud, OWASP, OpenAPI) | 28 |
 | [08-observabilidad-testing.md](08-observabilidad-testing.md) | `OBS` · `QA` (logs, métricas, alertas, pruebas, k6, UAT) | 33 |
-| [09-entregables-ia.md](09-entregables-ia.md) | `UX` · `IA` · `DOC` (diseño, registro de IA, informes, manuales, sustentación) | 28 |
+| [09-entregables-ia.md](09-entregables-ia.md) | `UX` · `IA` · `DOC` (diseño, registro de IA, informes, manuales, sustentación) | 26 |
 
-**Total: 193 issues.**
+**Total: 191 issues.**
 
 ## Formato de cada Issue
 
@@ -57,7 +57,7 @@ Aceptación / evidencia
 | DevOps 3.2 (umbrales de cobertura) | `OPS-13` |
 | Obs 3.9 (matriz de autorización) | `GES-24`, `AUTH-21`, `ADM-22` (se cierran allí) |
 | Entregables 4.3 y Obs 7.4 (informe de pruebas) | `QA-23` |
-| Registrar uso de IA en cada módulo (`x.5`/`x.6`) | `IA-06` (un checkbox por módulo) |
+| Registrar uso de IA en cada módulo (`x.5`/`x.6`) | Se hace en cada PR; no tiene issue (ver "Alcance recortado") |
 | Tareas de roadmap sin fila en `03-tasks.md` (TASK-002, 013, 025, 039) | `BASE-03`, `QA-00`, `BASE-05`, `DOC-03` |
 | Wireframes (Entregables 1.1) | Documentados en texto (UX §5); el entregable visual en Figma es `UX-08` |
 
@@ -114,14 +114,15 @@ Tareas que **no vienen del enunciado** se eliminaron del backlog el 03/10/2026 p
 | Colecciones Bruno y escenarios k6 separados por módulo | `AUTH-24`, `REG-23`, `REG-24`, `GES-27`, `DASH-20`, `ADM-24` | Una colección Bruno (`QA-11`) y un escenario k6 (`QA-15`) |
 | Código de soporte en errores 5xx y canal de notificación de alertas | `OBS-08`, `OBS-12` | `traceId` en las respuestas de error y alertas visibles en Grafana |
 | Estadística de IA por fase, README con badges y prueba del manual con una persona nueva | `IA-04`, `DOC-06`, `DOC-07` | Registro de IA, lecciones aprendidas (`IA-05`) y los manuales |
+| Issues de proceso del registro de IA (plantilla de PR y registrar uso por módulo) | `IA-02`, `IA-06` | Lo hace cada persona en cada PR: la plantilla de PR ya lo pregunta y la Definición de Hecho exige el registro |
 
 ## Carga por rol
 
-Reparto de los 193 issues tras equilibrar la asignación original de las specs (que dejaba a R6 con 74 y a R3 con solo 4 en la Fase 1). Los issues de pruebas se asignan, siempre que es posible, al rol que construyó lo que se prueba; R6 conserva DevOps, seguridad, observabilidad de infraestructura y la coordinación de calidad.
+Reparto de los 191 issues tras equilibrar la asignación original de las specs (que dejaba a R6 con 74 y a R3 con solo 4 en la Fase 1). Los issues de pruebas se asignan, siempre que es posible, al rol que construyó lo que se prueba; R6 conserva DevOps, seguridad, observabilidad de infraestructura y la coordinación de calidad.
 
 | Rol | Total | Fase 1 (hasta 17/10) | Fase 2 (hasta 14/11) | Foco (issues por épica) |
 |:---|:-:|:-:|:-:|:---|
-| **R1 Tech Lead / SM** | 31 | 16 | 15 | DOC 10, AUTH 7, OPS 7, IA 4, BASE 2, QA 1 |
+| **R1 Tech Lead / SM** | 29 | 14 | 15 | DOC 10, AUTH 7, OPS 7, BASE 2, IA 2, QA 1 |
 | **R2 Backend 1** | 33 | 24 | 9 | GES 12, REG 10, OPS 4, QA 4, AUTH 3 |
 | **R3 Backend 2 / DBA** | 38 | 18 | 20 | ADM 11, DASH 9, QA 6, REG 4, BASE 2, GES 2, OBS 2, OPS 1, DOC 1 |
 | **R4 Frontend 1** | 27 | 20 | 7 | AUTH 6, UX 6, REG 5, QA 4, DOC 3, GES 1, DASH 1, ADM 1 |

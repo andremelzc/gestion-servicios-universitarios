@@ -6,13 +6,13 @@
 
 > **Trabajo en paralelo.** El milestone **1.6** reúne tareas que *no* están en la ruta crítica del MVP pero pueden hacerse ya porque sus bloqueadores están en los milestones 1.1–1.5 (Dockerfiles y CI, observabilidad base, consultas del dashboard, componentes del frontend, springdoc…). Aprovechan a quien tiene menos carga en la Fase 1. Llevan la etiqueta `adelanto` y un **plan B**: si el 17/10 no están hechas, **pasan a su milestone original de la Fase 2** sin afectar la presentación del MVP.
 
-> ⚠️ **Riesgo de capacidad:** la Fase 1 concentra 114 issues (de ellos 28 son adelantos opcionales) y la Fase 2 79. Si el avance real no alcanza, se aplica el [plan de contingencia](../04-gestion/calendario-y-contingencia.md#5-plan-de-contingencia-qué-se-recorta-y-en-qué-orden) (recortar primero notificaciones, comentarios, recuperación de contraseña y los opcionales).
+> ⚠️ **Riesgo de capacidad:** la Fase 1 concentra 112 issues (de ellos 28 son adelantos opcionales) y la Fase 2 79. Si el avance real no alcanza, se aplica el [plan de contingencia](../04-gestion/calendario-y-contingencia.md#5-plan-de-contingencia-qué-se-recorta-y-en-qué-orden) (recortar primero notificaciones, comentarios, recuperación de contraseña y los opcionales).
 
 ## Resumen
 
 | Milestone | Cierre | Sprint | Issues |
 |:--|:-:|:-:|:-:|
-| **1.1** Fundaciones técnicas | 06/10 | S1 | 9 |
+| **1.1** Fundaciones técnicas | 06/10 | S1 | 7 |
 | **1.2** Auth backend y base frontend | 08/10 | S1 | 18 |
 | **1.3** Registro backend, UI de auth y maqueta | 11/10 | S1 | 21 |
 | **1.4** Gestión backend y UI del flujo MVP | 14/10 | S1 | 25 |
@@ -45,9 +45,7 @@
 | UX-01 | Diseño - Biblioteca de estilos y componentes en Figma | R4 |
 | UX-08 | Diseño - Wireframes de baja fidelidad en Figma | R4 |
 | IA-01 | Proceso - Sesión de equipo y acta de la regla de registro | R1 |
-| IA-02 | Proceso - "¿Se usó IA? N° de entrada" en la plantilla de PR | R1 |
 | IA-03 | Proceso - Auditoría semanal del registro (recurrente, hasta la semana 16) | R6 |
-| IA-06 | Proceso - Registrar el uso de IA de cada módulo | R1 |
 
 ### Milestone 1.2 — Auth backend y base frontend · cierre 08/10 · S1
 

@@ -80,7 +80,7 @@ docs/
 
 | Documento | Contenido |
 |:---|:---|
-| **[Backlog de Issues](backlog/README.md)** | **193 issues** atómicos (1 issue = 1 responsable) con dependencias, mapa de cobertura del enunciado, equivalencia con las `TASK-xxx` y gestión en GitHub Projects |
+| **[Backlog de Issues](backlog/README.md)** | **191 issues** atómicos (1 issue = 1 responsable) con dependencias, mapa de cobertura del enunciado, equivalencia con las `TASK-xxx` y gestión en GitHub Projects |
 | **[Milestones](backlog/milestones.md)** | 14 sub-milestones en 2 fases (presentaciones 17/10 y 14/11) |
 
 ---

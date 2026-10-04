@@ -21,9 +21,8 @@
 |:-:|:-:|:---|:---:|:---:|:---|
 | [x] | 2.1 | `docs/04-gestion/ia-register.md` con la tabla de campos exigidos, reglas y entradas reales separadas de los ejemplos | TS-10 | R6 | [Registro de IA](../../docs/04-gestion/ia-register.md) |
 | [ ] | 2.2 | Sesión de equipo para acordar la regla "todo uso significativo de IA se registra de inmediato" y revisar [§3](../../docs/04-gestion/ia-register.md#3-criterios-de-aceptación-del-uso-de-ia) | TS-10 | R1 | Acta breve |
-| [ ] | 2.3 | Agregar "¿Se usó IA? N° de entrada" a la revisión de cada PR | TS-10 | R1 | Plantilla de PR |
-| [ ] | 2.4 | **Auditoría semanal** del registro (cada semana, hasta la semana 12) | TS-10 | R6 | Nota en la *review* |
-| [ ] | 2.5 | Lecciones aprendidas (proyecto y uso de IA) | TS-10 | Todos | [§10](../../docs/04-gestion/ia-register.md#10-reflexión-final-se-completa-en-la-fase-iv) completada |
+| [ ] | 2.3 | **Auditoría semanal** del registro (cada semana, hasta la semana 12) | TS-10 | R6 | Nota en la *review* |
+| [ ] | 2.4 | Lecciones aprendidas (proyecto y uso de IA) | TS-10 | Todos | [§10](../../docs/04-gestion/ia-register.md#10-reflexión-final-se-completa-en-la-fase-iv) completada |
 
 ## Fase 3 — Informes de hito · R1
 

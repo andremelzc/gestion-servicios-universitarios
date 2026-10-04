@@ -75,11 +75,6 @@ La Fase II del enunciado incluye cookies; el [ADR-004](../02-diseno/decisiones-a
 
 **Aceptación:** acta breve.
 
-### IA-02 · [IA] Proceso - "¿Se usó IA? N° de entrada" en la plantilla de PR
-**Rol:** R1 · **Labels:** `ia` `devops` `TS-10` · **Sprint:** S1 · **Milestone:** 1.1 Fundaciones técnicas · **Límite:** 06/10 · **Bloqueado por:** BASE-02
-
-**Aceptación:** plantilla de PR actualizada.
-
 ### IA-03 · [IA] Proceso - Auditoría semanal del registro (recurrente, hasta la semana 16)
 **Rol:** R6 · **Labels:** `ia` `TS-10` · **Sprint:** recurrente · **Milestone:** 1.1 Fundaciones técnicas · **Límite:** 14/11 (recurrente) · **Bloqueado por:** IA-01
 - [ ] Revisar semanalmente que las entradas tengan prompt, resultado, uso, validación, modificaciones y responsable
@@ -92,13 +87,6 @@ La Fase II del enunciado incluye cookies; el [ADR-004](../02-diseno/decisiones-a
 - [ ] Redactar la sección "Lecciones aprendidas" del informe final (paso 14 de la sustentación)
 
 **Aceptación:** sección completa.
-
-### IA-06 · [IA] Proceso - Registrar el uso de IA de cada módulo
-**Rol:** R1 (cada integrante registra lo suyo) · **Labels:** `ia` `TS-10` · **Sprint:** recurrente · **Milestone:** 1.1 Fundaciones técnicas · **Límite:** 14/11 (recurrente) · **Bloqueado por:** IA-01
-- [ ] Auth · [ ] Registro · [ ] Gestión (especialmente pruebas generadas) · [ ] Dashboard · [ ] Administración · [ ] DevOps (Dockerfiles, *workflows*, seguridad) · [ ] Observabilidad y pruebas · [ ] Notificaciones · [ ] Entregables
-- [ ] Cada entrada incluye la validación realizada
-
-**Aceptación:** entradas con validación; verificado por `IA-03`.
 
 ---
 

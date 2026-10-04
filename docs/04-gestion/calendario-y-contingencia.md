@@ -1,6 +1,6 @@
 # Calendario, Hitos y Contingencia
 
-> **Fuente única del calendario.** El detalle por tarea (193 issues, milestones y dependencias) vive en el [backlog](../backlog/milestones.md); aquí solo están el calendario, los hitos, la ruta crítica, la contingencia y el cumplimiento del ciclo exigido.
+> **Fuente única del calendario.** El detalle por tarea (191 issues, milestones y dependencias) vive en el [backlog](../backlog/milestones.md); aquí solo están el calendario, los hitos, la ruta crítica, la contingencia y el cumplimiento del ciclo exigido.
 > Relacionados: [Documento del proyecto (riesgos)](../01-definicion/documento-proyecto.md#6-riesgos-del-proyecto) · [SRS §7 (alcance MVP)](../01-definicion/especificaciones-tecnicas.md#7-alcance-del-mvp-17102026) · [Equipo y roles](equipo-y-flujo-de-trabajo.md) · [Gobernanza Git](equipo-y-flujo-de-trabajo.md)
 
 ---
