@@ -81,21 +81,21 @@
 ## ADR-007 — Plataforma de despliegue
 
 - **Estado:** Aceptada · **Fecha:** 2026-10-05
-- **Contexto:** Fase III exige "selección de plataforma cloud", ambientes dev/test/prod y despliegue. Las cuotas gratuitas cambian con el tiempo; **hay que verificar condiciones vigentes** antes de comprometerse.
+- **Contexto:** Fase III exige "selección de plataforma cloud", ambientes dev/test/prod y despliegue. Las plataformas deben mantener costos en cero para este proyecto universitario. Se descartó Railway debido a que recientemente eliminó su capa 100% gratuita.
 - **Opciones evaluadas:**
 
-| Criterio | A. VM + Docker Compose | B. PaaS (Railway / Render) | C. AWS gestionado (ECS + RDS) |
+| Criterio | A. VM + Docker Compose | B. Vercel (Front) + Render (Back/BD) | C. AWS gestionado (ECS + RDS) |
 |:---|:---|:---|:---|
 | Portabilidad (mismo `docker-compose` en dev y prod) | Alta | Media (config por plataforma) | Baja |
-| Soporte de MySQL 8 | Propio (contenedor) | **Aceptado en Railway** | RDS (de pago) |
-| Observabilidad (Prometheus/Grafana) | Incluida en el compose | **Integración de logs activa** | CloudWatch (de pago) |
-| Costo para el curso | Bajo/cero | **Gratuito / Plan Educativo** | Alto |
+| Soporte de MySQL 8 | Propio (contenedor) | **Integración con proveedor gratuito (ej. Aiven/CleverCloud) en Render** | RDS (de pago) |
+| Observabilidad (Prometheus/Grafana) | Incluida en el compose | **Logs en consola integrados** | CloudWatch (de pago) |
+| Costo para el curso | Bajo/cero | **100% Gratuito** | Alto |
 | Aprendizaje (Docker, redes, TLS) | Alto | Bajo | Alto |
-| Riesgo operativo | Mantenimiento del servidor | **Bajo (Totalmente gestionado)** | Complejidad |
+| Riesgo operativo | Mantenimiento del servidor | **Bajo (Servicios gestionados)** | Complejidad |
 
-- **Decisión final:** **Opción B — Plataforma como Servicio (Railway)** para alojar el Backend de Spring Boot, la base de datos MySQL 8 y el Frontend estático. Se seleccionó por su nulo mantenimiento de SO, su facilidad de integración nativa con GitHub para CI/CD continuo sin configurar pipelines extensos, y la protección SSL inmediata (Let's Encrypt).
-- **Consecuencias:** (+) El equipo se enfoca 100% en el código en lugar de parchar servidores Linux. El despliegue a producción será inmediato con cada merge a `main`. (−) Dependencia de las limitaciones de capa gratuita (ej. apagado de contenedores o límite de horas/GB de RAM).
-- **Criterio de decisión final:** Decisión formalizada por André Meléndez el 05/10/2026. Despliegues se rutarán hacia la región `us-east` (US).
+- **Decisión final:** **Opción B — Vercel para el Frontend y Render para el Backend**. Se utilizará Vercel para servir la SPA de React (Vite) debido a su excelente capa gratuita y CDN global. Render se utilizará para levantar la API de Spring Boot en un Web Service gratuito. Para la Base de Datos MySQL, se optará por un proveedor DBaaS gratuito compatible (como Aiven MySQL o TiDB) conectado a Render.
+- **Consecuencias:** (+) Costo $0 absoluto. Despliegue continuo directo desde las ramas de GitHub sin configurar workflows manuales complejos. (−) Las instancias gratuitas de Render "se duermen" (spin-down) tras 15 minutos de inactividad, por lo que la primera petición del día tardará unos 50 segundos en responder (Cold Start).
+- **Criterio de decisión final:** Decisión formalizada por André Meléndez el 05/10/2026 priorizando la viabilidad económica del proyecto académico.
 
 ## ADR-008 — Herramientas de prueba y seguridad automatizada
 
