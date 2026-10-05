@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { AuthPort } from '../../ports/api/AuthPort';
-import { AuthSession } from '../../domain/models/Auth';
+import type { AuthPort } from '../../ports/api/AuthPort';
+import type { AuthSession } from '../../domain/models/Auth';
 
 const API_URL = 'http://localhost:8080/api/v1';
 

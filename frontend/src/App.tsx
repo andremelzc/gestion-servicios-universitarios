@@ -1,4 +1,4 @@
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from './store/useAuthStore';
 import { LogIn, LogOut, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
