@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AuthSession, Usuario } from '../domain/models/Auth';
+import type { AuthSession } from '../domain/models/Auth';
 import { authAdapter } from '../adapters/http/AuthAdapter';
 
 interface AuthState {

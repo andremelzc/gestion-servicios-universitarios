@@ -1,0 +1,50 @@
+name: Pipeline CD - Despliegue a Producción
+
+on:
+  push:
+    tags:
+      - 'v*' # Se ejecuta automáticamente cuando creas un tag de versión, ej: v1.0.0
+
+jobs:
+  deploy-render:
+    name: Desplegar Backend a Render
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "::error::El secreto RENDER_DEPLOY_HOOK no está configurado en GitHub Secrets."
+            exit 1
+          fi
+          echo "Iniciando despliegue en Render..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo " Petición de despliegue enviada a Render."
+
+  deploy-vercel:
+    name: Desplegar Frontend a Vercel
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Aviso de Vercel
+        run: |
+          echo "Vercel intercepta automáticamente los tags y commits a main."
+          echo "El despliegue del frontend ya está siendo gestionado por la integración nativa de Vercel con GitHub."
+
+  smoke-test:
+    name: Smoke Test (Salud del Backend)
+    runs-on: ubuntu-latest
+    needs: [deploy-render]
+    environment: production
+    steps:
+      - name: Esperar despliegue de Render
+        run: |
+          echo "Esperando 90 segundos para que el contenedor Docker levante en Render..."
+          sleep 90
+      
+      - name: Verificar Actuator Health
+        run: |
+          # En un proyecto real, se reemplaza la URL por la URL real de Render
+          # backend_url="https://backend-servicios.onrender.com"
+          # curl -f "$backend_url/actuator/health" || echo "Fallo en el Smoke Test"
+          echo "Smoke Test básico ejecutado (simulado hasta tener la URL real de Producción)."

@@ -14,7 +14,7 @@
 | [004](#adr-004--jwt-de-8-horas-sin-refresh-token) | JWT de 8 horas sin *refresh token* | Aceptada |
 | [005](#adr-005--rechazar-html-en-lugar-de-sanitizarlo) | Rechazar HTML en lugar de sanitizarlo | Aceptada |
 | [006](#adr-006--nginx-como-api-gateway-ligero) | Nginx como API Gateway ligero | Aceptada |
-| [007](#adr-007--plataforma-de-despliegue) | Plataforma de despliegue | **Propuesta** |
+| [007](#adr-007--plataforma-de-despliegue) | Plataforma de despliegue | Aceptada |
 | [008](#adr-008--herramientas-de-prueba-y-seguridad-automatizada) | Herramientas de prueba y seguridad automatizada | Aceptada |
 | [009](#adr-009--los-estados-son-un-catálogo-de-presentación-no-de-comportamiento) | Estados: catálogo de presentación, no de comportamiento | Aceptada |
 | [010](#adr-010--fuente-única-de-verdad-por-tema) | Fuente única de verdad por tema | Aceptada |
@@ -80,22 +80,22 @@
 
 ## ADR-007 — Plataforma de despliegue
 
-- **Estado:** **Propuesta — el equipo debe confirmarla antes del 23/10/2026** (ver riesgo R4) · **Fecha:** 2026-10-03
-- **Contexto:** Fase III exige "selección de plataforma cloud", ambientes dev/test/prod y despliegue. Las cuotas gratuitas cambian con el tiempo; **hay que verificar condiciones vigentes** antes de comprometerse.
+- **Estado:** Aceptada · **Fecha:** 2026-10-05
+- **Contexto:** Fase III exige "selección de plataforma cloud", ambientes dev/test/prod y despliegue. Las plataformas deben mantener costos en cero para este proyecto universitario. Se descartó Railway debido a que recientemente eliminó su capa 100% gratuita.
 - **Opciones evaluadas:**
 
-| Criterio | A. VM + Docker Compose | B. PaaS (Railway / Render) | C. AWS gestionado (ECS + RDS) |
+| Criterio | A. VM + Docker Compose | B. Vercel (Front) + Render (Back/BD) | C. AWS gestionado (ECS + RDS) |
 |:---|:---|:---|:---|
-| Portabilidad (mismo `docker-compose` en dev y prod) | **Alta** | Media (config por plataforma) | Baja |
-| Soporte de MySQL 8 | Propio (contenedor) | Depende del plan; verificar | RDS (de pago) |
-| Observabilidad (Prometheus/Grafana) | **Incluida en el compose** | Limitada o de pago | CloudWatch (de pago) |
-| Costo para el curso | Bajo/cero con créditos educativos o capa gratuita | Bajo, con límites | Alto |
-| Aprendizaje (Docker, redes, TLS) | **Alto** | Bajo | Alto |
-| Riesgo operativo | Mantenimiento del servidor | Cuotas / suspensión | Complejidad |
+| Portabilidad (mismo `docker-compose` en dev y prod) | Alta | Media (config por plataforma) | Baja |
+| Soporte de MySQL 8 | Propio (contenedor) | **Integración con proveedor gratuito (ej. Aiven/CleverCloud) en Render** | RDS (de pago) |
+| Observabilidad (Prometheus/Grafana) | Incluida en el compose | **Logs en consola integrados** | CloudWatch (de pago) |
+| Costo para el curso | Bajo/cero | **100% Gratuito** | Alto |
+| Aprendizaje (Docker, redes, TLS) | Alto | Bajo | Alto |
+| Riesgo operativo | Mantenimiento del servidor | **Bajo (Servicios gestionados)** | Complejidad |
 
-- **Decisión propuesta:** **Opción A — una VM Linux con Docker Compose** (proveedor a elegir entre los que ofrezcan créditos o capa gratuita a estudiantes: p. ej. Azure for Students, AWS, Oracle Cloud u otro), con **dominio + TLS (Let's Encrypt)** vía Nginx. **Plan B** si no hay VM disponible: PaaS (B) o Docker Compose en un equipo del grupo con túnel (documentando la limitación).
-- **Consecuencias:** (+) el mismo `docker-compose.yml` sirve en dev, staging y prod con distinto `.env`; todo el stack de observabilidad se despliega igual; (−) el equipo asume parches del SO, respaldos y seguridad del host (checklist en [DevOps §8](../03-calidad-y-operacion/devops-despliegue.md#8-operación-del-host)).
-- **Criterio de decisión final:** que alguien del equipo confirme el proveedor y registre aquí el nombre, región y fecha, y se actualice [DevOps](../03-calidad-y-operacion/devops-despliegue.md).
+- **Decisión final:** **Opción B — Vercel para el Frontend y Render para el Backend**. Se utilizará Vercel para servir la SPA de React (Vite) debido a su excelente capa gratuita y CDN global. Render se utilizará para levantar la API de Spring Boot en un Web Service gratuito. Para la Base de Datos MySQL, se optará por un proveedor DBaaS gratuito compatible (como Aiven MySQL o TiDB) conectado a Render.
+- **Consecuencias:** (+) Costo $0 absoluto. Despliegue continuo directo desde las ramas de GitHub sin configurar workflows manuales complejos. (−) Las instancias gratuitas de Render "se duermen" (spin-down) tras 15 minutos de inactividad, por lo que la primera petición del día tardará unos 50 segundos en responder (Cold Start).
+- **Criterio de decisión final:** Decisión formalizada por André Meléndez el 05/10/2026 priorizando la viabilidad económica del proyecto académico.
 
 ## ADR-008 — Herramientas de prueba y seguridad automatizada
 
