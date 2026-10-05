@@ -274,12 +274,12 @@ Aplica a la VM de *staging*/*prod* ([ADR-007](../02-diseno/decisiones-arquitectu
 
 ## 9. Plataforma cloud
 
-La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: propuesta pendiente de confirmación.** Cuando se confirme, se completa aquí:
+La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: Aceptada.** La arquitectura consta de Vercel (Frontend) y Render (Backend y DBaaS externo):
 
 | Dato | Valor |
 |:---|:---|
-| Proveedor y región | *por definir* |
-| URL de *staging* | *por definir* |
-| URL de producción/demo | *por definir* |
-| Responsable de la infraestructura | Rol 6 |
-| Fecha de decisión | *por definir (antes del 23/10/2026)* |
+| Proveedor y región | Vercel (Front, Global) / Render (Back, US East) |
+| URL de *staging* | *Pendiente del primer despliegue automatizado* |
+| URL de producción/demo | *Pendiente del primer despliegue automatizado* |
+| Responsable de la infraestructura | andremelzc (Tech Lead / DevOps) |
+| Fecha de decisión | 05/10/2026 |
