@@ -19,3 +19,5 @@ storage/
 .idea/
 .vscode/
 *.iml
+.vercel
+.env*
