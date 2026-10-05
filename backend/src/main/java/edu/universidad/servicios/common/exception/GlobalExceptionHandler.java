@@ -62,6 +62,15 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
+    @ExceptionHandler(RecursoEnConflictoException.class)
+    public ProblemDetail handleConflictoException(RecursoEnConflictoException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        pd.setTitle("Recurso en conflicto");
+        pd.setType(URI.create("https://api.servicios.edu/errors/conflict"));
+        addCommonProperties(pd);
+        return pd;
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGlobalException(Exception ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ha ocurrido un error inesperado en el servidor.");

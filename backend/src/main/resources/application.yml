@@ -20,6 +20,8 @@ app:
     expiration-minutes: 480
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  security:
+    allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:universidad.edu}
 
 server:
   port: ${PORT:8080}
