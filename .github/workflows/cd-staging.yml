@@ -1,0 +1,37 @@
+name: CD Pipeline - Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-backend:
+    name: Desplegar Backend a Render
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          if [ -z "${{ secrets.RENDER_STAGING_HOOK }}" ]; then
+            echo "::error::El secreto RENDER_STAGING_HOOK no está configurado en GitHub Secrets."
+            exit 1
+          fi
+          echo "Iniciando despliegue del Backend en Render (Staging)..."
+          curl -X GET "${{ secrets.RENDER_STAGING_HOOK }}"
+          echo " Petición de despliegue enviada a Render."
+
+  deploy-frontend:
+    name: Desplegar Frontend a Vercel
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Trigger Vercel Deploy Hook
+        run: |
+          if [ -z "${{ secrets.VERCEL_STAGING_HOOK }}" ]; then
+            echo "::error::El secreto VERCEL_STAGING_HOOK no está configurado en GitHub Secrets."
+            exit 1
+          fi
+          echo "Iniciando despliegue del Frontend en Vercel (Staging)..."
+          curl -X POST "${{ secrets.VERCEL_STAGING_HOOK }}"
+          echo " Petición de despliegue enviada a Vercel."
