@@ -2,7 +2,8 @@ import axios from 'axios';
 import type { AuthPort } from '../../ports/api/AuthPort';
 import type { AuthSession } from '../../domain/models/Auth';
 
-const API_URL = 'http://localhost:8080/api/v1';
+// Lee la URL base desde las variables de entorno, o usa localhost por defecto
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 export const authAdapter: AuthPort = {
   login: async (correo: string, password: string): Promise<AuthSession> => {
