@@ -25,13 +25,19 @@ jobs:
     name: Desplegar Frontend a Vercel
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - name: Trigger Vercel Deploy Hook
-        run: |
-          if [ -z "${{ secrets.VERCEL_STAGING_HOOK }}" ]; then
-            echo "::error::El secreto VERCEL_STAGING_HOOK no está configurado en GitHub Secrets."
-            exit 1
-          fi
-          echo "Iniciando despliegue del Frontend en Vercel (Staging)..."
-          curl -X POST "${{ secrets.VERCEL_STAGING_HOOK }}"
-          echo " Petición de despliegue enviada a Vercel."
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Vercel CLI
+        run: npm i -g vercel
+      - name: Vercel pull
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel deploy
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
