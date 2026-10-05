@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Actualizaciones de dependencias Java (Spring Boot)
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+
+  # Actualizaciones de dependencias Node.js (Vite/React)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+
+  # Actualizaciones de las GitHub Actions (CI/CD)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"

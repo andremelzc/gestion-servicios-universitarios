@@ -1,0 +1,15 @@
+# Reglas de CODEOWNERS para el repositorio
+
+# Dueño global por defecto (Tech Lead R1)
+*       @andremelzc
+
+# El equipo de Backend es dueño de la carpeta backend
+/backend/       @andremelzc
+
+# El equipo de Frontend será dueño de la carpeta frontend (cuando se cree)
+/frontend/      @andremelzc
+
+# El equipo DevOps / Tech Lead controla infraestructura y docs
+/.github/       @andremelzc
+/docs/          @andremelzc
+/specs/         @andremelzc
