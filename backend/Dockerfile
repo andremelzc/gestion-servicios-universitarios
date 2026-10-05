@@ -3,7 +3,7 @@ FROM eclipse-temurin:21-jdk-jammy AS build
 WORKDIR /app
 
 # Copiamos el código del backend y la base de datos
-COPY backend/ .mvn/ mvnw pom.xml ./
+COPY backend/ ./backend/
 COPY database/ ./database/
 
 # Ajustamos permisos y bajamos dependencias
