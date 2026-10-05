@@ -80,22 +80,22 @@
 
 ## ADR-007 — Plataforma de despliegue
 
-- **Estado:** **Propuesta — el equipo debe confirmarla antes del 23/10/2026** (ver riesgo R4) · **Fecha:** 2026-10-03
+- **Estado:** Aceptada · **Fecha:** 2026-10-05
 - **Contexto:** Fase III exige "selección de plataforma cloud", ambientes dev/test/prod y despliegue. Las cuotas gratuitas cambian con el tiempo; **hay que verificar condiciones vigentes** antes de comprometerse.
 - **Opciones evaluadas:**
 
 | Criterio | A. VM + Docker Compose | B. PaaS (Railway / Render) | C. AWS gestionado (ECS + RDS) |
 |:---|:---|:---|:---|
-| Portabilidad (mismo `docker-compose` en dev y prod) | **Alta** | Media (config por plataforma) | Baja |
-| Soporte de MySQL 8 | Propio (contenedor) | Depende del plan; verificar | RDS (de pago) |
-| Observabilidad (Prometheus/Grafana) | **Incluida en el compose** | Limitada o de pago | CloudWatch (de pago) |
-| Costo para el curso | Bajo/cero con créditos educativos o capa gratuita | Bajo, con límites | Alto |
-| Aprendizaje (Docker, redes, TLS) | **Alto** | Bajo | Alto |
-| Riesgo operativo | Mantenimiento del servidor | Cuotas / suspensión | Complejidad |
+| Portabilidad (mismo `docker-compose` en dev y prod) | Alta | Media (config por plataforma) | Baja |
+| Soporte de MySQL 8 | Propio (contenedor) | **Aceptado en Railway** | RDS (de pago) |
+| Observabilidad (Prometheus/Grafana) | Incluida en el compose | **Integración de logs activa** | CloudWatch (de pago) |
+| Costo para el curso | Bajo/cero | **Gratuito / Plan Educativo** | Alto |
+| Aprendizaje (Docker, redes, TLS) | Alto | Bajo | Alto |
+| Riesgo operativo | Mantenimiento del servidor | **Bajo (Totalmente gestionado)** | Complejidad |
 
-- **Decisión propuesta:** **Opción A — una VM Linux con Docker Compose** (proveedor a elegir entre los que ofrezcan créditos o capa gratuita a estudiantes: p. ej. Azure for Students, AWS, Oracle Cloud u otro), con **dominio + TLS (Let's Encrypt)** vía Nginx. **Plan B** si no hay VM disponible: PaaS (B) o Docker Compose en un equipo del grupo con túnel (documentando la limitación).
-- **Consecuencias:** (+) el mismo `docker-compose.yml` sirve en dev, staging y prod con distinto `.env`; todo el stack de observabilidad se despliega igual; (−) el equipo asume parches del SO, respaldos y seguridad del host (checklist en [DevOps §8](../03-calidad-y-operacion/devops-despliegue.md#8-operación-del-host)).
-- **Criterio de decisión final:** que alguien del equipo confirme el proveedor y registre aquí el nombre, región y fecha, y se actualice [DevOps](../03-calidad-y-operacion/devops-despliegue.md).
+- **Decisión final:** **Opción B — Plataforma como Servicio (Railway)** para alojar el Backend de Spring Boot, la base de datos MySQL 8 y el Frontend estático. Se seleccionó por su nulo mantenimiento de SO, su facilidad de integración nativa con GitHub para CI/CD continuo sin configurar pipelines extensos, y la protección SSL inmediata (Let's Encrypt).
+- **Consecuencias:** (+) El equipo se enfoca 100% en el código en lugar de parchar servidores Linux. El despliegue a producción será inmediato con cada merge a `main`. (−) Dependencia de las limitaciones de capa gratuita (ej. apagado de contenedores o límite de horas/GB de RAM).
+- **Criterio de decisión final:** Decisión formalizada por André Meléndez el 05/10/2026. Despliegues se rutarán hacia la región `us-east` (US).
 
 ## ADR-008 — Herramientas de prueba y seguridad automatizada
 
