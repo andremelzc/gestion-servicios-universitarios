@@ -26,10 +26,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Aviso de Vercel
+      - name: Trigger Vercel Deploy Hook
         run: |
-          echo "Vercel intercepta automáticamente los tags y commits a main."
-          echo "El despliegue del frontend ya está siendo gestionado por la integración nativa de Vercel con GitHub."
+          if [ -z "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
+            echo "::error::El secreto VERCEL_DEPLOY_HOOK no está configurado en GitHub Secrets."
+            exit 1
+          fi
+          echo "Iniciando despliegue en Vercel..."
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+          echo " Petición de despliegue enviada a Vercel."
 
   smoke-test:
     name: Smoke Test (Salud del Backend)
