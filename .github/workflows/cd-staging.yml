@@ -6,8 +6,13 @@ on:
       - develop
 
 jobs:
+  ci:
+    name: Pruebas (CI)
+    uses: ./.github/workflows/ci.yml
+
   deploy-backend:
     name: Desplegar Backend a Render
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -23,6 +28,7 @@ jobs:
 
   deploy-frontend:
     name: Desplegar Frontend a Vercel
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: staging
     env:

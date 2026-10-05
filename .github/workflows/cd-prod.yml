@@ -6,8 +6,13 @@ on:
       - 'v*' # Se ejecuta automáticamente cuando creas un tag de versión, ej: v1.0.0
 
 jobs:
+  ci:
+    name: Pruebas (CI)
+    uses: ./.github/workflows/ci.yml
+
   deploy-render:
     name: Desplegar Backend a Render
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -23,6 +28,7 @@ jobs:
 
   deploy-vercel:
     name: Desplegar Frontend a Vercel
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: production
     env:
