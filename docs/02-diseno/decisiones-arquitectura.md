@@ -14,7 +14,7 @@
 | [004](#adr-004--jwt-de-8-horas-sin-refresh-token) | JWT de 8 horas sin *refresh token* | Aceptada |
 | [005](#adr-005--rechazar-html-en-lugar-de-sanitizarlo) | Rechazar HTML en lugar de sanitizarlo | Aceptada |
 | [006](#adr-006--nginx-como-api-gateway-ligero) | Nginx como API Gateway ligero | Aceptada |
-| [007](#adr-007--plataforma-de-despliegue) | Plataforma de despliegue | **Propuesta** |
+| [007](#adr-007--plataforma-de-despliegue) | Plataforma de despliegue | Aceptada |
 | [008](#adr-008--herramientas-de-prueba-y-seguridad-automatizada) | Herramientas de prueba y seguridad automatizada | Aceptada |
 | [009](#adr-009--los-estados-son-un-catálogo-de-presentación-no-de-comportamiento) | Estados: catálogo de presentación, no de comportamiento | Aceptada |
 | [010](#adr-010--fuente-única-de-verdad-por-tema) | Fuente única de verdad por tema | Aceptada |
