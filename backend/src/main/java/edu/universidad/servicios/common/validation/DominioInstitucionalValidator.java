@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class DominioInstitucionalValidator implements ConstraintValidator<DominioInstitucional, String> {
 
     @Value("${app.security.allowed-email-domain:universidad.edu}")
-    private String allowedDomain;
+    private String allowedDomain = "universidad.edu";
 
     @Override
     public void initialize(DominioInstitucional constraintAnnotation) {
