@@ -10,8 +10,14 @@ import java.time.Clock;
 public class ClockConfig {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(Clock.class)
     public Clock clock() {
         return Clock.systemUTC();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(io.micrometer.core.instrument.Clock.class)
+    public io.micrometer.core.instrument.Clock micrometerClock() {
+        return io.micrometer.core.instrument.Clock.SYSTEM;
     }
 }

@@ -43,7 +43,8 @@ public class SecurityConfig {
                         "/api/v1/auth/registro",
                         "/api/v1/auth/recuperar-password",
                         "/api/v1/auth/restablecer-password",
-                        "/actuator/health"
+                        "/actuator",
+                        "/actuator/**"
                 ).permitAll()
                 // Swagger (se debería limitar en prod)
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
