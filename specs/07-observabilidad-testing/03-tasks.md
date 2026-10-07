@@ -26,19 +26,19 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 3.1 | Base de pruebas: Testcontainers MySQL compartido, `Clock` fijo, *builders* | TS-06 | CA-10 |
-| [ ] | 3.2 | Unitarias de `AuthService` (login, registro y cambio de contraseña) — *con apoyo de IA, revisadas con la lista* | TS-06 | TC-001, 002, 004…006 |
+| [x] | 3.1 | Base de pruebas: Testcontainers MySQL compartido, `Clock` fijo, *builders* | TS-06 | CA-10 |
+| [x] | 3.2 | Unitarias de `AuthService` (login, registro y cambio de contraseña) — *con apoyo de IA, revisadas con la lista* | TS-06 | TC-001, 002, 004…006 |
 | [ ] | 3.3 | Unitarias de `SolicitudWorkflowService`: transiciones válidas y las inválidas más comunes | TS-06 | TC-014…019 |
 | [ ] | 3.4 | Unitarias de `FileTypeValidator`, `SlaCalculator`, `CodigoSolicitudService`, `AccessPolicy` | TS-06 | TC-007…011 |
 | [ ] | 3.5 | Integración de persistencia: migraciones, triggers, constraints | TS-06 | TC-022 |
 | [ ] | 3.6 | Integración del dashboard con dataset conocido | TS-06 | TC-024, TC-025 |
-| [ ] | 3.7 | Suite de autorización parametrizada (matriz completa) | TS-06 | CA-12 |
+| [x] | 3.7 | Suite de autorización parametrizada (matriz completa) | TS-06 | CA-12 |
 
 ## Fase 4 — Pruebas frontend · R4 / R5
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 4.1 | Configurar Vitest + Testing Library + MSW y cobertura | TS-06 | `npm test` en CI |
+| [x] | 4.1 | Configurar Vitest + Testing Library + MSW y cobertura | TS-06 | `npm test` en CI |
 | [ ] | 4.2 | Pruebas de formularios (login, registro, nueva solicitud), `FileUploader`, `AuthContext`, rutas protegidas | TS-06 | CA-13 |
 | [ ] | 4.3 | Pruebas de `AccionesSolicitud` (botones según `accionesPermitidas`) y de gráficos con datos vacíos | TS-06 | CA-13 |
 
