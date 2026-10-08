@@ -5,7 +5,7 @@ SPA con React 18 + JavaScript (JSX), Vite y React Router. Estructura por _featur
 
 ## Requisitos
 
-Node 20 (o superior) y npm.
+Node >= 20.19 y < 23 (el proyecto usa `engine-strict`) y npm.
 
 ## Scripts
 
