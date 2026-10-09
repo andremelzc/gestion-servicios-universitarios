@@ -1,0 +1,218 @@
+/* Los tokens de tokens.css aún no existen en develop: se usan con el valor de UX §2.1 como respaldo. */
+.data-table {
+  --dt-border: var(--color-border, #d1d5db);
+  --dt-text: var(--color-text, #111827);
+  --dt-muted: var(--color-text-muted, #4b5563);
+  --dt-surface: var(--color-surface, #ffffff);
+  --dt-primary: var(--color-primary, #1d4ed8);
+  --dt-primary-hover: var(--color-primary-hover, #1e40af);
+  --dt-focus: var(--color-focus, #2563eb);
+  --dt-radius: var(--radius, 8px);
+  color: var(--dt-text);
+  min-width: 0;
+}
+
+.data-table__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.data-table__boton {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--dt-primary);
+  border-radius: var(--dt-radius);
+  background: var(--dt-surface);
+  color: var(--dt-primary);
+  cursor: pointer;
+}
+
+.data-table__boton:hover:not(:disabled) {
+  border-color: var(--dt-primary-hover);
+  background: var(--dt-primary-hover);
+  color: var(--dt-surface);
+}
+
+.data-table__boton:active:not(:disabled) {
+  background: var(--dt-primary);
+  color: var(--dt-surface);
+}
+
+.data-table__boton:disabled {
+  border-color: var(--dt-border);
+  color: var(--dt-muted);
+  cursor: not-allowed;
+}
+
+/* Controles que llegan por slot (acciones de fila, filtros): objetivo táctil ≥ 44 px (UX §2.2). */
+.data-table select,
+.data-table__acciones button,
+.data-table__acciones a {
+  min-height: 44px;
+}
+
+.data-table__acciones button,
+.data-table__acciones a {
+  min-width: 44px;
+  padding: 0 16px;
+}
+
+.data-table__acciones a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-table select {
+  padding: 0 12px;
+  border: 1px solid var(--dt-border);
+  border-radius: var(--dt-radius);
+}
+
+.data-table input:focus-visible,
+.data-table select:focus-visible,
+.data-table button:focus-visible,
+.data-table a:focus-visible,
+.data-table__scroll:focus-visible {
+  outline: 3px solid var(--dt-focus);
+  outline-offset: 2px;
+}
+
+/* Tabla (≥ 768 px) */
+.data-table__scroll {
+  overflow-x: auto;
+}
+
+.data-table__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--dt-surface);
+}
+
+.data-table__tabla th,
+.data-table__tabla td {
+  padding: 12px;
+  border-bottom: 1px solid var(--dt-border);
+  text-align: left;
+}
+
+.data-table__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Tarjetas (móvil) */
+.data-table__tarjetas {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.data-table__tarjeta {
+  padding: 16px;
+  border: 1px solid var(--dt-border);
+  border-radius: var(--dt-radius);
+  background: var(--dt-surface);
+}
+
+.data-table__tarjeta dl {
+  margin: 0;
+}
+
+.data-table__dato {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.data-table__dato dt {
+  color: var(--dt-muted);
+}
+
+.data-table__dato dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.data-table__tarjeta > .data-table__acciones {
+  margin-top: 12px;
+}
+
+/* Estado Activa / Inactiva: texto + icono, el color solo refuerza */
+.data-table__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.data-table__estado--activa {
+  color: var(--color-success, #047857);
+}
+
+.data-table__estado--inactiva {
+  color: var(--dt-muted);
+}
+
+/* Cargando, vacío y error */
+.data-table__esqueleto {
+  display: grid;
+  gap: 12px;
+}
+
+.data-table__esqueleto-fila {
+  height: 44px;
+  border-radius: var(--dt-radius);
+  background: linear-gradient(
+    90deg,
+    var(--dt-border) 25%,
+    var(--dt-surface) 50%,
+    var(--dt-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: data-table-brillo 1.4s ease-in-out infinite;
+}
+
+@keyframes data-table-brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table__esqueleto-fila {
+    animation: none;
+  }
+}
+
+.data-table__mensaje {
+  padding: 24px 16px;
+  border: 1px dashed var(--dt-border);
+  border-radius: var(--dt-radius);
+  text-align: center;
+}
+
+.data-table__mensaje p {
+  margin: 0 0 12px;
+}
+
+.data-table__mensaje p:last-child {
+  margin-bottom: 0;
+}
+
+.data-table__mensaje--error {
+  border: 1px solid var(--color-danger, #b91c1c);
+  color: var(--color-danger, #b91c1c);
+}
