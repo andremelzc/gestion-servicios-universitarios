@@ -8,17 +8,19 @@
 
 ### OBS-01 · [Observabilidad] Backend - Actuator, Micrometer Prometheus y Tracing/OTel
 **Rol:** R6 · **Labels:** `backend` `observabilidad` `TS-05` `TASK-020` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.5 · **Bloqueado por:** BASE-03
-- [ ] Dependencias de Actuator, `micrometer-registry-prometheus` y Micrometer Tracing/OpenTelemetry
+- [x] Dependencias de Actuator, `micrometer-registry-prometheus` y Micrometer Tracing/OpenTelemetry
 
 **Aceptación:** `/actuator/health` y `/actuator/prometheus` responden.
 
 ### OBS-02 · [Observabilidad] Backend - `TraceIdFilter` (MDC, `X-Trace-Id`, `traceparent`)
 **Rol:** R6 · **Labels:** `backend` `observabilidad` `TS-05` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.5 · **Bloqueado por:** OBS-01
+- [x] `TraceIdFilter` con soporte de MDC, `X-Trace-Id` y W3C `traceparent`
 
 **Aceptación:** CA-2 (cada respuesta lleva `X-Trace-Id` y el log lo incluye).
 
 ### OBS-03 · [Observabilidad] Backend - Logs JSON (test/prod) y texto en dev
 **Rol:** R6 · **Labels:** `backend` `observabilidad` `TS-05` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.5 · **Bloqueado por:** OBS-02
+- [x] Formato de logs estructurado JSON en test/prod/staging y texto amigable con traceId en dev
 
 **Aceptación:** CA-3.
 
@@ -85,13 +87,13 @@
 
 ### QA-01 · [QA] Backend - Base de pruebas (Testcontainers, `Clock` fijo, *builders*)
 **Rol:** R6 · **Labels:** `backend` `qa` `TS-06` · **Sprint:** S1 · **Milestone:** 1.3 Registro backend, UI de auth y maqueta · **Límite:** 11/10 · **Bloqueado por:** BASE-03
-- [ ] Testcontainers MySQL compartido, `Clock` fijo y *builders* de entidades
+- [x] Testcontainers MySQL compartido, `Clock` fijo y *builders* de entidades
 
 **Aceptación:** CA-10; las pruebas de integración de otros issues lo reutilizan.
 
 ### QA-02 · [QA] Backend - Unitarias de `AuthService`
 **Rol:** R3 · **Labels:** `backend` `qa` `TS-06` `TASK-012` · **Sprint:** S1 · **Milestone:** 1.5 Pruebas, E2E, informe y presentación de la Fase 1 · **Límite:** 16/10 · **Bloqueado por:** AUTH-10, AUTH-11, QA-01
-- [ ] Login, registro y cambio de contraseña; *con apoyo de IA, revisadas con la lista* (se registra en `QA-24`)
+- [x] Login, registro y cambio de contraseña; *con apoyo de IA, revisadas con la lista* (se registra en `QA-24`)
 
 **Aceptación:** TC-001, 002, 004…006.
 
