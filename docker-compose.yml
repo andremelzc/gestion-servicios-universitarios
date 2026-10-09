@@ -41,6 +41,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-012345678901234567890123456789}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:5173}
       ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-universidad.edu}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      DEMO_SOLICITUDES: ${DEMO_SOLICITUDES:-200}
       STORAGE_PATH: /var/app/evidencias
       TZ: ${TZ:-UTC}
     volumes:

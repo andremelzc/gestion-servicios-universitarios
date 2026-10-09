@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="30 seconds">
+<configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <!-- Perfil dev / por defecto: Formato de texto coloreado legible con traceId (TS-05 / CA-3) -->
-    <springProfile name="dev,default">
+    <springProfile name="dev,default,demo">
         <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%clr(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}){faint} %clr(%5p) %clr([%X{traceId:-sin-trace}]){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
