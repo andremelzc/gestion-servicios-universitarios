@@ -6,8 +6,9 @@
 backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
 
-# Node / frontend
-frontend/node_modules/
+# Node / frontend (en cualquier carpeta: frontend/, frontend-prototipo/, ...)
+node_modules/
+coverage/
 frontend/dist/
 
 # Local runtime data
