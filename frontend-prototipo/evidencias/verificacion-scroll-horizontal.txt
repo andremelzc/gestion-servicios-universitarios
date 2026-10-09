@@ -1,0 +1,71 @@
+Verificación de scroll horizontal — 2026-10-09T14:43:31.455Z
+Criterio: documentElement.scrollWidth <= clientWidth (sin scroll horizontal de página)
+
+OK    01-login @375x667: scrollWidth=375 clientWidth=375
+OK    01-login @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    02-login-validacion @375x667: scrollWidth=375 clientWidth=375
+OK    02-login-validacion @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    03-login-credenciales-invalidas @375x667: scrollWidth=375 clientWidth=375
+OK    03-login-credenciales-invalidas @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    04-registro @375x667: scrollWidth=375 clientWidth=375
+OK    04-registro @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    05-mis-solicitudes @375x667: scrollWidth=375 clientWidth=375
+OK    05-mis-solicitudes @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    06-mis-solicitudes-filtro @375x667: scrollWidth=375 clientWidth=375
+OK    06-mis-solicitudes-filtro @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    07-mis-solicitudes-vacio @375x667: scrollWidth=375 clientWidth=375
+OK    07-mis-solicitudes-vacio @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    08-mis-solicitudes-error-500 @375x667: scrollWidth=375 clientWidth=375
+OK    08-mis-solicitudes-error-500 @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    09-mis-solicitudes-cargando @375x667: scrollWidth=375 clientWidth=375
+OK    09-mis-solicitudes-cargando @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    10-nueva-solicitud @375x667: scrollWidth=375 clientWidth=375
+OK    10-nueva-solicitud @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    11-nueva-solicitud-validacion @375x667: scrollWidth=375 clientWidth=375
+OK    11-nueva-solicitud-validacion @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    12-nueva-solicitud-evidencia @375x667: scrollWidth=375 clientWidth=375
+OK    12-nueva-solicitud-evidencia @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    13-nueva-solicitud-confirmacion @375x667: scrollWidth=375 clientWidth=375
+OK    13-nueva-solicitud-confirmacion @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    14-nueva-solicitud-400-categoria-invalida @375x667: scrollWidth=375 clientWidth=375
+OK    14-nueva-solicitud-400-categoria-invalida @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    15-bandeja-supervisor @375x667: scrollWidth=375 clientWidth=375
+OK    15-bandeja-supervisor @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    16-bandeja-tecnico @375x667: scrollWidth=375 clientWidth=375
+OK    16-bandeja-tecnico @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    17-dashboard @375x667: scrollWidth=375 clientWidth=375
+OK    17-dashboard @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    19-nueva-solicitud-409-simulado @375x667: scrollWidth=375 clientWidth=375
+OK    19-nueva-solicitud-409-simulado @1920x1080: scrollWidth=1920 clientWidth=1920
+OK    18-dashboard-datos-abiertos @375x667: scrollWidth=375 clientWidth=375
+OK    18-dashboard-datos-abiertos @1920x1080: scrollWidth=1920 clientWidth=1920
+
+Anchos adicionales (sin captura):
+OK    /login.html @360: scrollWidth=360 clientWidth=360
+OK    /registro.html @360: scrollWidth=360 clientWidth=360
+OK    /mis-solicitudes.html @360: scrollWidth=360 clientWidth=360
+OK    /nueva-solicitud.html @360: scrollWidth=360 clientWidth=360
+OK    /bandeja.html @360: scrollWidth=360 clientWidth=360
+OK    /dashboard.html @360: scrollWidth=360 clientWidth=360
+OK    /login.html @768: scrollWidth=768 clientWidth=768
+OK    /registro.html @768: scrollWidth=768 clientWidth=768
+OK    /mis-solicitudes.html @768: scrollWidth=768 clientWidth=768
+OK    /nueva-solicitud.html @768: scrollWidth=768 clientWidth=768
+OK    /bandeja.html @768: scrollWidth=768 clientWidth=768
+OK    /dashboard.html @768: scrollWidth=768 clientWidth=768
+OK    /login.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /registro.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /mis-solicitudes.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /nueva-solicitud.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /bandeja.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /dashboard.html @1024: scrollWidth=1024 clientWidth=1024
+OK    /login.html @1440: scrollWidth=1440 clientWidth=1440
+OK    /registro.html @1440: scrollWidth=1440 clientWidth=1440
+OK    /mis-solicitudes.html @1440: scrollWidth=1440 clientWidth=1440
+OK    /nueva-solicitud.html @1440: scrollWidth=1440 clientWidth=1440
+OK    /bandeja.html @1440: scrollWidth=1440 clientWidth=1440
+OK    /dashboard.html @1440: scrollWidth=1440 clientWidth=1440
+
+Excepciones JS / violaciones de CSP: 0
+
+RESULTADO: sin scroll horizontal ni errores de JS/CSP

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Iniciar sesión · Servicios Universitarios</title>
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+  <main class="public" id="contenido">
+    <div class="card">
+      <svg class="logo" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" focusable="false"><rect width="56" height="56" rx="12" fill="#1D4ED8"/><path d="M28 14 10 23l18 9 14-7v10h4V23L28 14Zm-10 16v7c0 3 5 6 10 6s10-3 10-6v-7l-10 5-10-5Z" fill="#fff"/></svg>
+      <h1>Servicios Universitarios</h1>
+      <p class="subtitle">Inicia sesión para registrar y seguir tus solicitudes.</p>
+      <div id="aviso" role="alert"></div>
+      <form id="form-login" class="form" novalidate>
+        <div class="field">
+          <label for="correo">Correo institucional</label>
+          <input class="input" id="correo" name="correo" type="email" autocomplete="username" inputmode="email" required placeholder="nombre@universidad.edu" aria-describedby="correo-error" aria-invalid="false">
+          <p class="field-error" id="correo-error"></p>
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <div class="pw-wrap">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" required aria-describedby="password-error" aria-invalid="false">
+            <button class="btn btn--link pw-toggle" id="ver-password" type="button">Mostrar</button>
+          </div>
+          <p class="field-error" id="password-error"></p>
+        </div>
+        <button class="btn btn--block" id="enviar" type="submit">Iniciar sesión</button>
+      </form>
+      <hr class="divider">
+      <p class="centered">¿Primera vez? <a href="registro.html">Regístrate</a></p>
+      <p class="demo-note">Maqueta: usa <code>juan@universidad.edu</code> / <code>Demo1234</code> (estudiante), <code>carlos@…</code> técnico, <code>ana@…</code> supervisor, <code>marco@…</code> admin.</p>
+    </div>
+  </main>
+  <script type="module" src="js/pages/login.js"></script>
+</body>
+</html>
