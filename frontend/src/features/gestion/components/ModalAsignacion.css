@@ -73,9 +73,12 @@
 
 .modal-asignacion__acciones .modal-asignacion__primario {
   background: var(--color-primary, #1d4ed8);
-  color: #ffffff;
+  color: var(--color-surface, #ffffff);
 }
 
 .modal-asignacion__acciones button:disabled {
-  opacity: 0.6;
+  border-color: var(--color-border, #d1d5db);
+  background: var(--color-disabled-bg, #e5e7eb);
+  color: var(--color-disabled-text, #4b5563);
+  cursor: not-allowed;
 }
