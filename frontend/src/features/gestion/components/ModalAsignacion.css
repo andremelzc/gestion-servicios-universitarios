@@ -1,0 +1,84 @@
+/* Los tokens de tokens.css aún no existen en develop: se usan con el valor de UX §2.1 como respaldo. */
+.modal-asignacion {
+  display: grid;
+  gap: 16px;
+}
+
+.modal-asignacion__campo {
+  display: grid;
+  gap: 4px;
+}
+
+.modal-asignacion select,
+.modal-asignacion textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #111827);
+}
+
+.modal-asignacion [aria-invalid='true'] {
+  border-color: var(--color-danger, #b91c1c);
+}
+
+.modal-asignacion :focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.modal-asignacion__resumen,
+.modal-asignacion__contador {
+  margin: 0;
+  justify-self: end;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.modal-asignacion__resumen {
+  justify-self: start;
+}
+
+.modal-asignacion__error,
+.modal-asignacion__alerta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-danger, #b91c1c);
+}
+
+.modal-asignacion__error::before,
+.modal-asignacion__alerta::before {
+  content: '⚠ ';
+}
+
+.modal-asignacion__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-asignacion__acciones button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.modal-asignacion__acciones .modal-asignacion__primario {
+  background: var(--color-primary, #1d4ed8);
+  color: var(--color-surface, #ffffff);
+}
+
+.modal-asignacion__acciones button:disabled {
+  border-color: var(--color-border, #d1d5db);
+  background: var(--color-disabled-bg, #e5e7eb);
+  color: var(--color-disabled-text, #4b5563);
+  cursor: not-allowed;
+}
