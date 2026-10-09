@@ -12,8 +12,6 @@ WORKDIR /app/backend
 RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 
-# Extraccion de capas usando jarmode=tools (Spring Boot 4.x / 3.3+)
-RUN java -Djarmode=tools -jar target/*.jar extract --layers --destination extracted
 
 # ==========================================
 # Etapa 2: Entorno de Ejecucion Endurecido (Runtime)
@@ -34,11 +32,8 @@ RUN groupadd -g 10001 spring && \
 RUN mkdir -p /var/app/evidencias && \
     chown -R spring:spring /app /var/app/evidencias
 
-# Copiar capas extraidas desde la etapa build manteniendo orden para optimizar cache Docker
-COPY --from=build --chown=spring:spring /app/backend/extracted/dependencies/ ./
-COPY --from=build --chown=spring:spring /app/backend/extracted/spring-boot-loader/ ./
-COPY --from=build --chown=spring:spring /app/backend/extracted/snapshot-dependencies/ ./
-COPY --from=build --chown=spring:spring /app/backend/extracted/application/ ./
+# Copiar el JAR ejecutable para que Spring Boot gestione su propio classpath
+COPY --from=build --chown=spring:spring /app/backend/target/*.jar /app/app.jar
 
 # Cambiar a usuario no root
 USER spring:spring
@@ -57,4 +52,4 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # EntryPoint con JarLauncher oficial (Spring Boot 3.2+ y 4.x)
-ENTRYPOINT ["java", "-Duser.timezone=UTC", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["java", "-Duser.timezone=UTC", "-jar", "/app/app.jar"]
