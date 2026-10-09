@@ -3,8 +3,12 @@ export const SIN_DATO = '—';
 
 const formateador = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 1 });
 
-/** Número en es-PE con un decimal como máximo; "—" si no hay dato (null/undefined). */
+export function esNumero(valor) {
+  return typeof valor === 'number' && Number.isFinite(valor);
+}
+
+/** Número en es-PE con un decimal como máximo; "—" si no hay dato (null, undefined o no numérico). */
 export function formatNumero(valor) {
-  if (valor === null || valor === undefined) return SIN_DATO;
+  if (!esNumero(valor)) return SIN_DATO;
   return formateador.format(valor);
 }

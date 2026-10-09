@@ -1,10 +1,10 @@
 import { useId } from 'react';
-import { SIN_DATO, formatNumero } from '../format.js';
+import { SIN_DATO, esNumero, formatNumero } from '../format.js';
 import './KpiCard.css';
 
 export default function KpiCard({ titulo, valor, unidad, icono, descripcion }) {
   const tituloId = useId();
-  const sinDato = valor === null || valor === undefined;
+  const sinDato = !esNumero(valor);
 
   return (
     <div className="kpi-card" role="group" aria-labelledby={tituloId}>

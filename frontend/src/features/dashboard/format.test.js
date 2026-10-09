@@ -21,4 +21,10 @@ describe('formatNumero', () => {
   it('[US-12 CA-11] el cero es un valor válido, no un dato ausente', () => {
     expect(formatNumero(0)).toBe('0');
   });
+
+  it('[US-12 CA-11] devuelve "—" para valores no numéricos', () => {
+    expect(formatNumero(NaN)).toBe('—');
+    expect(formatNumero('abc')).toBe('—');
+    expect(formatNumero(Infinity)).toBe('—');
+  });
 });

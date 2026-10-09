@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import KpiCard from './KpiCard.jsx';
@@ -67,5 +69,22 @@ describe('KpiCard', () => {
 
     expect(screen.getByText('Atendidas')).toBeVisible();
     expect(screen.getByText('98')).toBeVisible();
+  });
+
+  it('[US-12 CA-11] un valor no numérico (NaN, texto, Infinity) se trata como sin datos', () => {
+    for (const valor of [NaN, 'abc', Infinity]) {
+      const { unmount } = render(<KpiCard titulo="MTTR" valor={valor} unidad="h" />);
+      const grupo = screen.getByRole('group', { name: 'MTTR' });
+      expect(grupo).toHaveTextContent('—');
+      expect(grupo).toHaveTextContent('Sin datos');
+      expect(grupo).not.toHaveTextContent('NaN');
+      unmount();
+    }
+  });
+
+  it('[US-12 CA-11] la utilidad .sr-only vive en los estilos globales (base.css)', () => {
+    const lee = (ruta) => readFileSync(resolve(process.cwd(), ruta), 'utf8');
+    expect(lee('src/styles/base.css')).toMatch(/\.sr-only\s*{/);
+    expect(lee('src/features/dashboard/components/KpiCard.css')).not.toMatch(/\.sr-only/);
   });
 });
