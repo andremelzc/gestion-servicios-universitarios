@@ -6,31 +6,31 @@
 
 ### OPS-01 · [DevOps] Backend - `Dockerfile` multi-stage
 **Rol:** R6 · **Labels:** `devops` `TS-01` `TASK-015` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** BASE-03
-- [ ] Multi-stage con capas de Spring Boot, usuario no root y `HEALTHCHECK`
+- [x] Multi-stage con capas de Spring Boot, usuario no root y `HEALTHCHECK`
 
 **Aceptación:** CA-3; imagen construye y responde en `/actuator/health`.
 
 ### OPS-02 · [DevOps] Frontend - `Dockerfile` multi-stage (Node → Nginx)
 **Rol:** R5 · **Labels:** `devops` `TS-01` `TASK-015` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** BASE-04
-- [ ] `VITE_API_URL` como `ARG`
+- [x] `VITE_API_URL` como `ARG`
 
 **Aceptación:** CA-1.
 
 ### OPS-03 · [DevOps] `docker-compose.yml` base
 **Rol:** R6 · **Labels:** `devops` `TS-01` `TASK-015` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** OPS-01, OPS-02
-- [ ] Servicios `db`, `backend`, `frontend`; `depends_on: condition: service_healthy`, volúmenes y `restart`
+- [x] Servicios `db`, `backend`, `frontend`; `depends_on: condition: service_healthy`, volúmenes y `restart`
 
 **Aceptación:** CA-1, CA-2.
 
 ### OPS-04 · [DevOps] Overrides `dev` y `prod` de Compose
 **Rol:** R6 · **Labels:** `devops` `TS-01` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** OPS-03
-- [ ] `dev`: puertos abiertos · `prod`: sin puerto de BD y límites de recursos
+- [x] `dev`: puertos abiertos · `prod`: sin puerto de BD y límites de recursos
 
 **Aceptación:** CA-3.
 
 ### OPS-05 · [DevOps] Nginx como API Gateway (`default.conf`)
 **Rol:** R5 · **Labels:** `devops` `seguridad` `TS-04` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** OPS-02
-- [ ] Proxy `/api/` → `backend:8080`, cabeceras de seguridad, `limit_req`, `client_max_body_size` (alineado con `REG-10`), `/actuator` bloqueado
+- [x] Proxy `/api/` → `backend:8080`, cabeceras de seguridad, `limit_req`, `client_max_body_size` (alineado con `REG-10`), `/actuator` bloqueado
 - [ ] Documentar el rol de gateway ([API §8.1](../02-diseno/api-rest.md#81-api-gateway), [ADR-006](../02-diseno/decisiones-arquitectura.md#adr-006--nginx-como-api-gateway-ligero))
 
 **Aceptación:** CA-8, CA-9, CA-10.
@@ -90,14 +90,14 @@
 
 ### OPS-12 · [DevOps] CI - `ci.yml` con jobs `backend`, `frontend`, `docker-build`
 **Rol:** R6 · **Labels:** `devops` `TS-02` `TASK-001` · **Sprint:** S1 · **Milestone:** 1.2 Auth backend y base frontend · **Límite:** 08/10 · **Bloqueado por:** BASE-03, BASE-04
-- [ ] Quitar el atajo "omitir si no existe" ([diagnóstico](../03-calidad-y-operacion/devops-despliegue.md#44-estado-actual-del-ci-diagnóstico-y-pendientes)); los jobs deben **fallar** si falta el proyecto
+- [x] Quitar el atajo "omitir si no existe" ([diagnóstico](../03-calidad-y-operacion/devops-despliegue.md#44-estado-actual-del-ci-diagnóstico-y-pendientes)); los jobs deben **fallar** si falta el proyecto
 
 **Aceptación:** CA-11.
 
 ### OPS-13 · [DevOps] CI - JaCoCo y Vitest con umbrales de cobertura
 **Rol:** R6 · **Labels:** `devops` `qa` `TS-02` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.1 · **Bloqueado por:** OPS-12
-- [ ] 70 % global; cobertura de Vitest
-- [ ] Reporte de cobertura adjunto en cada PR
+- [x] 70 % global; cobertura de Vitest
+- [x] Reporte de cobertura adjunto en cada PR
 
 **Aceptación:** CA-12.
 
@@ -108,7 +108,7 @@
 
 ### OPS-15 · [DevOps] CI - Reglas de protección con checks requeridos
 **Rol:** R6 · **Labels:** `devops` `TS-02` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.2 · **Bloqueado por:** OPS-12, OPS-16
-- [ ] Checks requeridos `backend`, `frontend`, `security` en `main` y `develop`
+- [x] Checks requeridos `backend`, `frontend`, `security` en `main` y `develop`
 
 **Aceptación:** CA-11.
 
@@ -116,8 +116,8 @@
 
 ### OPS-16 · [Seguridad] CI - `security.yml` (CodeQL y gitleaks)
 **Rol:** R6 · **Labels:** `devops` `seguridad` `TS-08` `TASK-029` `adelanto` · **Sprint:** S1 · **Milestone:** 1.6 Adelantos en paralelo (no bloquean el MVP) · **Límite:** 17/10 · **Plan B:** pasa a 2.2 · **Bloqueado por:** OPS-01
-- [ ] Un job por herramienta; fallo ante hallazgo crítico/alto
-- [ ] Las dependencias las vigila Dependabot (ver `BASE-02`)
+- [x] Un job por herramienta; fallo ante hallazgo crítico/alto
+- [x] Las dependencias las vigila Dependabot (ver `BASE-02`)
 
 **Aceptación:** CA-16, CA-17 (PR de prueba bloqueado).
 
