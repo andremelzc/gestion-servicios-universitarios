@@ -68,7 +68,7 @@ docs/
 |:---|:---|:---|
 | **[Calendario y contingencia](04-gestion/calendario-y-contingencia.md)** | Calendario (semanas 7–12, presentaciones 17/10 y 14/11), hitos, sprints, ruta crítica, plan de contingencia, cumplimiento del ciclo | Calendario |
 | **[Equipo y flujo de trabajo](04-gestion/equipo-y-flujo-de-trabajo.md)** | **Parte A:** 6 roles, asignación, carga, suplentes, RACI, ceremonias. **Parte B:** ramas, Conventional Commits, PR, **Definición de Hecho**, versionado | Organización del equipo y flujo Git |
-| **[Registro de uso de IA](04-gestion/ia-register.md)** | Reglas, campos exigidos, auditoría, bitácora real y ejemplos | Uso de IA |
+| **[Registro de uso de IA](04-gestion/ia-register.md)** | Reglas, campos exigidos, auditoría, ejemplos y enlaces a la bitácora de cada rol | Uso de IA |
 
 ### 2.5 `05-entregables/` — Entrega y sustentación
 
