@@ -6,7 +6,7 @@
 
 | Aspecto | Decisión |
 |:---|:---|
-| **Ubicación única** | `docs/04-gestion/ia-register.md` (se unifica el nombre; antes aparecía también `REGISTRO_IA.md`) |
+| **Ubicación única** | `docs/04-gestion/ia-register.md` (reglas) y un archivo por rol en `docs/04-gestion/ia-registro/` (bitácora); se unifica el nombre, antes aparecía también `REGISTRO_IA.md`. El registro del grupo es la unión de ambos |
 | **Formato** | Tabla Markdown con los campos exigidos + N° y fecha; ejemplos aparte, marcados como ilustrativos |
 | **Cuándo se registra** | Inmediatamente al usar la IA; en el PR se enlaza el N° |
 | **Auditoría** | Semanal (Rol 6, 15 min en la *review*) |
@@ -33,7 +33,7 @@ docs/
 ├── 01-definicion/                     documento-proyecto · especificaciones-tecnicas · ux-ui-prototipo
 ├── 02-diseno/                         arquitectura-tecnica · modelo-datos · api-rest · decisiones-arquitectura
 ├── 03-calidad-y-operacion/            seguridad-owasp · devops-despliegue · observabilidad · estrategia-pruebas
-├── 04-gestion/                        calendario-y-contingencia · equipo-y-flujo-de-trabajo · ia-register
+├── 04-gestion/                        calendario-y-contingencia · equipo-y-flujo-de-trabajo · ia-register · ia-registro/ (un archivo por rol)
 ├── 05-entregables/                    informes-y-sustentacion (incluye el índice del informe de la Fase I)
 ├── backlog/                           issues, milestones y cobertura del enunciado
 ├── incidentes/                  (post-mortems y simulacros)

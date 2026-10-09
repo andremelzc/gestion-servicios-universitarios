@@ -25,7 +25,7 @@ Son los campos exigidos por el enunciado, más número y fecha para trazabilidad
 
 | Campo                    | Qué escribir                                                                                                                             |
 | :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| **N°**                   | Correlativo (01, 02, …)                                                                                                                  |
+| **N°** | Con prefijo de rol y correlativo propio: `R5-01`, `R5-02`, … |
 | **Herramienta**          | Nombre y versión/modelo (Copilot, ChatGPT-4o, Claude…)                                                                                   |
 | **Prompt**               | El prompt**real** (resumido si es muy largo). **Sin secretos ni datos personales**                                                       |
 | **Resultado generado**   | Qué produjo: código, prueba, arquitectura, BDD, texto…                                                                                   |
@@ -53,7 +53,7 @@ Son los campos exigidos por el enunciado, más número y fecha para trazabilidad
 
 | Cuándo                             | Qué                                                                         | Quién        |
 | :--------------------------------- | :-------------------------------------------------------------------------- | :----------- |
-| Al usar IA                         | Registrar**inmediatamente** (no al final)                                   | Quien la usó |
+| Al usar IA                         | Registrar **inmediatamente** (no al final) en **tu archivo personal** (§7)                                   | Quien la usó |
 | En cada PR                         | Marcar "¿Se usó IA?" y enlazar la entrada (N°) en la descripción            | Autor del PR |
 | Cada semana (15 min en la*review*) | Auditar entradas: ¿completas? ¿validaciones reales? ¿faltan usos evidentes? | Rol 6        |
 | Cierre de cada fase                | Resumen de usos y lecciones aprendidas                                      | Rol 1        |
@@ -79,6 +79,8 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 
 ## 6. Resumen estadístico (actualizar al cerrar cada fase)
 
+> Las cifras se calculan sumando las entradas de los seis archivos de la §7.
+
 | Fase | Entradas | `Sí` | `Parcialmente` | `No` | Con prueba/validación automatizada | Lecciones principales |
 | :--- | :------: | :--: | :------------: | :--: | :--------------------------------: | :-------------------- |
 | I    |    4     |  2   |       2        |  0   |                 2                  | _(completar)_         |
@@ -90,10 +92,27 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 
 ## 7. Bitácora de entradas reales
 
-> Entradas **reales** del equipo. (Los ejemplos de formato están en §8 y **no** cuentan como registros.)
+> La bitácora está **repartida por rol**: cada integrante registra sus usos en **su propio archivo** y no edita el de los demás. Así dos PR nunca modifican el mismo `.md` y se evitan los conflictos de _merge_. Los ejemplos de formato (§8) **no** cuentan como registros.
 
-| N° | Herramienta | Prompt utilizado | Resultado generado | ¿Se utilizó? | Validación realizada | Modificaciones realizadas | Responsable | Fecha |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| Rol | Archivo | Entradas |
+|:---|:---|:--:|
+| R1 · Tech Lead / Scrum Master | [`ia-registro/r1-tech-lead.md`](ia-registro/r1-tech-lead.md) | 1 |
+| R2 · Backend 1 | [`ia-registro/r2-backend-1.md`](ia-registro/r2-backend-1.md) | 1 |
+| R3 · Backend 2 / DBA | [`ia-registro/r3-backend-2-dba.md`](ia-registro/r3-backend-2-dba.md) | 0 |
+| R4 · Frontend 1 | [`ia-registro/r4-frontend-1.md`](ia-registro/r4-frontend-1.md) | 0 |
+| R5 · Frontend 2 | [`ia-registro/r5-frontend-2.md`](ia-registro/r5-frontend-2.md) | 6 |
+| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 0 |
+
+**Reglas de uso**
+
+1. Añade tus filas **al final de la tabla de tu archivo**, con el N° `R<n>-NN` siguiente al último que tengas.
+2. En el PR, enlaza la entrada (por ejemplo `R5-03`) en la casilla de IA de la plantilla.
+3. Las columnas «Entradas» de arriba se actualizan al cerrar cada fase (junto con §6), no en cada PR; así esta tabla tampoco genera conflictos.
+4. Las entradas migradas del registro único conservan su N° anterior entre paréntesis («antes N° 03») para no perder la trazabilidad con PR y comentarios previos.
+
+**Documento único del grupo.** Para la entrega o la auditoría, el registro del grupo es la unión de los seis archivos: este documento (reglas) más las seis tablas en orden R1 → R6. Se junta al cierre de cada fase y antes de la sustentación; no hace falta mantener una copia consolidada en el repositorio entre entregas.
+
+---|:---|:---|:---|:---|:---|:---|:---|:---|
 | **01** | Claude Code (Claude Sonnet 5.5) | *"Necesito que analices toda la documentación respecto a lo que se pide en [el PDF del proyecto del curso]"* y, tras el diagnóstico: *"Sí, tiene que ser una muy buena documentación, tiene que estar todo muy bien documentado"* (+ aclaración: *"solo quiero la documentación"*) | (a) Informe de brechas y contradicciones entre el enunciado y la documentación inicial; (b) reescritura y ampliación de la documentación: documento del proyecto, SRS 2.0, arquitectura, modelo de datos, API REST, ADRs, seguridad/OWASP, DevOps, observabilidad, estrategia de pruebas, UX/UI, roadmap, equipo, gobernanza, registro de IA, entregables; migraciones SQL `V1`/`V2` | **Parcialmente** — pendiente de adopción tras revisión del equipo | Cotejo del enunciado con cada documento; verificación mecánica de enlaces internos y anclas. **Pendiente (no realizado):** revisión humana documento por documento; ejecución de `V1`/`V2` contra MySQL 8.0 real (**el SQL no se ha probado**, Docker no estaba disponible); confirmación de supuestos (equipo de 6, calendario semanas 7–16, dominio de correo, nube) | *(completar tras la revisión: número y descripción de cambios)* | Integrante que ejecutó la sesión (usuario Git `andremelzc`) — *confirmar rol* | 2026-10-03 |
 | **02** | Antigravity IDE (Gemini 3.8 Flash) | _"Necesito que generes una propuesta de clase SlaCalculator aplicando la regla RN-09 y una prueba unitaria JUnit 5 con reloj fijo"_                                                                                                                                                | Clase base SlaCalculator y esqueleto de prueba unitaria con Clock.fixed                                                                                                                                                                                                                                                                                                             | Sí (parcialmente)                                                 | Revisión línea a línea de la regla RN-09 contra la especificación (que era mínimo de horas entre categoría y prioridad) y la verificación de aserciones en casos borde                                                                                                                                                                                                | 3: se adaptó para inyectar el Clock del bean ClockConfig; se agregaron validaciones de parámetros nulos (IllegalArgumentException)y se ajustaron los nombres según el modelo | Rol 2 — Roberto Pizarro                                                      | 2026-10-08 |
 | **03** | Claude Code (Claude Opus 5.5 orquestando, subagente Sonnet 5.5) | *"Implementar el issue #11 (BASE-04): proyecto Vite + React, rutas y estructura; seguir estrictamente los .md del repo (React 18 + JS, estructura de arquitectura §4.2, mapa de rutas de UX, Vitest + RTL + MSW, ESLint/Prettier, VITE_API_URL y proxy). TDD estricto."* | Migración del scaffold (TypeScript/zustand/axios/oxlint) a React 18 + JSX + ESLint/Prettier; estructura por *features*; router con una página *placeholder* por ruta del mapa de UX y página 404; `VITE_API_URL` + proxy de desarrollo; Vitest + jsdom + Testing Library + MSW con pruebas de humo; README del frontend | **Sí** | En `frontend/`, con `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage` y `npm run build` ejecutados en **Node 20.20.2** y en **Node 22.15.1** (npm 10.9.2 en ambos): sin advertencias `EBADENGINE`, 0 vulnerabilidades, lint limpio, 4 archivos y 21 pruebas en verde, cobertura sobre el umbral de 50 % y build correcto. `prettier --check` limpio. Las pruebas de rutas, App y config se vieron **fallar** antes de implementar. `npm view` por cada dependencia y revisión de los `engines` del `package-lock.json`. `vite` en dev: la SPA responde 200 y `/api/v1/x` devuelve 502 (proxy activo, sin backend). **Fallo de la IA detectado en revisión:** la primera versión usó vitest 5, msw 3 y jest-dom 7, que exigen Node ≥ 22; en Node 20.20.2 `npm ci` daba `EBADENGINE` y `npm test` fallaba con `Promise.withResolvers is not a function`. Fue una verificación solo en Node 22 que la IA presentó como compatible con Node 20. | 0 cambios manuales del integrante; ajustes tras revisión automatizada: (1) *downgrade* a vitest/coverage-v8 4.x, msw 2.x y jest-dom 6.9 por compatibilidad con Node 20 (vitest 4.1.11+ no se instala con el npm 10 en el árbol resuelto: se generó el lockfile con npm 11 y se verificó `npm ci` con npm 10); (2) `engines` `>=20.19 <23` y `.npmrc` con `engine-strict`; (3) `jsdom` 30 → 29 y `eslint` 10 → 9 por `engines`/*peer*; (4) umbrales de cobertura a 50 %; (5) prueba de `config` reescrita con `vi.stubEnv` (la original era tautológica); (6) router de `App` movido a nivel de módulo (fuga de listener bajo StrictMode); (7) orden de `!.env.example` en `.gitignore` | R5 · Andre Cuenca | 2026-10-08 |
@@ -121,7 +140,7 @@ Se conservan como guía de cuánto detalle se espera. **No** deben contarse en l
 ## 9. Plantilla para copiar
 
 ```markdown
-| NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
+| R<n>-NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
 ```
 
 ## 10. Reflexión final (se completa en la Fase IV)

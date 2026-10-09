@@ -14,7 +14,7 @@
 
 ### 1. Asignación nominal
 
-> **Completar al inicio del Sprint 1.** La trazabilidad individual es obligatoria: el [Registro de IA](ia-register.md) y los PR identifican a la persona responsable.
+> **Completar al inicio del Sprint 1.** La trazabilidad individual es obligatoria: el [Registro de IA](ia-register.md) (un archivo por rol) y los PR identifican a la persona responsable.
 
 | Rol | Integrante | Usuario GitHub | Correo institucional |
 |:---|:---|:---|:---|
@@ -156,7 +156,7 @@ Cualquier cambio se refleja en [§1](#1-asignación-nominal) y en el [Documento 
 | **Daily Standup** | Lun-Mié-Vie, **15 min estrictos** | Todos | ¿Qué logré? ¿Qué haré? ¿Qué me bloquea? Los bloqueos se anotan en el tablero (`bloqueado`) |
 | **Sprint Review / Demo** | Fin de sprint, 45 min | Todos (+ docente en hitos) | Demostración **funcionando** de lo hecho; aceptación contra criterios BDD |
 | **Retrospectiva** | Fin de sprint, 30 min | Todos | Qué mantener / qué mejorar / acciones con responsable (se registran como issues `mejora`) |
-| **Revisión de IA** | Semanal, 15 min (dentro de la review) | Rol 6 + todos | Auditar el [Registro de IA](ia-register.md): entradas completas, validaciones reales |
+| **Revisión de IA** | Semanal, 15 min (dentro de la review) | Rol 6 + todos | Auditar el [Registro de IA](ia-register.md#7-bitácora-de-entradas-reales) (los 6 archivos personales): entradas completas, validaciones reales |
 
 ---
 
@@ -322,7 +322,7 @@ Una tarea/historia está **hecha** solo si cumple **todo** lo siguiente:
 - [ ] Sin secretos ni `hardcode`; entradas validadas; autorización probada.
 - [ ] **Documentación actualizada** en su fuente única (API/OpenAPI, esquema/migración, spec, ADR, manual si afecta al usuario).
 - [ ] Probada en el ambiente de integración (*staging* o Compose local) por alguien distinto del autor.
-- [ ] Uso de IA registrado en [`ia-register.md`](ia-register.md) (si aplica).
+- [ ] Uso de IA registrado en tu archivo personal de [`ia-registro/`](ia-register.md#7-bitácora-de-entradas-reales) (si aplica).
 - [ ] Issue cerrado y tablero actualizado.
 
 ---
