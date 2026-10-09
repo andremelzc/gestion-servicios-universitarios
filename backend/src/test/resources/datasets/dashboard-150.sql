@@ -42,7 +42,14 @@ WITH RECURSIVE numeros (numero) AS (
 ), datos AS (
     SELECT
         numero,
-        MOD(numero - 1, 6) AS estado_indice,
+        CASE
+            WHEN numero <= 14 THEN 0
+            WHEN numero <= 36 THEN 1
+            WHEN numero <= 45 THEN 2
+            WHEN numero <= 50 THEN 3
+            WHEN numero <= 80 THEN 4
+            ELSE 5
+        END AS estado_indice,
         MOD(numero - 1, 2) AS area_indice,
         CASE MOD(numero - 1, 2)
             WHEN 0 THEN MOD(FLOOR((numero - 1) / 2), 3)
@@ -66,8 +73,11 @@ SELECT
     DATE_ADD(datos.fecha, INTERVAL prioridad.sla_max_horas HOUR),
     CASE WHEN datos.estado_indice >= 2 THEN DATE_ADD(datos.fecha, INTERVAL 2 HOUR) END,
     CASE WHEN datos.estado_indice >= 3 THEN DATE_ADD(datos.fecha, INTERVAL 4 HOUR) END,
-    CASE WHEN datos.estado_indice >= 4 THEN DATE_ADD(datos.fecha, INTERVAL 8 HOUR) END,
-    CASE WHEN datos.estado_indice >= 5 THEN DATE_ADD(datos.fecha, INTERVAL 10 HOUR) END
+    CASE
+        WHEN datos.estado_indice = 4 THEN DATE_ADD(datos.fecha, INTERVAL 8 HOUR)
+        WHEN datos.estado_indice = 5 THEN DATE_ADD(datos.fecha, INTERVAL 10 HOUR)
+    END,
+    CASE WHEN datos.estado_indice = 5 THEN DATE_ADD(datos.fecha, INTERVAL 12 HOUR) END
 FROM datos
 JOIN usuarios usuario
     ON usuario.codigo_institucional = CASE MOD(datos.numero, 2)

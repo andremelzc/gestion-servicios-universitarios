@@ -3,6 +3,8 @@ package edu.universidad.servicios.solicitud;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import edu.universidad.servicios.config.AbstractIntegrationTest;
+import edu.universidad.servicios.dashboard.repository.DashboardKpis;
+import edu.universidad.servicios.dashboard.repository.DashboardRepository;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +19,9 @@ class DashboardRepositoryIT extends AbstractIntegrationTest {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private DashboardRepository dashboardRepository;
 
 	@Test
 	void flywayCargaCatalogosMaestros() {
@@ -46,17 +51,17 @@ class DashboardRepositoryIT extends AbstractIntegrationTest {
 		assertThat(porEstado).containsExactlyInAnyOrderEntriesOf(
 			Map.of(
 				"REGISTRADA",
-				25L,
+				14L,
 				"EN_EVALUACION",
-				25L,
+				22L,
 				"ASIGNADA",
-				25L,
+				9L,
 				"EN_ATENCION",
-				25L,
+				5L,
 				"RESUELTA",
-				25L,
+				30L,
 				"CERRADA",
-				25L
+				70L
 			)
 		);
 
@@ -104,6 +109,39 @@ class DashboardRepositoryIT extends AbstractIntegrationTest {
 		assertThat(
 			java.time.Duration.between(fechaMinima, fechaMaxima).toDays()
 		).isEqualTo(89);
+	}
+
+	@Test
+	@Sql("/datasets/dashboard-150.sql")
+	void kpisGlobalesCumplenCa1() {
+		DashboardKpis kpis = dashboardRepository.kpis(
+			java.time.LocalDate.of(2026, 7, 12),
+			java.time.LocalDate.of(2026, 10, 9),
+			null,
+			null
+		);
+
+		assertThat(kpis.registradas()).isEqualTo(150);
+		assertThat(kpis.pendientes()).isEqualTo(50);
+		assertThat(kpis.atendidas()).isEqualTo(100);
+		assertThat(kpis.mttrHoras()).isEqualByComparingTo("9.4");
+	}
+
+	@Test
+	@Sql({ "/datasets/dashboard-150.sql", "/datasets/dashboard-mttr-4.sql" })
+	void mttrIgnoraSolicitudesSinFechaDeResolucionSegunCa7() {
+		DashboardKpis kpis = dashboardRepository.kpis(
+			java.time.LocalDate.of(2025, 1, 1),
+			java.time.LocalDate.of(2025, 1, 1),
+			null,
+			null
+		);
+
+		assertThat(kpis.registradas()).isEqualTo(4);
+		assertThat(kpis.pendientes()).isEqualTo(1);
+		assertThat(kpis.atendidas()).isEqualTo(3);
+		assertThat(kpis.mttrHoras()).isEqualByComparingTo("4.0");
+		assertThat(kpis.vencidas()).isEqualTo(1);
 	}
 
 	private int cantidad(String tabla) {
