@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Perfil dev / por defecto: Formato de texto coloreado legible con traceId (TS-05 / CA-3) -->
+    <springProfile name="dev,default">
+        <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%clr(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}){faint} %clr(%5p) %clr([%X{traceId:-sin-trace}]){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_DEV"/>
+        </root>
+        <logger name="edu.universidad.servicios" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Perfiles test, prod y staging: JSON estructurado para Docker / ELK / Promtail (TS-05 / CA-3) -->
+    <springProfile name="prod,test,staging">
+        <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp>
+                        <fieldName>timestamp</fieldName>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+                    <logLevel>
+                        <fieldName>level</fieldName>
+                    </logLevel>
+                    <loggerName>
+                        <fieldName>logger</fieldName>
+                    </loggerName>
+                    <message>
+                        <fieldName>message</fieldName>
+                    </message>
+                    <mdc>
+                        <includeMdcKeyName>traceId</includeMdcKeyName>
+                        <includeMdcKeyName>spanId</includeMdcKeyName>
+                        <includeMdcKeyName>usuarioId</includeMdcKeyName>
+                        <includeMdcKeyName>rol</includeMdcKeyName>
+                    </mdc>
+                    <arguments>
+                        <includeStructuredArguments>true</includeStructuredArguments>
+                    </arguments>
+                    <stackTrace>
+                        <fieldName>stackTrace</fieldName>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                            <maxLength>2048</maxLength>
+                            <shortenedClassNameLength>25</shortenedClassNameLength>
+                            <rootCauseFirst>true</rootCauseFirst>
+                        </throwableConverter>
+                    </stackTrace>
+                </providers>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+    </springProfile>
+</configuration>

@@ -2,8 +2,8 @@ spring:
   application:
     name: servicios
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/servicios_db?useSSL=false&serverTimezone=UTC}
-    username: ${DB_USERNAME:root}
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:gestion_servicios_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USER:${DB_USERNAME:root}}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -25,3 +25,25 @@ app:
 
 server:
   port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:1.0}
+    propagation:
+      type: W3C

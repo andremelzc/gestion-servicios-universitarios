@@ -7,15 +7,15 @@
 
 ## 1. ¿Qué se registra?
 
-Se registra **todo uso significativo** de IA. Es *significativo* si el resultado se incorporó (total o parcialmente) o influyó en una decisión de **código, pruebas, arquitectura, especificación, documentación, seguridad o despliegue**.
+Se registra **todo uso significativo** de IA. Es _significativo_ si el resultado se incorporó (total o parcialmente) o influyó en una decisión de **código, pruebas, arquitectura, especificación, documentación, seguridad o despliegue**.
 
-| Se registra | No hace falta registrar |
-|:---|:---|
-| Código, consultas SQL, configuraciones, *workflows* generados o modificados con IA | Corrector ortográfico o autocompletado trivial de una línea |
-| Pruebas generadas o escenarios BDD propuestos/revisados por IA | Preguntas puntuales de sintaxis cuyo resultado no se usa |
-| Borradores de documentación, ADRs, planes o informes | Búsquedas de documentación sin generar contenido |
-| Revisión de seguridad o de arquitectura asistida por IA | |
-| Diseño (textos de interfaz, ideas de UX) generado con IA | |
+| Se registra                                                                       | No hace falta registrar                                     |
+| :-------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| Código, consultas SQL, configuraciones,_workflows_ generados o modificados con IA | Corrector ortográfico o autocompletado trivial de una línea |
+| Pruebas generadas o escenarios BDD propuestos/revisados por IA                    | Preguntas puntuales de sintaxis cuyo resultado no se usa    |
+| Borradores de documentación, ADRs, planes o informes                              | Búsquedas de documentación sin generar contenido            |
+| Revisión de seguridad o de arquitectura asistida por IA                           |                                                             |
+| Diseño (textos de interfaz, ideas de UX) generado con IA                          |                                                             |
 
 **Regla de oro:** en la duda, se registra.
 
@@ -23,19 +23,19 @@ Se registra **todo uso significativo** de IA. Es *significativo* si el resultado
 
 Son los campos exigidos por el enunciado, más número y fecha para trazabilidad.
 
-| Campo | Qué escribir |
-|:---|:---|
-| **N°** | Correlativo (01, 02, …) |
-| **Herramienta** | Nombre y versión/modelo (Copilot, ChatGPT-4o, Claude…) |
-| **Prompt** | El prompt **real** (resumido si es muy largo). **Sin secretos ni datos personales** |
-| **Resultado generado** | Qué produjo: código, prueba, arquitectura, BDD, texto… |
-| **¿Se utilizó?** | `Sí` · `No` · `Parcialmente` (indicar qué parte) |
+| Campo                    | Qué escribir                                                                                                                             |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| **N°**                   | Correlativo (01, 02, …)                                                                                                                  |
+| **Herramienta**          | Nombre y versión/modelo (Copilot, ChatGPT-4o, Claude…)                                                                                   |
+| **Prompt**               | El prompt**real** (resumido si es muy largo). **Sin secretos ni datos personales**                                                       |
+| **Resultado generado**   | Qué produjo: código, prueba, arquitectura, BDD, texto…                                                                                   |
+| **¿Se utilizó?**         | `Sí` · `No` · `Parcialmente` (indicar qué parte)                                                                                         |
 | **Validación realizada** | Cómo se comprobó: ejecución de pruebas, revisión línea a línea, prueba manual, comparación con la documentación oficial, pasada de SAST… |
-| **Modificaciones** | Qué se cambió respecto a lo generado (número y descripción) |
-| **Responsable** | Rol e integrante que lo usó y responde por el resultado |
-| **Fecha** | `AAAA-MM-DD` |
+| **Modificaciones**       | Qué se cambió respecto a lo generado (número y descripción)                                                                              |
+| **Responsable**          | Rol e integrante que lo usó y responde por el resultado                                                                                  |
+| **Fecha**                | `AAAA-MM-DD`                                                                                                                             |
 
-> *Una entrada sin validación concreta no es válida: "se revisó" no basta; debe indicar **qué** prueba o comprobación se hizo.*
+> _Una entrada sin validación concreta no es válida: "se revisó" no basta; debe indicar **qué** prueba o comprobación se hizo._
 
 ---
 
@@ -51,27 +51,27 @@ Son los campos exigidos por el enunciado, más número y fecha para trazabilidad
 
 ## 4. Proceso y auditoría
 
-| Cuándo | Qué | Quién |
-|:---|:---|:---|
-| Al usar IA | Registrar **inmediatamente** (no al final) | Quien la usó |
-| En cada PR | Marcar "¿Se usó IA?" y enlazar la entrada (N°) en la descripción | Autor del PR |
-| Cada semana (15 min en la *review*) | Auditar entradas: ¿completas? ¿validaciones reales? ¿faltan usos evidentes? | Rol 6 |
-| Cierre de cada fase | Resumen de usos y lecciones aprendidas | Rol 1 |
-| Antes de la sustentación | Revisión final del registro y de las estadísticas (§6) | Todos |
+| Cuándo                             | Qué                                                                         | Quién        |
+| :--------------------------------- | :-------------------------------------------------------------------------- | :----------- |
+| Al usar IA                         | Registrar**inmediatamente** (no al final)                                   | Quien la usó |
+| En cada PR                         | Marcar "¿Se usó IA?" y enlazar la entrada (N°) en la descripción            | Autor del PR |
+| Cada semana (15 min en la*review*) | Auditar entradas: ¿completas? ¿validaciones reales? ¿faltan usos evidentes? | Rol 6        |
+| Cierre de cada fase                | Resumen de usos y lecciones aprendidas                                      | Rol 1        |
+| Antes de la sustentación           | Revisión final del registro y de las estadísticas (§6)                      | Todos        |
 
 ## 5. Áreas de uso esperadas (alineadas con el enunciado)
 
 El enunciado menciona desarrollo asistido (Copilot), generación de pruebas con IA, seguridad al usar IA y revisión de escenarios con IA. Se espera evidencia de cada una:
 
-| Área | Ejemplos de uso legítimo | Entradas mínimas esperadas |
-|:---|:---|:---:|
-| **Especificación** | Revisar la completitud de escenarios BDD; proponer casos de borde; detectar contradicciones entre documentos | ≥ 3 |
-| **Diseño/arquitectura** | Contrastar alternativas (ADRs); detectar riesgos | ≥ 2 |
-| **Desarrollo asistido** | Autocompletado de código, *boilerplate*, refactorización | ≥ 5 |
-| **Pruebas** | Generar esqueletos de pruebas unitarias/API, datos de prueba, scripts k6 — con la [lista de verificación](../03-calidad-y-operacion/estrategia-pruebas.md#102-lista-de-verificación-de-una-prueba-generada-por-ia) | ≥ 5 |
-| **Seguridad** | Revisar código contra OWASP, interpretar hallazgos de SAST/DAST (sin exponer secretos) | ≥ 2 |
-| **DevOps** | Dockerfiles, *workflows*, configuración de Nginx/Prometheus | ≥ 2 |
-| **Documentación** | Borradores de manuales e informes, revisados por humanos | ≥ 2 |
+| Área                    | Ejemplos de uso legítimo                                                                                                                                                                                          | Entradas mínimas esperadas |
+| :---------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------: |
+| **Especificación**      | Revisar la completitud de escenarios BDD; proponer casos de borde; detectar contradicciones entre documentos                                                                                                      |            ≥ 3             |
+| **Diseño/arquitectura** | Contrastar alternativas (ADRs); detectar riesgos                                                                                                                                                                  |            ≥ 2             |
+| **Desarrollo asistido** | Autocompletado de código,_boilerplate_, refactorización                                                                                                                                                           |            ≥ 5             |
+| **Pruebas**             | Generar esqueletos de pruebas unitarias/API, datos de prueba, scripts k6 — con la[lista de verificación](../03-calidad-y-operacion/estrategia-pruebas.md#102-lista-de-verificación-de-una-prueba-generada-por-ia) |            ≥ 5             |
+| **Seguridad**           | Revisar código contra OWASP, interpretar hallazgos de SAST/DAST (sin exponer secretos)                                                                                                                            |            ≥ 2             |
+| **DevOps**              | Dockerfiles,_workflows_, configuración de Nginx/Prometheus                                                                                                                                                        |            ≥ 2             |
+| **Documentación**       | Borradores de manuales e informes, revisados por humanos                                                                                                                                                          |            ≥ 2             |
 
 Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que cada entrada tenga validación real.
 
@@ -80,11 +80,11 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 ## 6. Resumen estadístico (actualizar al cerrar cada fase)
 
 | Fase | Entradas | `Sí` | `Parcialmente` | `No` | Con prueba/validación automatizada | Lecciones principales |
-|:---|:---:|:---:|:---:|:---:|:---:|:---|
-| I | 1 | 0 | 1 | 0 | 0 | *(completar)* |
-| II | | | | | | |
-| III | | | | | | |
-| IV | | | | | | |
+| :--- | :------: | :--: | :------------: | :--: | :--------------------------------: | :-------------------- |
+| I    |    1     |  0   |       1        |  0   |                 0                  | _(completar)_         |
+| II   |          |      |                |      |                                    |                       |
+| III  |          |      |                |      |                                    |                       |
+| IV   |          |      |                |      |                                    |                       |
 
 ---
 
@@ -95,8 +95,9 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 | N° | Herramienta | Prompt utilizado | Resultado generado | ¿Se utilizó? | Validación realizada | Modificaciones realizadas | Responsable | Fecha |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|
 | **01** | Claude Code (Claude Sonnet 5.5) | *"Necesito que analices toda la documentación respecto a lo que se pide en [el PDF del proyecto del curso]"* y, tras el diagnóstico: *"Sí, tiene que ser una muy buena documentación, tiene que estar todo muy bien documentado"* (+ aclaración: *"solo quiero la documentación"*) | (a) Informe de brechas y contradicciones entre el enunciado y la documentación inicial; (b) reescritura y ampliación de la documentación: documento del proyecto, SRS 2.0, arquitectura, modelo de datos, API REST, ADRs, seguridad/OWASP, DevOps, observabilidad, estrategia de pruebas, UX/UI, roadmap, equipo, gobernanza, registro de IA, entregables; migraciones SQL `V1`/`V2` | **Parcialmente** — pendiente de adopción tras revisión del equipo | Cotejo del enunciado con cada documento; verificación mecánica de enlaces internos y anclas. **Pendiente (no realizado):** revisión humana documento por documento; ejecución de `V1`/`V2` contra MySQL 8.0 real (**el SQL no se ha probado**, Docker no estaba disponible); confirmación de supuestos (equipo de 6, calendario semanas 7–16, dominio de correo, nube) | *(completar tras la revisión: número y descripción de cambios)* | Integrante que ejecutó la sesión (usuario Git `andremelzc`) — *confirmar rol* | 2026-10-03 |
-| **02** | Claude Code (Claude Opus 5.5 orquestando, subagente Sonnet 5.5) | *"Implementar el issue #11 (BASE-04): proyecto Vite + React, rutas y estructura; seguir estrictamente los .md del repo (React 18 + JS, estructura de arquitectura §4.2, mapa de rutas de UX, Vitest + RTL + MSW, ESLint/Prettier, VITE_API_URL y proxy). TDD estricto."* | Migración del scaffold (TypeScript/zustand/axios/oxlint) a React 18 + JSX + ESLint/Prettier; estructura por *features*; router con una página *placeholder* por ruta del mapa de UX y página 404; `VITE_API_URL` + proxy de desarrollo; Vitest + jsdom + Testing Library + MSW con pruebas de humo; README del frontend | **Sí** | En `frontend/`, con `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage` y `npm run build` ejecutados en **Node 20.20.2** y en **Node 22.15.1** (npm 10.9.2 en ambos): sin advertencias `EBADENGINE`, 0 vulnerabilidades, lint limpio, 4 archivos y 21 pruebas en verde, cobertura sobre el umbral de 50 % y build correcto. `prettier --check` limpio. Las pruebas de rutas, App y config se vieron **fallar** antes de implementar. `npm view` por cada dependencia y revisión de los `engines` del `package-lock.json`. `vite` en dev: la SPA responde 200 y `/api/v1/x` devuelve 502 (proxy activo, sin backend). **Fallo de la IA detectado en revisión:** la primera versión usó vitest 5, msw 3 y jest-dom 7, que exigen Node ≥ 22; en Node 20.20.2 `npm ci` daba `EBADENGINE` y `npm test` fallaba con `Promise.withResolvers is not a function`. Fue una verificación solo en Node 22 que la IA presentó como compatible con Node 20. | 0 cambios manuales del integrante; ajustes tras revisión automatizada: (1) *downgrade* a vitest/coverage-v8 4.x, msw 2.x y jest-dom 6.9 por compatibilidad con Node 20 (vitest 4.1.11+ no se instala con el npm 10 en el árbol resuelto: se generó el lockfile con npm 11 y se verificó `npm ci` con npm 10); (2) `engines` `>=20.19 <23` y `.npmrc` con `engine-strict`; (3) `jsdom` 30 → 29 y `eslint` 10 → 9 por `engines`/*peer*; (4) umbrales de cobertura a 50 %; (5) prueba de `config` reescrita con `vi.stubEnv` (la original era tautológica); (6) router de `App` movido a nivel de módulo (fuga de listener bajo StrictMode); (7) orden de `!.env.example` en `.gitignore` | R5 · Andre Cuenca | 2026-10-08 |
-| *03* | | | | | | | | |
+| **02** | Antigravity IDE (Gemini 3.8 Flash) | _"Necesito que generes una propuesta de clase SlaCalculator aplicando la regla RN-09 y una prueba unitaria JUnit 5 con reloj fijo"_                                                                                                                                                | Clase base SlaCalculator y esqueleto de prueba unitaria con Clock.fixed                                                                                                                                                                                                                                                                                                             | Sí (parcialmente)                                                 | Revisión línea a línea de la regla RN-09 contra la especificación (que era mínimo de horas entre categoría y prioridad) y la verificación de aserciones en casos borde                                                                                                                                                                                                | 3: se adaptó para inyectar el Clock del bean ClockConfig; se agregaron validaciones de parámetros nulos (IllegalArgumentException)y se ajustaron los nombres según el modelo | Rol 2 — Roberto Pizarro                                                      | 2026-10-08 |
+| **03** | Claude Code (Claude Opus 5.5 orquestando, subagente Sonnet 5.5) | *"Implementar el issue #11 (BASE-04): proyecto Vite + React, rutas y estructura; seguir estrictamente los .md del repo (React 18 + JS, estructura de arquitectura §4.2, mapa de rutas de UX, Vitest + RTL + MSW, ESLint/Prettier, VITE_API_URL y proxy). TDD estricto."* | Migración del scaffold (TypeScript/zustand/axios/oxlint) a React 18 + JSX + ESLint/Prettier; estructura por *features*; router con una página *placeholder* por ruta del mapa de UX y página 404; `VITE_API_URL` + proxy de desarrollo; Vitest + jsdom + Testing Library + MSW con pruebas de humo; README del frontend | **Sí** | En `frontend/`, con `npm ci`, `npm run lint`, `npm test`, `npm run test:coverage` y `npm run build` ejecutados en **Node 20.20.2** y en **Node 22.15.1** (npm 10.9.2 en ambos): sin advertencias `EBADENGINE`, 0 vulnerabilidades, lint limpio, 4 archivos y 21 pruebas en verde, cobertura sobre el umbral de 50 % y build correcto. `prettier --check` limpio. Las pruebas de rutas, App y config se vieron **fallar** antes de implementar. `npm view` por cada dependencia y revisión de los `engines` del `package-lock.json`. `vite` en dev: la SPA responde 200 y `/api/v1/x` devuelve 502 (proxy activo, sin backend). **Fallo de la IA detectado en revisión:** la primera versión usó vitest 5, msw 3 y jest-dom 7, que exigen Node ≥ 22; en Node 20.20.2 `npm ci` daba `EBADENGINE` y `npm test` fallaba con `Promise.withResolvers is not a function`. Fue una verificación solo en Node 22 que la IA presentó como compatible con Node 20. | 0 cambios manuales del integrante; ajustes tras revisión automatizada: (1) *downgrade* a vitest/coverage-v8 4.x, msw 2.x y jest-dom 6.9 por compatibilidad con Node 20 (vitest 4.1.11+ no se instala con el npm 10 en el árbol resuelto: se generó el lockfile con npm 11 y se verificó `npm ci` con npm 10); (2) `engines` `>=20.19 <23` y `.npmrc` con `engine-strict`; (3) `jsdom` 30 → 29 y `eslint` 10 → 9 por `engines`/*peer*; (4) umbrales de cobertura a 50 %; (5) prueba de `config` reescrita con `vi.stubEnv` (la original era tautológica); (6) router de `App` movido a nivel de módulo (fuga de listener bajo StrictMode); (7) orden de `!.env.example` en `.gitignore` | R5 · Andre Cuenca | 2026-10-08 |
+| *04* | | | | | | | | |
 
 ---
 
@@ -104,10 +105,10 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 
 Se conservan como guía de cuánto detalle se espera. **No** deben contarse en las estadísticas ni presentarse como evidencia del equipo; están fechados a propósito como `AAAA-MM-DD`.
 
-| N° | Herramienta | Prompt utilizado | Resultado generado | ¿Se utilizó? | Validación realizada | Modificaciones realizadas | Responsable | Fecha |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| *Ej-A* | GitHub Copilot | *"Escribir prueba unitaria JUnit 5 y Mockito para `SolicitudWorkflowService.resolver` verificando que solo se permita pasar a `RESUELTA` si la solicitud estaba en `EN_ATENCION`."* | Clase de prueba con mocks de repositorio y aserción de `TransicionInvalidaException`. | Sí (parcialmente) | Ejecución `mvn test -Dtest=SolicitudWorkflowServiceTest`; se rompió a propósito la regla en el servicio y la prueba **falló** (verifica que detecta el defecto). | 3: se alinearon nombres con el enum `EstadoSolicitud`; se añadió aserción sobre el guardado del historial; se eliminó un *mock* innecesario. | Rol 2 | AAAA-MM-DD |
-| *Ej-B* | ChatGPT (modelo indicado) | *"Genera un hook `useFetch` con estados loading/error y cancelación con `AbortController`."* | Hook en JavaScript con `useEffect` y cancelación. | Sí (parcialmente) | Pruebas con Testing Library de carga, error y desmontaje (sin fugas); revisión línea a línea. | 2: se integró con el `apiClient` centralizado (interceptor JWT); se añadió manejo de 401/403. | Rol 4 | AAAA-MM-DD |
+| N°     | Herramienta               | Prompt utilizado                                                                                                                                                                    | Resultado generado                                                                   | ¿Se utilizó?      | Validación realizada                                                                                                                                            | Modificaciones realizadas                                                                                                                   | Responsable | Fecha      |
+| :----- | :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :--------- |
+| _Ej-A_ | GitHub Copilot            | _"Escribir prueba unitaria JUnit 5 y Mockito para `SolicitudWorkflowService.resolver` verificando que solo se permita pasar a `RESUELTA` si la solicitud estaba en `EN_ATENCION`."_ | Clase de prueba con mocks de repositorio y aserción de`TransicionInvalidaException`. | Sí (parcialmente) | Ejecución`mvn test -Dtest=SolicitudWorkflowServiceTest`; se rompió a propósito la regla en el servicio y la prueba **falló** (verifica que detecta el defecto). | 3: se alinearon nombres con el enum`EstadoSolicitud`; se añadió aserción sobre el guardado del historial; se eliminó un _mock_ innecesario. | Rol 2       | AAAA-MM-DD |
+| _Ej-B_ | ChatGPT (modelo indicado) | _"Genera un hook `useFetch` con estados loading/error y cancelación con `AbortController`."_                                                                                        | Hook en JavaScript con`useEffect` y cancelación.                                     | Sí (parcialmente) | Pruebas con Testing Library de carga, error y desmontaje (sin fugas); revisión línea a línea.                                                                   | 2: se integró con el`apiClient` centralizado (interceptor JWT); se añadió manejo de 401/403.                                                | Rol 4       | AAAA-MM-DD |
 
 ---
 

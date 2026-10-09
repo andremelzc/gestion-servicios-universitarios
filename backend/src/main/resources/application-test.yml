@@ -9,3 +9,14 @@ spring:
             ddl-auto: update
     flyway:
         enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true

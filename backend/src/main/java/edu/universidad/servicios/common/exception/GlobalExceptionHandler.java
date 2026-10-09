@@ -1,5 +1,7 @@
 package edu.universidad.servicios.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -77,12 +80,18 @@ public class GlobalExceptionHandler {
         pd.setTitle("Error Interno");
         pd.setType(URI.create("https://api.servicios.edu/errors/internal-server-error"));
         addCommonProperties(pd);
-        // NOTA: Para producción, se puede registrar el ex.getMessage() en los logs con el traceId.
+
+        Object traceId = pd.getProperties() != null ? pd.getProperties().get("traceId") : null;
+        log.error("Excepción no controlada [traceId={}]: {}", traceId, ex.getMessage(), ex);
         return pd;
     }
 
     private void addCommonProperties(ProblemDetail pd) {
         pd.setProperty("timestamp", Instant.now());
-        pd.setProperty("traceId", UUID.randomUUID().toString());
+        String traceId = MDC.get("traceId");
+        if (traceId == null || traceId.isBlank()) {
+            traceId = UUID.randomUUID().toString().replace("-", "");
+        }
+        pd.setProperty("traceId", traceId);
     }
 }
