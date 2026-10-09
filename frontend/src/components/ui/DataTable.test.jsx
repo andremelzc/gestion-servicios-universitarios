@@ -137,7 +137,7 @@ describe('DataTable', () => {
     it('[UX CA-14] dimensiona a 44 px los botones, enlaces y selects de los slots', () => {
       // jsdom no calcula estilos: se comprueba que la hoja cubra los controles que llegan por slot.
       const regla = (selector) =>
-        new RegExp(`${selector.replace(/[.[\]]/g, '\\$&')}[^{]*\\{[^}]*min-height:\\s*44px`);
+        new RegExp(`${selector.replace(/[\\.[\]]/g, '\\$&')}[^{]*\\{[^}]*min-height:\\s*44px`);
       expect(css).toMatch(regla('.data-table select'));
       expect(css).toMatch(regla('.data-table__acciones button'));
       expect(css).toMatch(regla('.data-table__acciones a'));

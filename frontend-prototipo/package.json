@@ -1,0 +1,17 @@
+{
+  "name": "frontend-prototipo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Maqueta HTML/CSS/JS vanilla con API simulada (json-server) - TASK-033",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "json-server": "^0.17.4"
+  }
+}
