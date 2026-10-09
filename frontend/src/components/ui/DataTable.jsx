@@ -41,6 +41,25 @@ import useMediaQuery from './useMediaQuery.js';
  *     cualquier otro           -> mensaje genérico
  *   Con error se muestra el aviso en lugar de los datos, con el botón "Reintentar" (onRetry).
  * - emptyMessage / emptyAction: texto y llamada a la acción del estado vacío (UX §2.5).
+ * - search / onSearchChange(valor): caja "Buscar". Solo emite cada cambio; el *debounce* es de
+ *   `useCrud`. appliedSearch (opcional): la búsqueda ya aplicada; solo con ella el vacío cita el
+ *   texto («Sin resultados para «x»…»), nunca el valor que se está escribiendo.
+ * - includeInactive / onIncludeInactiveChange(bool): casilla "Mostrar inactivas".
+ * - filters: nodo con filtros propios de la pantalla (p. ej. área o rol), en la misma barra.
+ * - page: sobre paginado de la API { page (base 0), size, totalElements, totalPages }, tal cual
+ *   lo entrega `useCrud`; onPageChange(n) recibe el índice base 0. Con una sola página no se
+ *   muestra. Durante la carga la navegación sigue montada (botones deshabilitados) para no
+ *   perder el foco; el texto "Página X de Y" está en una única región `aria-live`.
+ * Los controles de la barra se pintan solo si llega su callback.
+ *
+ * Ejemplo completo:
+ *   <DataTable
+ *     caption="Categorías" columns={columnas} data={crud.data}
+ *     isLoading={crud.isLoading} error={crud.error} onRetry={crud.refetch}
+ *     search={search} onSearchChange={setSearch}
+ *     includeInactive={includeInactive} onIncludeInactiveChange={setIncludeInactive}
+ *     page={crud.page} onPageChange={setPage}
+ *   />
  *
  * Fuera de alcance (#99): el ordenamiento por columnas. El issue y CA-14 no lo piden.
  *
@@ -67,6 +86,13 @@ function textoDeError({ status, detail, traceId, sinConexion } = {}) {
     : ERROR_INESPERADO;
   if (status >= 500 || status === 401) return inesperado;
   return detail || inesperado;
+}
+
+// El texto vacío no cita `search` (valor en vivo, aún sin aplicar): solo la búsqueda ya aplicada.
+function textoSinResultados(appliedSearch) {
+  return appliedSearch
+    ? `Sin resultados para «${appliedSearch}». Prueba con otra búsqueda.`
+    : 'Sin resultados. Prueba con otra búsqueda.';
 }
 
 function EstadoActivo({ activo, etiquetas }) {
@@ -147,6 +173,71 @@ function Tarjetas({ caption, columns, data, rowKey, renderActions, etiquetas }) 
   );
 }
 
+function Barra({ search, onSearchChange, includeInactive, onIncludeInactiveChange, filters }) {
+  if (!onSearchChange && !onIncludeInactiveChange && !filters) return null;
+  return (
+    <div className="data-table__barra">
+      {onSearchChange && (
+        <label className="data-table__campo">
+          Buscar
+          <input
+            type="search"
+            className="data-table__control"
+            value={search ?? ''}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </label>
+      )}
+      {filters}
+      {onIncludeInactiveChange && (
+        <label className="data-table__campo data-table__campo--check">
+          <input
+            type="checkbox"
+            checked={Boolean(includeInactive)}
+            onChange={(e) => onIncludeInactiveChange(e.target.checked)}
+          />
+          Mostrar inactivas
+        </label>
+      )}
+    </div>
+  );
+}
+
+// `page` es el índice base 0 del sobre paginado de la API; a la persona se le muestra base 1.
+// La navegación no se desmonta al cargar: así el foco no cae al <body> y la región `aria-live`
+// (única y persistente) anuncia el cambio de página.
+function Paginacion({ page, totalElements, totalPages, onPageChange, isLoading }) {
+  if (!onPageChange || !totalPages || totalPages <= 1) return null;
+  const bloqueado = (deshabilitado) => ({
+    disabled: deshabilitado || isLoading,
+    'aria-disabled': deshabilitado || isLoading,
+  });
+  return (
+    <nav aria-label="Paginación" className="data-table__paginacion">
+      <button
+        type="button"
+        className="data-table__boton"
+        {...bloqueado(page <= 0)}
+        onClick={() => onPageChange(page - 1)}
+      >
+        Anterior
+      </button>
+      <p role="status" aria-live="polite">
+        Página {page + 1} de {totalPages}
+      </p>
+      <p>{totalElements === 1 ? '1 registro' : `${totalElements} registros`}</p>
+      <button
+        type="button"
+        className="data-table__boton"
+        {...bloqueado(page >= totalPages - 1)}
+        onClick={() => onPageChange(page + 1)}
+      >
+        Siguiente
+      </button>
+    </nav>
+  );
+}
+
 const ETIQUETAS_ACTIVO = { activo: 'Activa', inactivo: 'Inactiva' };
 
 export default function DataTable({
@@ -162,6 +253,14 @@ export default function DataTable({
   onRetry,
   emptyMessage = 'No hay registros para mostrar.',
   emptyAction,
+  search,
+  onSearchChange,
+  appliedSearch,
+  includeInactive,
+  onIncludeInactiveChange,
+  filters,
+  page,
+  onPageChange,
 }) {
   const esEscritorio = useMediaQuery('(min-width: 768px)');
   const Vista = esEscritorio ? Tabla : Tarjetas;
@@ -195,7 +294,7 @@ export default function DataTable({
   } else if (data.length === 0) {
     contenido = (
       <div className="data-table__mensaje">
-        <p role="status">{emptyMessage}</p>
+        <p role="status">{search ? textoSinResultados(appliedSearch) : emptyMessage}</p>
         {emptyAction}
       </div>
     );
@@ -213,5 +312,17 @@ export default function DataTable({
     );
   }
 
-  return <section className="data-table">{contenido}</section>;
+  return (
+    <section className="data-table">
+      <Barra
+        search={search}
+        onSearchChange={onSearchChange}
+        includeInactive={includeInactive}
+        onIncludeInactiveChange={onIncludeInactiveChange}
+        filters={filters}
+      />
+      {contenido}
+      {page && <Paginacion {...page} onPageChange={onPageChange} isLoading={isLoading} />}
+    </section>
+  );
 }
