@@ -1,0 +1,57 @@
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+  min-width: 0;
+  padding: var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 1px 2px rgb(17 24 39 / 8%);
+  color: var(--color-text, #111827);
+}
+
+.kpi-card__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  color: var(--color-text-muted, #4b5563);
+  font-size: 0.875rem;
+}
+
+.kpi-card__titulo {
+  margin: 0;
+}
+
+.kpi-card__valor {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.kpi-card__unidad {
+  margin-left: var(--space-1, 4px);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.kpi-card__descripcion {
+  margin: 0;
+  color: var(--color-text-muted, #4b5563);
+  font-size: 0.875rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
