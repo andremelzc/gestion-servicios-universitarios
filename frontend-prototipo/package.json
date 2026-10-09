@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "evidencias": "node scripts/capturar.mjs"
   },
   "devDependencies": {
     "json-server": "^0.17.4"
