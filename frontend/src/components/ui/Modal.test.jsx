@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef, useState } from 'react';
+import { createRef, useEffect, useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import Modal from './Modal.jsx';
 
@@ -318,5 +318,25 @@ describe('Modal', () => {
     await userEvent.keyboard('{Escape}');
 
     expect(screen.getByRole('main')).toHaveFocus();
+  });
+
+  it('[UX §8] no le quita el foco a un control hijo que ya lo tomó al montarse', () => {
+    function Hijo() {
+      const ref = useRef(null);
+      useEffect(() => ref.current.focus(), []);
+      return (
+        <>
+          <button type="button">Primero</button>
+          <input aria-label="Con foco propio" ref={ref} />
+        </>
+      );
+    }
+    render(
+      <Modal isOpen titulo="Hijo con foco" onClose={() => {}}>
+        <Hijo />
+      </Modal>,
+    );
+
+    expect(screen.getByLabelText('Con foco propio')).toHaveFocus();
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import './Modal.css';
 
@@ -45,7 +45,8 @@ function destinoSeguro(disparador) {
  * - role: `dialog` (por defecto) o `alertdialog` para confirmaciones.
  * - descripcion: texto visible asociado con `aria-describedby`.
  * - closeOnEsc: `true` por defecto; con `false` Esc se ignora (p. ej. mientras se envía).
- * - initialFocusRef: ref del control con el foco inicial; si falta, el primer tabulable.
+ * - initialFocusRef: ref del control con el foco inicial; si falta, el primer tabulable. Un hijo
+ *   que ya tomó el foco al montarse lo conserva.
  * - returnFocusRef: ref del elemento que recibe el foco al cerrar; si falta se usa el disparador
  *   y, si ya no está en el DOM (o era `body`), el elemento `<main>`.
  * Con modales anidados solo el de arriba atiende Esc y el trap de Tab.
@@ -64,6 +65,12 @@ export default function Modal({
   const id = useId();
   const dialogoRef = useRef(null);
   const opcionesRef = useRef({});
+  const disparadorRef = useRef(null);
+
+  // Antes de cualquier efecto de los hijos (que pueden mover el foco): quién abrió el modal.
+  useLayoutEffect(() => {
+    if (isOpen) disparadorRef.current = document.activeElement;
+  }, [isOpen]);
 
   useEffect(() => {
     opcionesRef.current = { onClose, closeOnEsc, initialFocusRef, returnFocusRef };
@@ -73,14 +80,18 @@ export default function Modal({
     if (!isOpen) return undefined;
 
     const turno = {};
-    const disparador = document.activeElement;
+    const disparador = disparadorRef.current;
     const dialogo = dialogoRef.current;
     if (pila.length === 0) {
       overflowPrevio = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
     }
     pila.push(turno);
-    (opcionesRef.current.initialFocusRef?.current ?? tabulables(dialogo)[0] ?? dialogo).focus();
+    // Un hijo que ya tomó el foco al montarse (p. ej. el primer campo inválido) lo conserva.
+    const activo = document.activeElement;
+    if (activo === dialogo || !dialogo.contains(activo)) {
+      (opcionesRef.current.initialFocusRef?.current ?? tabulables(dialogo)[0] ?? dialogo).focus();
+    }
 
     function alPulsarTecla(evento) {
       if (pila[pila.length - 1] !== turno) return;
