@@ -10,22 +10,22 @@ import lombok.Setter;
 @Setter
 public class EstadoSolicitud {
 
-    @Id
-    @Column(nullable = false, length = 20)
-    private String codigo;
+	@Id
+	@Column(nullable = false, length = 20)
+	private String codigo;
 
-    @Column(name = "nombre_visible", nullable = false, length = 40)
-    private String nombreVisible;
+	@Column(name = "nombre_visible", nullable = false, length = 40)
+	private String nombreVisible;
 
-    @Column(length = 255)
-    private String descripcion;
+	@Column(length = 255)
+	private String descripcion;
 
-    @Column(name = "color_hex", nullable = false, length = 7)
-    private String colorHex;
+	@Column(name = "color_hex", nullable = false, length = 7)
+	private String colorHex;
 
-    @Column(nullable = false)
-    private Short orden;
+	@Column(nullable = false)
+	private Byte orden;
 
-    @Column(name = "es_final", nullable = false)
-    private Boolean esFinal = false;
+	@Column(name = "es_final", nullable = false)
+	private Boolean esFinal = false;
 }
