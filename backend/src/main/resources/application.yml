@@ -1,18 +1,22 @@
 spring:
-  application:
-    name: servicios
-  datasource:
-    url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:gestion_servicios_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
-    username: ${DB_USER:${DB_USERNAME:root}}
-    password: ${DB_PASSWORD:root}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: false
+    application:
+        name: servicios
+    servlet:
+        multipart:
+            max-file-size: ${MAX_FILE_SIZE_MB:5}MB
+            max-request-size: 16MB
+    datasource:
+        url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:gestion_servicios_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+        username: ${DB_USER:${DB_USERNAME:root}}
+        password: ${DB_PASSWORD:root}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+        hibernate:
+            ddl-auto: validate
+        properties:
+            hibernate:
+                format_sql: true
+        show-sql: false
 
   servlet:
     multipart:
@@ -20,37 +24,35 @@ spring:
       max-request-size: 16MB
 
 app:
-  jwt:
-    secret: ${JWT_SECRET:8f7e2a9b3d1c4f5e6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}
-    expiration-minutes: 480
-  cors:
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-  security:
-    allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:universidad.edu}
-  storage:
-    path: ${STORAGE_PATH:./uploads/evidencias}
+    jwt:
+        secret: ${JWT_SECRET}
+        expiration-minutes: 480
+    cors:
+        allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+    security:
+        allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:universidad.edu}
 
 server:
-  port: ${PORT:8080}
+    port: ${PORT:8080}
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    health:
-      show-details: when_authorized
-      probes:
-        enabled: true
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
-  tracing:
-    sampling:
-      probability: ${TRACING_PROBABILITY:1.0}
-    propagation:
-      type: W3C
+    endpoints:
+        web:
+            exposure:
+                include: health,info,prometheus
+    endpoint:
+        health:
+            show-details: when_authorized
+            probes:
+                enabled: true
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http:
+                    server:
+                        requests: true
+    tracing:
+        sampling:
+            probability: ${TRACING_PROBABILITY:1.0}
+        propagation:
+            type: W3C
