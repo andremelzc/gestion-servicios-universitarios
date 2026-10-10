@@ -36,6 +36,11 @@ public class FileStorageService {
 
 	public StoredFile store(FileTypeValidator.ValidatedFile file) {
 		String extension = extension(file.originalName());
+		if (!extension.matches("jpg|jpeg|png|pdf")) {
+			throw new IllegalArgumentException(
+				"Tipo de archivo almacenado inválido"
+			);
+		}
 		String storedName = UUID.randomUUID() + "." + extension;
 		Path destination = resolveStoredName(storedName);
 		try {
@@ -74,7 +79,13 @@ public class FileStorageService {
 				"Nombre de archivo almacenado inválido"
 			);
 		}
-		return root.resolve(storedName).normalize();
+		Path destination = root.resolve(storedName).normalize();
+		if (!destination.startsWith(root)) {
+			throw new IllegalArgumentException(
+				"La ruta del archivo almacenado está fuera del almacenamiento"
+			);
+		}
+		return destination;
 	}
 
 	private String extension(String originalName) {
