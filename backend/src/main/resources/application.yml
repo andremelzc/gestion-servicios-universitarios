@@ -18,6 +18,11 @@ spring:
                 format_sql: true
         show-sql: false
 
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE_MB:5}MB
+      max-request-size: 16MB
+
 app:
     jwt:
         secret: ${JWT_SECRET}
