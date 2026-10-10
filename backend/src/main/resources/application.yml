@@ -20,7 +20,7 @@ spring:
 
 app:
     jwt:
-        secret: ${JWT_SECRET:8f7e2a9b3d1c4f5e6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}
+        secret: ${JWT_SECRET}
         expiration-minutes: 480
     cors:
         allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
