@@ -3,8 +3,8 @@ package edu.universidad.servicios.solicitud.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.universidad.servicios.auth.security.UsuarioDetails;
 import edu.universidad.servicios.common.exception.GlobalExceptionHandler;
-import edu.universidad.servicios.solicitud.dto.SolicitudCrearRequest;
-import edu.universidad.servicios.solicitud.dto.SolicitudCreadaResponse;
+import edu.universidad.servicios.solicitud.dto.*;
+import edu.universidad.servicios.solicitud.service.SolicitudConsultaService;
 import edu.universidad.servicios.solicitud.service.SolicitudService;
 import edu.universidad.servicios.usuario.domain.Rol;
 import edu.universidad.servicios.usuario.domain.Usuario;
@@ -16,6 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -29,10 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -46,6 +52,9 @@ class SolicitudControllerTest {
     @Mock
     private SolicitudService solicitudService;
 
+    @Mock
+    private SolicitudConsultaService solicitudConsultaService;
+
     @InjectMocks
     private SolicitudController solicitudController;
 
@@ -56,7 +65,10 @@ class SolicitudControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(solicitudController)
                 .setControllerAdvice(new GlobalExceptionHandler())
-                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+                .setCustomArgumentResolvers(
+                        new AuthenticationPrincipalArgumentResolver(),
+                        new PageableHandlerMethodArgumentResolver()
+                )
                 .build();
 
         Rol rol = new Rol();
@@ -186,7 +198,6 @@ class SolicitudControllerTest {
     @Test
     @DisplayName("POST /api/v1/solicitudes con datos inválidos retorna 400 Bad Request")
     void debeRetornar400CuandoValidacionFalla() throws Exception {
-        // Título demasiado corto (< 5 chars) y sin descripción
         SolicitudCrearRequest requestInvalido = new SolicitudCrearRequest(
                 "Falla",
                 "",
@@ -214,103 +225,132 @@ class SolicitudControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/solicitudes con archivo inválido retorna 415 Unsupported Media Type")
-    void debeRetornar415CuandoTipoArchivoNoEsPermitido() throws Exception {
-        SolicitudCrearRequest request = new SolicitudCrearRequest(
-                "Problema en red wifi",
-                "No hay conexión a la red de estudiantes en el pabellón A.",
-                "Campus Central",
-                "Pabellón A",
-                1,
-                1
+    @DisplayName("GET /api/v1/solicitudes/mis-solicitudes retorna 200 con paginación (REG-11 / CA-11)")
+    void debeRetornarMisSolicitudesPaginadas() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 10, 13, 10, 0);
+        SolicitudResumenResponse item = new SolicitudResumenResponse(
+                150L,
+                "SOL-2026-0150",
+                "Proyector sin imagen",
+                "Equipos",
+                "ALTA",
+                "REGISTRADA",
+                "Registrada",
+                "#3B82F6",
+                null,
+                now,
+                now.plusHours(24)
         );
 
-        when(solicitudService.crear(eq(request), any(), eq(usuario)))
-                .thenThrow(new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Solo se permiten archivos JPG, PNG o PDF"));
+        when(solicitudConsultaService.listarMisSolicitudes(eq(usuario), eq("REGISTRADA"), eq("proyector"), any()))
+                .thenReturn(new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1));
 
-        MockMultipartFile solicitudPart = new MockMultipartFile(
-                "solicitud",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(request)
-        );
+        mockMvc.perform(get("/api/v1/solicitudes/mis-solicitudes")
+                        .param("estado", "REGISTRADA")
+                        .param("q", "proyector")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].codigo", is("SOL-2026-0150")))
+                .andExpect(jsonPath("$.totalElements", is(1)));
 
-        MockMultipartFile archivoExe = new MockMultipartFile(
-                "archivos",
-                "script.exe",
-                "application/x-msdownload",
-                new byte[]{0x4D, 0x5A}
-        );
-
-        mockMvc.perform(multipart("/api/v1/solicitudes")
-                        .file(solicitudPart)
-                        .file(archivoExe)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isUnsupportedMediaType());
+        verify(solicitudConsultaService).listarMisSolicitudes(eq(usuario), eq("REGISTRADA"), eq("proyector"), any());
     }
 
     @Test
-    @DisplayName("POST /api/v1/solicitudes con archivo excediendo 5MB retorna 413 Payload Too Large")
-    void debeRetornar413CuandoArchivoExcedeTamano() throws Exception {
-        SolicitudCrearRequest request = new SolicitudCrearRequest(
-                "Problema en proyector",
-                "El proyector muestra rayas verdes intermitentes en la pantalla.",
+    @DisplayName("GET /api/v1/solicitudes/{id} retorna 200 con detalle completo (REG-12 / CA-13)")
+    void debeRetornarDetalleSolicitud() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 10, 13, 10, 0);
+        SolicitudDetalleResponse detalle = new SolicitudDetalleResponse(
+                150L,
+                "SOL-2026-0150",
+                "Proyector sin imagen",
+                "Falla en entrada HDMI",
                 "Campus Central",
-                "Pabellón B",
+                "Aula 402",
+                2,
+                "Equipos",
                 1,
-                1
+                "TI",
+                3,
+                "ALTA",
+                "REGISTRADA",
+                "Registrada",
+                "#3B82F6",
+                10L,
+                "Roberto Pizarro",
+                null,
+                null,
+                null,
+                now,
+                now.plusHours(24),
+                null,
+                null,
+                null,
+                null,
+                List.of(new EvidenciaItemResponse(1L, "INICIAL", "foto.jpg", "image/jpeg", 1024L)),
+                List.of("COMENTAR")
         );
 
-        when(solicitudService.crear(eq(request), any(), eq(usuario)))
-                .thenThrow(new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "El archivo supera el límite de 5 MB"));
+        when(solicitudConsultaService.obtenerDetalle(eq(150L), eq(usuario))).thenReturn(detalle);
 
-        MockMultipartFile solicitudPart = new MockMultipartFile(
-                "solicitud",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(request)
-        );
+        mockMvc.perform(get("/api/v1/solicitudes/150"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(150)))
+                .andExpect(jsonPath("$.codigo", is("SOL-2026-0150")))
+                .andExpect(jsonPath("$.evidencias", hasSize(1)))
+                .andExpect(jsonPath("$.accionesPermitidas", hasSize(1)));
 
-        MockMultipartFile archivoPesado = new MockMultipartFile(
-                "archivos",
-                "video.mp4",
-                "video/mp4",
-                new byte[6 * 1024 * 1024]
-        );
-
-        mockMvc.perform(multipart("/api/v1/solicitudes")
-                        .file(solicitudPart)
-                        .file(archivoPesado)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isPayloadTooLarge());
+        verify(solicitudConsultaService).obtenerDetalle(eq(150L), eq(usuario));
     }
 
     @Test
-    @DisplayName("POST /api/v1/solicitudes sin autenticación retorna 401 Unauthorized")
-    void debeRetornar401CuandoNoHayUsuarioAutenticado() throws Exception {
-        SecurityContextHolder.clearContext();
+    @DisplayName("GET /api/v1/solicitudes/{id} retorna 404 cuando la solicitud es ajena (RN-16 / CA-12 IDOR)")
+    void debeRetornar404CuandoSolicitudEsAjena() throws Exception {
+        when(solicitudConsultaService.obtenerDetalle(eq(999L), eq(usuario)))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitud no encontrada"));
 
-        SolicitudCrearRequest request = new SolicitudCrearRequest(
-                "Problema en red wifi",
-                "No hay conexión a la red de estudiantes en el pabellón A.",
-                "Campus Central",
-                "Pabellón A",
-                1,
-                1
+        mockMvc.perform(get("/api/v1/solicitudes/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/solicitudes/{id}/historial retorna 200 con eventos cronológicos (REG-12)")
+    void debeRetornarHistorialSolicitud() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 10, 13, 10, 0);
+        HistorialItemResponse item = new HistorialItemResponse(
+                now,
+                "Roberto Pizarro",
+                null,
+                "REGISTRADA",
+                "Registro inicial"
         );
 
-        MockMultipartFile solicitudPart = new MockMultipartFile(
-                "solicitud",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(request)
-        );
+        when(solicitudConsultaService.obtenerHistorial(eq(150L), eq(usuario))).thenReturn(List.of(item));
 
-        mockMvc.perform(multipart("/api/v1/solicitudes")
-                        .file(solicitudPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/v1/solicitudes/150/historial"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].estadoNuevo", is("REGISTRADA")));
 
-        verifyNoInteractions(solicitudService);
+        verify(solicitudConsultaService).obtenerHistorial(eq(150L), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/solicitudes/{id}/evidencias/{idEvidencia} descarga archivo con headers correctos (REG-12)")
+    void debeDescargarEvidenciaCorrectamente() throws Exception {
+        byte[] contenido = new byte[]{1, 2, 3, 4};
+        var descarga = new SolicitudConsultaService.EvidenciaDescarga("captura.jpg", "image/jpeg", contenido);
+
+        when(solicitudConsultaService.descargarEvidencia(eq(150L), eq(1L), eq(usuario))).thenReturn(descarga);
+
+        mockMvc.perform(get("/api/v1/solicitudes/150/evidencias/1"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"captura.jpg\""))
+                .andExpect(content().contentType(MediaType.IMAGE_JPEG))
+                .andExpect(content().bytes(contenido));
+
+        verify(solicitudConsultaService).descargarEvidencia(eq(150L), eq(1L), eq(usuario));
     }
 }

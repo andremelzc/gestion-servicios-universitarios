@@ -59,6 +59,21 @@ public class FileStorageService {
 		}
 	}
 
+	public byte[] read(String storedName) {
+		Path file = resolveStoredName(storedName);
+		if (!Files.exists(file)) {
+			throw new org.springframework.web.server.ResponseStatusException(
+				org.springframework.http.HttpStatus.NOT_FOUND,
+				"El archivo de evidencia no existe en el almacenamiento"
+			);
+		}
+		try {
+			return Files.readAllBytes(file);
+		} catch (IOException exception) {
+			throw new IllegalStateException("No se pudo leer la evidencia", exception);
+		}
+	}
+
 	public void delete(String storedName) {
 		try {
 			Files.deleteIfExists(resolveStoredName(storedName));
