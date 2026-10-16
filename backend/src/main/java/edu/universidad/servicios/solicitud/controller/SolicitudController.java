@@ -35,6 +35,7 @@ public class SolicitudController {
 
     private final SolicitudService solicitudService;
     private final SolicitudConsultaService solicitudConsultaService;
+    private final edu.universidad.servicios.solicitud.service.SolicitudWorkflowService solicitudWorkflowService;
 
     /**
      * Registra una nueva solicitud de servicio con evidencias adjuntas (REG-09 / Issue #42).
@@ -129,6 +130,82 @@ public class SolicitudController {
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + descarga.nombreOriginal() + "\"")
                 .body(descarga.contenido());
+    }
+
+    /**
+     * Consulta la bandeja general de solicitudes con filtros y alcance por rol (GES-09 / RF-12 / CA-16).
+     * Técnico: asignadas a él.
+     * Supervisor: área de su incumbencia.
+     * Administrador: global.
+     * Estudiante: 403 Forbidden.
+     */
+    @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TECNICO', 'SUPERVISOR', 'ADMIN')")
+    public ResponseEntity<Page<SolicitudResumenResponse>> listarBandeja(
+            @RequestParam(value = "estado", required = false) List<String> estados,
+            @RequestParam(value = "idPrioridad", required = false) Integer idPrioridad,
+            @RequestParam(value = "idCategoria", required = false) Integer idCategoria,
+            @RequestParam(value = "idTecnico", required = false) Long idTecnico,
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "desde", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime desde,
+            @RequestParam(value = "hasta", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime hasta,
+            @RequestParam(value = "vencidas", required = false) Boolean vencidas,
+            @PageableDefault(size = 20, sort = "fechaRegistro", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+            Authentication authentication
+    ) {
+        Usuario usuario = resolverUsuario(usuarioDetails, authentication);
+        Page<SolicitudResumenResponse> response = solicitudConsultaService.listarBandeja(
+                usuario, estados, idPrioridad, idCategoria, idTecnico, q, desde, hasta, vencidas, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Asigna o reasigna un técnico operativo a la solicitud (GES-06 / US-08 / CA-1 / CA-4 / CA-8).
+     */
+    @PutMapping("/{id}/asignar")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('SUPERVISOR', 'ADMIN')")
+    public ResponseEntity<SolicitudDetalleResponse> asignar(
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudAsignarRequest request,
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+            Authentication authentication
+    ) {
+        Usuario actor = resolverUsuario(usuarioDetails, authentication);
+        SolicitudDetalleResponse response = solicitudWorkflowService.asignar(id, request, actor);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Marca el inicio de atención operativa por parte del técnico asignado o admin (GES-07 / US-09 / CA-9).
+     */
+    @PutMapping("/{id}/iniciar-atencion")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TECNICO', 'ADMIN')")
+    public ResponseEntity<SolicitudDetalleResponse> iniciarAtencion(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+            Authentication authentication
+    ) {
+        Usuario actor = resolverUsuario(usuarioDetails, authentication);
+        SolicitudDetalleResponse response = solicitudWorkflowService.iniciarAtencion(id, actor);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Resuelve la solicitud requiriendo informe técnico y entre 1 y 3 evidencias (GES-08 / US-10 / CA-10 / CA-11).
+     */
+    @PutMapping(value = "/{id}/resolver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TECNICO', 'ADMIN')")
+    public ResponseEntity<SolicitudDetalleResponse> resolver(
+            @PathVariable Long id,
+            @Valid @RequestPart("datos") SolicitudResolverRequest datos,
+            @RequestPart(value = "archivos", required = false) List<MultipartFile> archivos,
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+            Authentication authentication
+    ) {
+        Usuario actor = resolverUsuario(usuarioDetails, authentication);
+        SolicitudDetalleResponse response = solicitudWorkflowService.resolver(id, datos, archivos, actor);
+        return ResponseEntity.ok(response);
     }
 
     private Usuario resolverUsuario(UsuarioDetails usuarioDetails, Authentication authentication) {

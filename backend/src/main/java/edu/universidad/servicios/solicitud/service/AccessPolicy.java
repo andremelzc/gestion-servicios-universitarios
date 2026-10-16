@@ -83,6 +83,32 @@ public class AccessPolicy {
     }
 
     /**
+     * Determina si el actor tiene los permisos requeridos para ejecutar una transición específica (GES-02).
+     *
+     * @param actor      Usuario que intenta realizar la transición.
+     * @param solicitud  Solicitud sobre la cual se ejecutará la transición.
+     * @param transicion Transición solicitada.
+     * @return {@code true} si tiene permisos según rol y alcance de datos, {@code false} en caso contrario.
+     */
+    public boolean puedeEjecutar(Usuario actor, Solicitud solicitud, edu.universidad.servicios.solicitud.domain.Transicion transicion) {
+        if (actor == null || solicitud == null || transicion == null) {
+            return false;
+        }
+
+        String rol = normalizarRol(actor);
+        boolean esAdmin = "ADMIN".equals(rol);
+        boolean esSupervisorArea = "SUPERVISOR".equals(rol) && perteneceMismaArea(actor, solicitud);
+        boolean esTecnicoAsignado = "TECNICO".equals(rol) && esTecnicoAsignado(actor, solicitud);
+        boolean esDueno = esSolicitante(actor, solicitud);
+
+        return switch (transicion) {
+            case EVALUAR, ASIGNAR, REASIGNAR -> esAdmin || esSupervisorArea;
+            case INICIAR_ATENCION, RESOLVER -> esAdmin || esTecnicoAsignado;
+            case CERRAR -> esAdmin || esSupervisorArea || esDueno;
+        };
+    }
+
+    /**
      * Calcula la lista de acciones que el actor tiene permitido ejecutar sobre la solicitud (GES-02).
      */
     public List<String> accionesPermitidas(Usuario actor, Solicitud solicitud) {
@@ -90,38 +116,33 @@ public class AccessPolicy {
             return List.of();
         }
 
-        String rol = normalizarRol(actor);
         String estado = (solicitud.getEstado() != null) ? solicitud.getEstado().getCodigo() : "";
         List<String> acciones = new ArrayList<>();
 
-        boolean esAdmin = "ADMIN".equals(rol);
-        boolean esSupervisorArea = "SUPERVISOR".equals(rol) && perteneceMismaArea(actor, solicitud);
-        boolean esTecnico = "TECNICO".equals(rol) && esTecnicoAsignado(actor, solicitud);
-        boolean esDueno = esSolicitante(actor, solicitud);
-
-        // EVALUAR: REGISTRADA (Supervisor del área o Admin)
-        if ("REGISTRADA".equals(estado) && (esAdmin || esSupervisorArea)) {
+        if (edu.universidad.servicios.solicitud.domain.Transicion.EVALUAR.esOrigenValido(estado)
+                && puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.EVALUAR)) {
             acciones.add("EVALUAR");
         }
 
-        // ASIGNAR / REASIGNAR: REGISTRADA, EN_EVALUACION, ASIGNADA, EN_ATENCION (Supervisor del área o Admin)
-        if (List.of("REGISTRADA", "EN_EVALUACION", "ASIGNADA", "EN_ATENCION").contains(estado)
-                && (esAdmin || esSupervisorArea)) {
+        if ((edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR.esOrigenValido(estado)
+                || edu.universidad.servicios.solicitud.domain.Transicion.REASIGNAR.esOrigenValido(estado))
+                && (puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR)
+                || puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.REASIGNAR))) {
             acciones.add("ASIGNAR");
         }
 
-        // INICIAR_ATENCION: ASIGNADA (Técnico asignado o Admin)
-        if ("ASIGNADA".equals(estado) && (esAdmin || esTecnico)) {
+        if (edu.universidad.servicios.solicitud.domain.Transicion.INICIAR_ATENCION.esOrigenValido(estado)
+                && puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.INICIAR_ATENCION)) {
             acciones.add("INICIAR_ATENCION");
         }
 
-        // RESOLVER: EN_ATENCION (Técnico asignado o Admin)
-        if ("EN_ATENCION".equals(estado) && (esAdmin || esTecnico)) {
+        if (edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER.esOrigenValido(estado)
+                && puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER)) {
             acciones.add("RESOLVER");
         }
 
-        // CERRAR: RESUELTA (Solicitante, Supervisor del área o Admin)
-        if ("RESUELTA".equals(estado) && (esDueno || esAdmin || esSupervisorArea)) {
+        if (edu.universidad.servicios.solicitud.domain.Transicion.CERRAR.esOrigenValido(estado)
+                && puedeEjecutar(actor, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)) {
             acciones.add("CERRAR");
         }
 

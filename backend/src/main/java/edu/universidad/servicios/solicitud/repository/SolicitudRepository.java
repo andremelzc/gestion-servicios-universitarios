@@ -53,4 +53,13 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long>, Jpa
         ORDER BY s.fechaRegistro DESC
     """)
     Page<SolicitudResumenResponse> findResumenBySolicitanteId(Long usuarioId, Pageable pageable);
+
+    @Query("""
+        SELECT s.tecnicoAsignado.id, COUNT(s)
+        FROM Solicitud s
+        WHERE s.tecnicoAsignado.id IN :tecnicoIds
+          AND s.estado.codigo IN ('ASIGNADA', 'EN_ATENCION')
+        GROUP BY s.tecnicoAsignado.id
+    """)
+    java.util.List<Object[]> countCargasActualesPorTecnicos(@org.springframework.data.repository.query.Param("tecnicoIds") java.util.Collection<Long> tecnicoIds);
 }
