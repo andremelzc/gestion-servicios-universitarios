@@ -2,9 +2,13 @@ package edu.universidad.servicios.dashboard.repository;
 
 import edu.universidad.servicios.dashboard.dto.SerieEstadoItem;
 import edu.universidad.servicios.dashboard.dto.SerieItem;
+import edu.universidad.servicios.solicitud.dto.SolicitudResumenResponse;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -98,6 +102,38 @@ public class DashboardRepository {
 		FILTRO_SOLICITUDES +
 		" GROUP BY u.id, u.nombre, u.apellido ORDER BY valor DESC, u.id";
 
+	private static final String CONSULTA_VENCIDAS_DESDE = """
+	FROM solicitudes s
+	JOIN categorias c ON c.id = s.id_categoria
+	""";
+
+	private static final String FILTRO_VENCIDAS =
+		FILTRO_SOLICITUDES +
+		"""
+		AND s.estado IN ('REGISTRADA', 'EN_EVALUACION', 'ASIGNADA', 'EN_ATENCION')
+		AND s.fecha_limite_sla < UTC_TIMESTAMP()
+		""";
+
+	private static final String CONSULTA_VENCIDAS =
+		"""
+		SELECT s.id, s.codigo, s.titulo, c.nombre AS categoria_nombre,
+		       p.nivel AS prioridad_nivel, e.codigo AS estado_codigo,
+		       e.nombre_visible AS estado_nombre, e.color_hex AS estado_color_hex,
+		       CONCAT(u.nombre, ' ', u.apellido) AS tecnico_nombre,
+		       s.fecha_registro, s.fecha_limite_sla
+		""" +
+		CONSULTA_VENCIDAS_DESDE +
+		"""
+		JOIN prioridades p ON p.id = s.id_prioridad
+		JOIN estados_solicitud e ON e.codigo = s.estado
+		LEFT JOIN usuarios u ON u.id = s.id_tecnico_asignado
+		""" +
+		FILTRO_VENCIDAS +
+		" ORDER BY s.fecha_limite_sla ASC, s.id ASC LIMIT :limite OFFSET :offset";
+
+	private static final String CONSULTA_TOTAL_VENCIDAS =
+		"SELECT COUNT(*) " + CONSULTA_VENCIDAS_DESDE + FILTRO_VENCIDAS;
+
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
 	public DashboardRepository(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -182,6 +218,53 @@ public class DashboardRepository {
 			(rs, rowNum) ->
 				new SerieItem(rs.getString("nombre"), rs.getLong("valor"))
 		);
+	}
+
+	public Page<SolicitudResumenResponse> vencidas(
+		LocalDate desde,
+		LocalDate hasta,
+		Integer idArea,
+		Long idTecnico,
+		Pageable pageable
+	) {
+		if (pageable.isUnpaged()) {
+			throw new IllegalArgumentException(
+				"La consulta de vencidas requiere paginación"
+			);
+		}
+		MapSqlParameterSource parametros = parametros(
+			desde,
+			hasta,
+			idArea,
+			idTecnico
+		);
+		Long total = jdbcTemplate.queryForObject(
+			CONSULTA_TOTAL_VENCIDAS,
+			parametros,
+			Long.class
+		);
+		parametros
+			.addValue("limite", pageable.getPageSize())
+			.addValue("offset", pageable.getOffset());
+		List<SolicitudResumenResponse> contenido = jdbcTemplate.query(
+			CONSULTA_VENCIDAS,
+			parametros,
+			(rs, rowNum) ->
+				new SolicitudResumenResponse(
+					rs.getLong("id"),
+					rs.getString("codigo"),
+					rs.getString("titulo"),
+					rs.getString("categoria_nombre"),
+					rs.getString("prioridad_nivel"),
+					rs.getString("estado_codigo"),
+					rs.getString("estado_nombre"),
+					rs.getString("estado_color_hex"),
+					rs.getString("tecnico_nombre"),
+					rs.getTimestamp("fecha_registro").toLocalDateTime(),
+					rs.getTimestamp("fecha_limite_sla").toLocalDateTime()
+				)
+		);
+		return new PageImpl<>(contenido, pageable, total);
 	}
 
 	private MapSqlParameterSource parametros(

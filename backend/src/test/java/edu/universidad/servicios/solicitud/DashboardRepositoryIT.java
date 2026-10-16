@@ -7,6 +7,7 @@ import edu.universidad.servicios.dashboard.dto.SerieEstadoItem;
 import edu.universidad.servicios.dashboard.dto.SerieItem;
 import edu.universidad.servicios.dashboard.repository.DashboardKpis;
 import edu.universidad.servicios.dashboard.repository.DashboardRepository;
+import edu.universidad.servicios.solicitud.dto.SolicitudResumenResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -285,6 +288,99 @@ class DashboardRepositoryIT extends AbstractIntegrationTest {
 				.mapToLong(SerieEstadoItem::valor)
 				.sum()
 		).isEqualTo(3);
+	}
+
+	@Test
+	@Sql("/datasets/dashboard-150.sql")
+	void vencidasPaginadasSoloPendientesOrdenadasPorMayorRetraso() {
+		LocalDate desde = LocalDate.of(2026, 7, 12);
+		LocalDate hasta = LocalDate.of(2026, 10, 9);
+		Page<SolicitudResumenResponse> primera = dashboardRepository.vencidas(
+			desde,
+			hasta,
+			null,
+			null,
+			PageRequest.of(0, 10)
+		);
+		Page<SolicitudResumenResponse> segunda = dashboardRepository.vencidas(
+			desde,
+			hasta,
+			null,
+			null,
+			PageRequest.of(1, 10)
+		);
+		assertThat(primera.getTotalElements()).isEqualTo(50);
+		assertThat(primera.getTotalPages()).isEqualTo(5);
+		assertThat(primera.getContent())
+			.hasSize(10)
+			.allSatisfy(item ->
+				assertThat(item.estadoCodigo()).isIn(
+					"REGISTRADA",
+					"EN_EVALUACION",
+					"ASIGNADA",
+					"EN_ATENCION"
+				)
+			);
+		assertThat(
+			primera
+				.getContent()
+				.stream()
+				.map(SolicitudResumenResponse::fechaLimiteSla)
+		).isSorted();
+		assertThat(
+			primera.getContent().getLast().fechaLimiteSla()
+		).isBeforeOrEqualTo(segunda.getContent().getFirst().fechaLimiteSla());
+		assertThat(
+			primera
+				.getContent()
+				.stream()
+				.map(SolicitudResumenResponse::id)
+				.toList()
+		).doesNotContainAnyElementsOf(
+			segunda
+				.getContent()
+				.stream()
+				.map(SolicitudResumenResponse::id)
+				.toList()
+		);
+
+		Integer areaTi = jdbcTemplate.queryForObject(
+			"SELECT id FROM areas WHERE nombre = 'Tecnologías de la Información'",
+			Integer.class
+		);
+		assertThat(
+			dashboardRepository
+				.vencidas(desde, hasta, areaTi, null, PageRequest.of(0, 10))
+				.getTotalElements()
+		).isEqualTo(25);
+	}
+
+	@Test
+	@Sql({ "/datasets/dashboard-150.sql", "/datasets/dashboard-mttr-4.sql" })
+	void vencidasExcluyeResueltasAunConSlaPasadoYRespetaFechas() {
+		Page<SolicitudResumenResponse> resultado = dashboardRepository.vencidas(
+			LocalDate.of(2025, 1, 1),
+			LocalDate.of(2025, 1, 1),
+			null,
+			null,
+			PageRequest.of(0, 2)
+		);
+		assertThat(resultado.getTotalElements()).isEqualTo(1);
+		assertThat(resultado.getContent())
+			.singleElement()
+			.extracting(SolicitudResumenResponse::codigo)
+			.isEqualTo("DASH-02-MTTR-OPEN");
+		assertThat(
+			dashboardRepository
+				.vencidas(
+					LocalDate.of(2025, 1, 2),
+					LocalDate.of(2025, 1, 2),
+					null,
+					null,
+					PageRequest.of(0, 2)
+				)
+				.getTotalElements()
+		).isZero();
 	}
 
 	private int cantidad(String tabla) {
