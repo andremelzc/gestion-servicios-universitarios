@@ -55,6 +55,9 @@ class SolicitudControllerTest {
     @Mock
     private SolicitudConsultaService solicitudConsultaService;
 
+    @Mock
+    private edu.universidad.servicios.solicitud.service.SolicitudWorkflowService solicitudWorkflowService;
+
     @InjectMocks
     private SolicitudController solicitudController;
 
@@ -352,5 +355,104 @@ class SolicitudControllerTest {
                 .andExpect(content().bytes(contenido));
 
         verify(solicitudConsultaService).descargarEvidencia(eq(150L), eq(1L), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/solicitudes consulta bandeja general con filtros y paginación (GES-09)")
+    void debeListarBandejaCorrectamente() throws Exception {
+        SolicitudResumenResponse item = new SolicitudResumenResponse(
+                150L, "SOL-2026-0150", "Problema de red", "Redes", "ALTA",
+                "ASIGNADA", "Asignada", "#2563EB", "Carlos Ruiz",
+                LocalDateTime.now(), LocalDateTime.now().plusDays(1), false
+        );
+
+        when(solicitudConsultaService.listarBandeja(
+                eq(usuario), any(), any(), any(), any(), any(), any(), any(), any(), any()
+        )).thenReturn(new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1));
+
+        mockMvc.perform(get("/api/v1/solicitudes")
+                        .param("estado", "ASIGNADA")
+                        .param("q", "red"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].codigo", is("SOL-2026-0150")))
+                .andExpect(jsonPath("$.content[0].vencida", is(false)));
+
+        verify(solicitudConsultaService).listarBandeja(
+                eq(usuario), any(), any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/asignar delega al workflow service (GES-06)")
+    void debeAsignarCorrectamente() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "ASIGNADA", "Asignada", "#2563EB", 20L, null);
+
+        when(solicitudWorkflowService.asignar(eq(150L), any(SolicitudAsignarRequest.class), eq(usuario)))
+                .thenReturn(detalle);
+
+        SolicitudAsignarRequest req = new SolicitudAsignarRequest(20L, "Asignación");
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/asignar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("ASIGNADA")))
+                .andExpect(jsonPath("$.tecnicoId", is(20)));
+
+        verify(solicitudWorkflowService).asignar(eq(150L), any(SolicitudAsignarRequest.class), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/iniciar-atencion delega al workflow service (GES-07)")
+    void debeIniciarAtencionCorrectamente() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "EN_ATENCION", "En atención", "#7C3AED", 20L, null);
+
+        when(solicitudWorkflowService.iniciarAtencion(eq(150L), eq(usuario)))
+                .thenReturn(detalle);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/iniciar-atencion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("EN_ATENCION")));
+
+        verify(solicitudWorkflowService).iniciarAtencion(eq(150L), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/resolver procesa multipart y delega al workflow service (GES-08)")
+    void debeResolverCorrectamente() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "RESUELTA", "Resuelta", "#059669", 20L, "Se resolvió el incidente con éxito.");
+
+        when(solicitudWorkflowService.resolver(eq(150L), any(SolicitudResolverRequest.class), any(), eq(usuario)))
+                .thenReturn(detalle);
+
+        MockMultipartFile datosPart = new MockMultipartFile(
+                "datos", "", MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(new SolicitudResolverRequest("Se resolvió el incidente con éxito."))
+        );
+        MockMultipartFile archivoPart = new MockMultipartFile(
+                "archivos", "evidencia.jpg", MediaType.IMAGE_JPEG_VALUE, new byte[]{1, 2, 3}
+        );
+
+        mockMvc.perform(multipart("/api/v1/solicitudes/150/resolver")
+                        .file(datosPart)
+                        .file(archivoPart)
+                        .with(request -> { request.setMethod("PUT"); return request; }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("RESUELTA")))
+                .andExpect(jsonPath("$.informeResolucion", is("Se resolvió el incidente con éxito.")));
+
+        verify(solicitudWorkflowService).resolver(eq(150L), any(SolicitudResolverRequest.class), any(), eq(usuario));
+    }
+
+    private SolicitudDetalleResponse crearDetalleMock(Long id, String estadoCodigo, String estadoNombre, String colorHex, Long tecnicoId, String informe) {
+        return new SolicitudDetalleResponse(
+                id, "SOL-2026-0150", "Titulo", "Descripcion", "Campus Central", "Aula 101",
+                1, "Redes", 1, "TI", 3, "ALTA",
+                estadoCodigo, estadoNombre, colorHex,
+                1L, "Juan Perez", tecnicoId, "Carlos Ruiz",
+                informe, LocalDateTime.now(), LocalDateTime.now().plusDays(1),
+                LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), null,
+                List.of(), List.of("COMENTAR")
+        );
     }
 }

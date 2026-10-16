@@ -16,9 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -48,6 +50,12 @@ class SolicitudConsultaServiceTest {
 
     @Mock
     private AccessPolicy accessPolicy;
+
+    @Spy
+    private java.time.Clock clock = java.time.Clock.fixed(
+            java.time.Instant.parse("2026-10-15T12:00:00Z"),
+            java.time.ZoneOffset.UTC
+    );
 
     @InjectMocks
     private SolicitudConsultaService service;
@@ -187,5 +195,52 @@ class SolicitudConsultaServiceTest {
         assertThat(descarga.nombreOriginal()).isEqualTo("foto.jpg");
         assertThat(descarga.mimeType()).isEqualTo("image/jpeg");
         assertThat(descarga.contenido()).containsExactly(1, 2, 3);
+    }
+
+    @Test
+    @DisplayName("listarBandeja para TECNICO aplica filtro por id de técnico")
+    void listarBandejaTecnico() {
+        Rol rolTecnico = new Rol();
+        rolTecnico.setId(2);
+        rolTecnico.setNombre("ROLE_TECNICO");
+
+        Usuario tecnico = new Usuario();
+        tecnico.setId(20L);
+        tecnico.setRol(rolTecnico);
+
+        when(solicitudRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(solicitud)));
+
+        Page<SolicitudResumenResponse> page = service.listarBandeja(
+                tecnico, null, null, null, null, null, null, null, null, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("listarBandeja para ESTUDIANTE lanza 403 Forbidden")
+    void listarBandejaEstudianteLanza403() {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                service.listarBandeja(estudiante, null, null, null, null, null, null, null, null, PageRequest.of(0, 10))
+        );
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("listarBandeja para SUPERVISOR sin área asignada lanza 403 Forbidden")
+    void listarBandejaSupervisorSinAreaLanza403() {
+        Rol rolSup = new Rol();
+        rolSup.setId(3);
+        rolSup.setNombre("ROLE_SUPERVISOR");
+
+        Usuario supSinArea = new Usuario();
+        supSinArea.setId(30L);
+        supSinArea.setRol(rolSup);
+        supSinArea.setArea(null);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                service.listarBandeja(supSinArea, null, null, null, null, null, null, null, null, PageRequest.of(0, 10))
+        );
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

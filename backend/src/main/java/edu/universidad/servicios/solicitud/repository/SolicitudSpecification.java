@@ -60,4 +60,76 @@ public class SolicitudSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+    public static Specification<Solicitud> paraBandeja(
+            Long tecnicoAsignadoId,
+            Integer areaCategoriaId,
+            List<String> estados,
+            Integer prioridadId,
+            Integer categoriaId,
+            Long filtroTecnicoId,
+            String textoBusqueda,
+            LocalDateTime fechaDesde,
+            LocalDateTime fechaHasta,
+            Boolean soloVencidas,
+            LocalDateTime ahora
+    ) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (tecnicoAsignadoId != null) {
+                predicates.add(cb.equal(root.get("tecnicoAsignado").get("id"), tecnicoAsignadoId));
+            }
+
+            if (areaCategoriaId != null) {
+                predicates.add(cb.equal(root.get("categoria").get("area").get("id"), areaCategoriaId));
+            }
+
+            if (estados != null && !estados.isEmpty()) {
+                List<String> cleanEstados = estados.stream()
+                        .filter(StringUtils::hasText)
+                        .map(String::trim)
+                        .toList();
+                if (!cleanEstados.isEmpty()) {
+                    predicates.add(root.get("estado").get("codigo").in(cleanEstados));
+                }
+            }
+
+            if (prioridadId != null) {
+                predicates.add(cb.equal(root.get("prioridad").get("id"), prioridadId));
+            }
+
+            if (categoriaId != null) {
+                predicates.add(cb.equal(root.get("categoria").get("id"), categoriaId));
+            }
+
+            if (filtroTecnicoId != null) {
+                predicates.add(cb.equal(root.get("tecnicoAsignado").get("id"), filtroTecnicoId));
+            }
+
+            if (StringUtils.hasText(textoBusqueda)) {
+                String pattern = "%" + textoBusqueda.trim().toLowerCase() + "%";
+                Predicate porCodigo = cb.like(cb.lower(root.get("codigo")), pattern);
+                Predicate porTitulo = cb.like(cb.lower(root.get("titulo")), pattern);
+                predicates.add(cb.or(porCodigo, porTitulo));
+            }
+
+            if (fechaDesde != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("fechaRegistro"), fechaDesde));
+            }
+
+            if (fechaHasta != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("fechaRegistro"), fechaHasta));
+            }
+
+            if (Boolean.TRUE.equals(soloVencidas)) {
+                Predicate noFinal = cb.isFalse(root.get("estado").get("esFinal"));
+                Predicate tieneSla = cb.isNotNull(root.get("fechaLimiteSla"));
+                Predicate vencida = cb.lessThan(root.get("fechaLimiteSla"), ahora != null ? ahora : LocalDateTime.now());
+                predicates.add(cb.and(noFinal, tieneSla, vencida));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }

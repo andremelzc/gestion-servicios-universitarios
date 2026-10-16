@@ -59,6 +59,10 @@ class FileStorageServiceTest {
 
 	@Test
 	void rejectsReadOnlyStorageLocation() {
+		org.junit.jupiter.api.Assumptions.assumeTrue(
+			Files.exists(Path.of("/sys")) && !Files.isWritable(Path.of("/sys")),
+			"Aplica en entornos con filesystem /sys no escribible"
+		);
 		assertThat(Files.isWritable(Path.of("/sys"))).isFalse();
 
 		var exception = assertThrows(IllegalStateException.class, () ->

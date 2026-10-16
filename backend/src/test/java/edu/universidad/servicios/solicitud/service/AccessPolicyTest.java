@@ -166,4 +166,36 @@ class AccessPolicyTest {
         List<String> acciones = accessPolicy.accionesPermitidas(estudiante, solicitud);
         assertThat(acciones).isEmpty();
     }
+
+    @Test
+    @DisplayName("puedeEjecutar valida permisos por rol y alcance según la matriz §2.2")
+    void puedeEjecutarSegunMatriz() {
+        Usuario estudiante = crearUsuario(1L, rolEstudiante, null);
+        Usuario tecnicoAsignado = crearUsuario(20L, rolTecnico, areaSistemas);
+        Usuario tecnicoAjeno = crearUsuario(21L, rolTecnico, areaSistemas);
+        Usuario supervisorSistemas = crearUsuario(30L, rolSupervisor, areaSistemas);
+        Usuario supervisorMantenimiento = crearUsuario(31L, rolSupervisor, areaMantenimiento);
+        Usuario admin = crearUsuario(40L, rolAdmin, null);
+
+        Solicitud solicitud = crearSolicitud(107L, estudiante, tecnicoAsignado, areaSistemas, "EN_ATENCION");
+
+        // EVALUAR / ASIGNAR / REASIGNAR
+        assertThat(accessPolicy.puedeEjecutar(supervisorSistemas, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(supervisorMantenimiento, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR)).isFalse();
+        assertThat(accessPolicy.puedeEjecutar(admin, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(tecnicoAsignado, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.ASIGNAR)).isFalse();
+
+        // INICIAR_ATENCION / RESOLVER
+        assertThat(accessPolicy.puedeEjecutar(tecnicoAsignado, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(tecnicoAjeno, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER)).isFalse();
+        assertThat(accessPolicy.puedeEjecutar(supervisorSistemas, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER)).isFalse();
+        assertThat(accessPolicy.puedeEjecutar(admin, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.RESOLVER)).isTrue();
+
+        // CERRAR
+        assertThat(accessPolicy.puedeEjecutar(estudiante, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(supervisorSistemas, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(supervisorMantenimiento, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)).isFalse();
+        assertThat(accessPolicy.puedeEjecutar(admin, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)).isTrue();
+        assertThat(accessPolicy.puedeEjecutar(tecnicoAsignado, solicitud, edu.universidad.servicios.solicitud.domain.Transicion.CERRAR)).isFalse();
+    }
 }

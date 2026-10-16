@@ -45,6 +45,68 @@ public class SolicitudConsultaService {
     private final HistorialSolicitudRepository historialRepository;
     private final FileStorageService fileStorageService;
     private final AccessPolicy accessPolicy;
+    private final java.time.Clock clock;
+
+    /**
+     * Lista las solicitudes de la bandeja general según el alcance del rol y filtros (GES-09 / RF-12 / CA-16).
+     * Técnico: solicitudes asignadas a él.
+     * Supervisor: solicitudes de categorías pertenecientes a su área.
+     * Administrador: todas las solicitudes o según filtro.
+     * Estudiante: 403 Forbidden (debe usar mis-solicitudes).
+     */
+    public Page<SolicitudResumenResponse> listarBandeja(
+            Usuario usuario,
+            List<String> estados,
+            Integer idPrioridad,
+            Integer idCategoria,
+            Long idTecnico,
+            String q,
+            java.time.LocalDateTime desde,
+            java.time.LocalDateTime hasta,
+            Boolean vencidas,
+            Pageable pageable
+    ) {
+        if (usuario == null || usuario.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No está autenticado o sus credenciales son inválidas.");
+        }
+
+        String rol = normalizarRol(usuario);
+        if ("ESTUDIANTE".equals(rol)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Los estudiantes deben consultar a través de mis-solicitudes.");
+        }
+
+        Long scopeTecnicoId = null;
+        Integer scopeAreaId = null;
+
+        if ("TECNICO".equals(rol)) {
+            scopeTecnicoId = usuario.getId();
+        } else if ("SUPERVISOR".equals(rol)) {
+            if (usuario.getArea() == null || usuario.getArea().getId() == null) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El supervisor no tiene un área asignada.");
+            }
+            scopeAreaId = usuario.getArea().getId();
+        } else if (!"ADMIN".equals(rol)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tiene permisos para consultar la bandeja.");
+        }
+
+        Pageable sanitizedPageable = sanitizarPageable(pageable);
+        Specification<Solicitud> spec = SolicitudSpecification.paraBandeja(
+                scopeTecnicoId,
+                scopeAreaId,
+                estados,
+                idPrioridad,
+                idCategoria,
+                idTecnico,
+                q,
+                desde,
+                hasta,
+                vencidas,
+                java.time.LocalDateTime.now(clock)
+        );
+
+        return solicitudRepository.findAll(spec, sanitizedPageable)
+                .map(s -> SolicitudResumenResponse.de(s, clock));
+    }
 
     /**
      * Lista las solicitudes registradas exclusivamente por el usuario autenticado (REG-11 / US-21 / CA-11).
@@ -77,7 +139,7 @@ public class SolicitudConsultaService {
         );
 
         return solicitudRepository.findAll(spec, sanitizedPageable)
-                .map(SolicitudResumenResponse::de);
+                .map(s -> SolicitudResumenResponse.de(s, clock));
     }
 
     /**
@@ -162,5 +224,12 @@ public class SolicitudConsultaService {
                 : Sort.by(orders);
 
         return PageRequest.of(page, size, sort);
+    }
+
+    private String normalizarRol(Usuario usuario) {
+        if (usuario.getRol() == null || usuario.getRol().getNombre() == null) {
+            return "";
+        }
+        return usuario.getRol().getNombre().toUpperCase().replace("ROLE_", "").trim();
     }
 }
