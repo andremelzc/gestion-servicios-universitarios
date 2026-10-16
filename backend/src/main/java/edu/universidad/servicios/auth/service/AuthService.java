@@ -1,8 +1,10 @@
 package edu.universidad.servicios.auth.service;
 
 import edu.universidad.servicios.auth.dto.AuthResponse;
+import edu.universidad.servicios.auth.dto.CambiarPasswordRequest;
 import edu.universidad.servicios.auth.dto.LoginRequest;
 import edu.universidad.servicios.auth.dto.RegistroRequest;
+import edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException;
 import edu.universidad.servicios.auth.security.JwtService;
 import edu.universidad.servicios.common.exception.RecursoEnConflictoException;
 import edu.universidad.servicios.usuario.domain.Rol;
@@ -110,6 +112,30 @@ public class AuthService {
         String jwtToken = jwtService.generateToken(usuario);
 
         return buildAuthResponse(usuario, jwtToken);
+    }
+
+    /**
+     * Cambio de contraseña para un usuario autenticado (US-18, CA-14, AUTH-12).
+     *
+     * <p>Reglas:</p>
+     * <ul>
+     *   <li>Verifica que la contraseña actual coincida con el hash almacenado (BCrypt).</li>
+     *   <li>Si no coincide, lanza {@link PasswordActualIncorrectaException}.</li>
+     *   <li>Si coincide, hashea la nueva contraseña con BCrypt y persiste.</li>
+     * </ul>
+     */
+    @Transactional
+    public void cambiarPassword(String correo, CambiarPasswordRequest request) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + correo));
+
+        if (!passwordEncoder.matches(request.passwordActual(), usuario.getPasswordHash())) {
+            throw new PasswordActualIncorrectaException("La contraseña actual es incorrecta");
+        }
+
+        usuario.setPasswordHash(passwordEncoder.encode(request.nuevaPassword()));
+        usuarioRepository.save(usuario);
+        log.info("Contraseña actualizada exitosamente para usuario: {}", correo);
     }
 
     /**
