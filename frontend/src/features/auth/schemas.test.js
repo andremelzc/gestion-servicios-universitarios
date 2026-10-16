@@ -43,6 +43,10 @@ describe('LoginSchema (US-01)', () => {
     }
   });
 
+  it('[US-01] el login acepta cualquier formato válido (el dominio lo valida el servidor con 401)', () => {
+    expect(LoginSchema.safeParse({ correo: 'juan@gmail.com', password: 'x' }).success).toBe(true);
+  });
+
   it.each([
     ['correo ausente', {}, 'El correo es obligatorio'],
     ['correo vacío', { correo: '', password: 'x' }, 'El correo es obligatorio'],
@@ -51,7 +55,6 @@ describe('LoginSchema (US-01)', () => {
       { correo: 'juan', password: 'x' },
       'Debe ser un correo electrónico válido',
     ],
-    ['dominio externo', { correo: 'juan@gmail.com', password: 'x' }, MSG_DOMINIO],
     ['password ausente', { correo: 'juan@universidad.edu' }, 'La contraseña es obligatoria'],
     [
       'password vacía',
@@ -112,6 +115,12 @@ describe('RegisterSchema (US-02/US-03)', () => {
     expect(mensajes(resultado)).toContain(MSG_POLITICA);
   });
 
+  it('[RN-03] acepta Ñ/Á como mayúscula (paridad con Character.isUpperCase del backend)', () => {
+    expect(RegisterSchema.safeParse({ ...REGISTRO_VALIDO, password: 'Ñandú1234' }).success).toBe(
+      true,
+    );
+  });
+
   it('[CA-6/US-03] rechaza el campo "rol"', () => {
     const resultado = RegisterSchema.safeParse({ ...REGISTRO_VALIDO, rol: 'ADMIN' });
 
@@ -167,6 +176,7 @@ describe('helpers (AUTH-17 checklist)', () => {
     ['corta', 'Pass1', { longitud: false, mayuscula: true, numero: true }],
     ['sin mayúscula', 'password123', { longitud: true, mayuscula: false, numero: true }],
     ['sin número', 'Password', { longitud: true, mayuscula: true, numero: false }],
+    ['con Ñ como mayúscula', 'Ñandú1234', { longitud: true, mayuscula: true, numero: true }],
     ['no texto', null, { longitud: false, mayuscula: false, numero: false }],
   ])('requisitosPassword(%s)', (_nombre, entrada, esperado) => {
     expect(requisitosPassword(entrada)).toEqual(esperado);

@@ -26,8 +26,9 @@ const MSG_APELLIDO_REQUERIDO = 'El apellido es obligatorio';
 const MSG_APELLIDO_LONGITUD = 'El apellido debe tener entre 2 y 50 caracteres';
 
 const REGEX_CODIGO = /^[A-Za-z0-9]{6,20}$/;
-const REGEX_MAYUSCULA = /[A-Z]/;
-const REGEX_NUMERO = /[0-9]/;
+// Paridad con el backend: `Character.isUpperCase/isDigit` aceptan Unicode (Ñ, Á…).
+const REGEX_MAYUSCULA = /\p{Lu}/u;
+const REGEX_NUMERO = /\p{Nd}/u;
 // Paridad con SinHtmlValidator: <[^>]+>
 const REGEX_HTML = /<[^>]+>/;
 
@@ -45,6 +46,12 @@ export function contieneHtml(texto) {
 }
 
 // Checklist en vivo para AUTH-17 (sin recortar: la política cuenta tal cual se escribe).
+// Etiquetas en español para pintar el checklist (el criterio es el mismo del esquema).
+export const REQUISITOS_PASSWORD = [
+  { id: 'longitud', etiqueta: 'Mínimo 8 caracteres' },
+  { id: 'mayuscula', etiqueta: 'Una mayúscula (A-Z, Ñ, Á…)' },
+  { id: 'numero', etiqueta: 'Un número' },
+];
 export function requisitosPassword(password) {
   if (typeof password !== 'string') {
     return { longitud: false, mayuscula: false, numero: false };
@@ -56,7 +63,10 @@ export function requisitosPassword(password) {
   };
 }
 
-const correoSchema = z
+// Formato de correo (trim + minúsculas). El dominio institucional va aparte:
+// el login (US-01) solo exige formato — su DTO no lleva @DominioInstitucional,
+// el "no eres de la universidad" lo dice el servidor con 401.
+const correoFormatoSchema = z
   .string({
     required_error: MSG_CORREO_REQUERIDO,
     invalid_type_error: MSG_CORREO_REQUERIDO,
@@ -64,8 +74,9 @@ const correoSchema = z
   .trim()
   .toLowerCase()
   .min(1, MSG_CORREO_REQUERIDO)
-  .email(MSG_CORREO_FORMATO)
-  .refine(esCorreoInstitucional, MSG_DOMINIO);
+  .email(MSG_CORREO_FORMATO);
+
+const correoSchema = correoFormatoSchema.refine(esCorreoInstitucional, MSG_DOMINIO);
 
 // Sin trim: la contraseña se usa tal cual (el backend no la recorta).
 // Sin .strict(): el backend solo rechaza campos extra en /registro (CA-6).
@@ -109,7 +120,7 @@ const apellidoSchema = z
   .refine((v) => !contieneHtml(v), MSG_SIN_HTML);
 
 export const LoginSchema = z.object({
-  correo: correoSchema,
+  correo: correoFormatoSchema,
   password: passwordLoginSchema,
 });
 
