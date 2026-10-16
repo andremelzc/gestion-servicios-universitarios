@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,6 +88,12 @@ class AuthServiceTest {
         assertEquals("Bearer", response.getTipo());
         assertEquals("estudiante@universidad.edu", response.getCorreo());
         assertEquals("ESTUDIANTE", response.getRol());
+        assertNotNull(estudiante.getUltimoAcceso());
+        ArgumentCaptor<UsernamePasswordAuthenticationToken> authenticationCaptor =
+                ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+        verify(authenticationManager).authenticate(authenticationCaptor.capture());
+        assertEquals("estudiante@universidad.edu", authenticationCaptor.getValue().getPrincipal());
+        assertEquals("Password123", authenticationCaptor.getValue().getCredentials());
         verify(usuarioRepository).save(estudiante);
     }
 
@@ -100,12 +107,16 @@ class AuthServiceTest {
 
         assertThrows(BadCredentialsException.class, () -> authService.login(request));
         verify(usuarioRepository, never()).findByCorreo(anyString());
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(jwtService, never()).generateToken(any(Usuario.class));
     }
 
     @Test
     @DisplayName("Registro exitoso crea usuario con rol estudiante y devuelve token")
     void registroExitoso() {
-        RegistroRequest request = crearRegistroRequest("20230001", "juan.perez@universidad.edu");
+        RegistroRequest request = crearRegistroRequest("20230001", " Juan.Perez@Universidad.edu ");
+        request.setNombre(" Juan ");
+        request.setApellido(" Perez ");
 
         Rol rolEstudiante = new Rol();
         rolEstudiante.setId(4);
@@ -123,7 +134,18 @@ class AuthServiceTest {
         assertEquals("jwt.token.nuevo", response.getToken());
         assertEquals("juan.perez@universidad.edu", response.getCorreo());
         assertEquals("ROLE_ESTUDIANTE", response.getRol());
-        verify(usuarioRepository).save(any(Usuario.class));
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        verify(usuarioRepository).save(usuarioCaptor.capture());
+        Usuario usuarioGuardado = usuarioCaptor.getValue();
+        assertEquals("20230001", usuarioGuardado.getCodigoInstitucional());
+        assertEquals("Juan", usuarioGuardado.getNombre());
+        assertEquals("Perez", usuarioGuardado.getApellido());
+        assertEquals("juan.perez@universidad.edu", usuarioGuardado.getCorreo());
+        assertEquals("encodedPassword", usuarioGuardado.getPasswordHash());
+        assertEquals("ROLE_ESTUDIANTE", usuarioGuardado.getRol().getNombre());
+        assertTrue(usuarioGuardado.getActivo());
+        assertNull(usuarioGuardado.getArea());
+        verify(passwordEncoder).encode("Password123");
     }
 
     @Test
@@ -147,6 +169,8 @@ class AuthServiceTest {
 
         assertThrows(RecursoEnConflictoException.class, () -> authService.registrar(request));
         verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(rolRepository, never()).findByNombre(anyString());
+        verify(passwordEncoder, never()).encode(anyString());
     }
 
     @Test
