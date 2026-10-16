@@ -1,8 +1,10 @@
 package edu.universidad.servicios.auth.service;
 
 import edu.universidad.servicios.auth.dto.AuthResponse;
+import edu.universidad.servicios.auth.dto.CambiarPasswordRequest;
 import edu.universidad.servicios.auth.dto.LoginRequest;
 import edu.universidad.servicios.auth.dto.RegistroRequest;
+import edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException;
 import edu.universidad.servicios.auth.security.JwtService;
 import edu.universidad.servicios.builder.UsuarioTestBuilder;
 import edu.universidad.servicios.common.exception.RecursoEnConflictoException;
@@ -157,5 +159,47 @@ class AuthServiceTest {
         when(rolRepository.findByNombre("ROLE_ESTUDIANTE")).thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () -> authService.registrar(request));
+    }
+
+    @Test
+    @DisplayName("Cambiar password exitoso actualiza el hash de la contraseña")
+    void cambiarPasswordExitoso() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordActual123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("estudiante@universidad.edu")).thenReturn(Optional.of(estudiante));
+        when(passwordEncoder.matches("PasswordActual123", estudiante.getPasswordHash())).thenReturn(true);
+        when(passwordEncoder.encode("NuevaPasswordSegura456")).thenReturn("nuevoHashEncriptado");
+
+        authService.cambiarPassword("estudiante@universidad.edu", request);
+
+        assertEquals("nuevoHashEncriptado", estudiante.getPasswordHash());
+        verify(usuarioRepository).save(estudiante);
+    }
+
+    @Test
+    @DisplayName("Cambiar password con contraseña actual incorrecta lanza PasswordActualIncorrectaException")
+    void cambiarPasswordActualIncorrecta() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordErrada123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("estudiante@universidad.edu")).thenReturn(Optional.of(estudiante));
+        when(passwordEncoder.matches("PasswordErrada123", estudiante.getPasswordHash())).thenReturn(false);
+
+        assertThrows(PasswordActualIncorrectaException.class,
+                () -> authService.cambiarPassword("estudiante@universidad.edu", request));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Cambiar password con usuario inexistente lanza IllegalArgumentException")
+    void cambiarPasswordUsuarioInexistente() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordActual123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("noexiste@universidad.edu")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> authService.cambiarPassword("noexiste@universidad.edu", request));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 }

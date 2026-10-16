@@ -101,6 +101,24 @@ public class GlobalExceptionHandler {
 		return pd;
 	}
 
+	@ExceptionHandler(edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException.class)
+	public ProblemDetail handlePasswordActualIncorrecta(
+		edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException ex
+	) {
+		ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+			HttpStatus.BAD_REQUEST,
+			"La contraseña actual es incorrecta"
+		);
+		pd.setTitle("Error de validación");
+		pd.setType(
+			URI.create("https://api.servicios.edu/errors/validation-error")
+		);
+		pd.setProperty("errores", Map.of("passwordActual", ex.getMessage()));
+		addCommonProperties(pd);
+		return pd;
+	}
+
+
 	@ExceptionHandler(ResponseStatusException.class)
 	public ProblemDetail handleResponseStatusException(
 		ResponseStatusException ex

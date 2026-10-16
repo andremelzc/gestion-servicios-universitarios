@@ -3,8 +3,11 @@ package edu.universidad.servicios.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import edu.universidad.servicios.auth.dto.AuthResponse;
+import edu.universidad.servicios.auth.dto.CambiarPasswordRequest;
 import edu.universidad.servicios.auth.dto.LoginRequest;
 import edu.universidad.servicios.auth.dto.RegistroRequest;
+import edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException;
+import edu.universidad.servicios.auth.security.UsuarioDetails;
 import edu.universidad.servicios.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -72,6 +78,51 @@ public class AuthController {
                     "Campo no permitido en esta petición"
             ));
         }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
+    }
+
+    /**
+     * Cambio de contraseña para el usuario autenticado (US-18, CA-14, AUTH-12).
+     *
+     * <p>Devuelve {@code 204 No Content} en caso de éxito.</p>
+     * <p>Si la contraseña actual no coincide, lanza {@link PasswordActualIncorrectaException}
+     * que se mapea a {@code 400 Bad Request} con el detalle del error en {@code errores.passwordActual}.</p>
+     */
+    @PutMapping("/cambiar-password")
+    public ResponseEntity<Void> cambiarPassword(
+            @Valid @RequestBody CambiarPasswordRequest request,
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails,
+            Authentication authentication
+    ) {
+        String correo = usuarioDetails != null ? usuarioDetails.getUsername()
+                : authentication != null ? authentication.getName()
+                : SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : null;
+
+        if (correo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        authService.cambiarPassword(correo, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Intercepta error de contraseña actual incorrecta devolviendo 400 Bad Request (CA-14).
+     */
+    @ExceptionHandler(PasswordActualIncorrectaException.class)
+    public ResponseEntity<ProblemDetail> handlePasswordActualIncorrecta(PasswordActualIncorrectaException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "La contraseña actual es incorrecta"
+        );
+        pd.setTitle("Error de validación");
+        pd.setType(URI.create("https://api.servicios.edu/errors/validation-error"));
+        pd.setProperty("timestamp", Instant.now());
+        pd.setProperty("traceId", UUID.randomUUID().toString());
+        pd.setProperty("errores", Map.of("passwordActual", ex.getMessage()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
     }

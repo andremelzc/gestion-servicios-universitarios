@@ -34,6 +34,7 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -292,5 +293,77 @@ class AuthAuthorizationIT extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/recurso-protegido")
                         .header("Authorization", "Bearer " + tokenTecnico))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("[CA-14 / AUTH-12] Cambiar password exitoso permite login con la nueva contraseña e invalida la anterior")
+    void testCambiarPasswordExitosoYLoginConNuevaClave() throws Exception {
+        String token = jwtService.generateToken(estudianteUser);
+
+        String cambiarBody = """
+                {
+                    "passwordActual": "Password123!",
+                    "nuevaPassword": "PasswordNueva456!"
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/auth/cambiar-password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cambiarBody))
+                .andExpect(status().isNoContent());
+
+        // Login con la contraseña antigua falla
+        LoginRequest loginViejo = new LoginRequest("estudiante.auth@universidad.edu", "Password123!");
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginViejo)))
+                .andExpect(status().isUnauthorized());
+
+        // Login con la nueva contraseña tiene éxito
+        LoginRequest loginNuevo = new LoginRequest("estudiante.auth@universidad.edu", "PasswordNueva456!");
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginNuevo)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isString())
+                .andExpect(jsonPath("$.correo").value("estudiante.auth@universidad.edu"));
+    }
+
+    @Test
+    @DisplayName("[CA-14 / AUTH-12] Cambiar password con contraseña actual errónea retorna 400 Bad Request con ProblemDetail")
+    void testCambiarPasswordActualErroneaRetorna400() throws Exception {
+        String token = jwtService.generateToken(estudianteUser);
+
+        String cambiarBody = """
+                {
+                    "passwordActual": "PasswordIncorrecta!",
+                    "nuevaPassword": "PasswordNueva456!"
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/auth/cambiar-password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cambiarBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Error de validación"))
+                .andExpect(jsonPath("$.errores.passwordActual").value("La contraseña actual es incorrecta"));
+    }
+
+    @Test
+    @DisplayName("[CA-14 / AUTH-12] Cambiar password sin token es rechazado")
+    void testCambiarPasswordSinTokenRechazaPeticion() throws Exception {
+        String cambiarBody = """
+                {
+                    "passwordActual": "Password123!",
+                    "nuevaPassword": "PasswordNueva456!"
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/auth/cambiar-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cambiarBody))
+                .andExpect(status().isForbidden());
     }
 }
