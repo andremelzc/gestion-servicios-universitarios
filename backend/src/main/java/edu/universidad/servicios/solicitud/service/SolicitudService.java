@@ -27,7 +27,7 @@ public class SolicitudService {
     private final EstadoSolicitudRepository estadoRepository;
     private final SolicitudRepository solicitudRepository;
     private final EvidenciaArchivoRepository evidenciaRepository;
-    private final HistorialSolicitudRepository historialRepository;
+    private final HistorialService historialService;
     private final CodigoSolicitudService codigoService;
     private final SlaCalculator slaCalculator;
     private final FileTypeValidator fileTypeValidator;
@@ -39,7 +39,7 @@ public class SolicitudService {
                             EstadoSolicitudRepository estadoRepository,
                             SolicitudRepository solicitudRepository,
                             EvidenciaArchivoRepository evidenciaRepository,
-                            HistorialSolicitudRepository historialRepository,
+                            HistorialService historialService,
                             CodigoSolicitudService codigoService,
                             SlaCalculator slaCalculator,
                             FileTypeValidator fileTypeValidator,
@@ -50,7 +50,7 @@ public class SolicitudService {
         this.estadoRepository = estadoRepository;
         this.solicitudRepository = solicitudRepository;
         this.evidenciaRepository = evidenciaRepository;
-        this.historialRepository = historialRepository;
+        this.historialService = historialService;
         this.codigoService = codigoService;
         this.slaCalculator = slaCalculator;
         this.fileTypeValidator = fileTypeValidator;
@@ -108,12 +108,7 @@ public class SolicitudService {
             evidenciaRepository.save(evidencia);
         }
 
-        HistorialSolicitud historial = new HistorialSolicitud();
-        historial.setSolicitud(savedSolicitud);
-        historial.setUsuario(solicitante);
-        historial.setEstadoAnterior(null);
-        historial.setEstadoNuevo(estado);
-        historialRepository.save(historial);
+        historialService.registrar(savedSolicitud, solicitante, null, estado, null);
 
         return new SolicitudCreadaResponse(savedSolicitud.getId(), savedSolicitud.getCodigo(),
                 savedSolicitud.getTitulo(), estado.getCodigo(), savedSolicitud.getFechaRegistro(),

@@ -42,7 +42,7 @@ class SolicitudServiceTest {
 	EvidenciaArchivoRepository evidenciaRepository;
 
 	@Mock
-	HistorialSolicitudRepository historialRepository;
+	HistorialService historialService;
 
 	@Mock
 	CodigoSolicitudService codigoService;
@@ -64,7 +64,7 @@ class SolicitudServiceTest {
 			estadoRepository,
 			solicitudRepository,
 			evidenciaRepository,
-			historialRepository,
+			historialService,
 			codigoService,
 			new SlaCalculator(clock),
 			new FileTypeValidator(),
@@ -139,12 +139,8 @@ class SolicitudServiceTest {
 			java.time.LocalDateTime.of(2026, 10, 10, 10, 0)
 		);
 		verify(evidenciaRepository).save(any(EvidenciaArchivo.class));
-		verify(historialRepository).save(
-			argThat(
-				historial ->
-					historial.getEstadoAnterior() == null &&
-					historial.getEstadoNuevo() == registrada
-			)
+		verify(historialService).registrar(
+			any(Solicitud.class), eq(solicitante), isNull(), eq(registrada), isNull()
 		);
 		TransactionSynchronizationManager.getSynchronizations().forEach(sync ->
 			sync.afterCompletion(TransactionSynchronization.STATUS_COMMITTED)
