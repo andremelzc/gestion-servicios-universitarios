@@ -135,7 +135,11 @@ public class AuthService {
 
         usuario.setPasswordHash(passwordEncoder.encode(request.nuevaPassword()));
         usuarioRepository.save(usuario);
-        log.info("Contraseña actualizada exitosamente para usuario: {}", correo);
+        String correoSeguroLog = correo == null ? null : correo
+                .replace('\r', ' ')
+                .replace('\n', ' ')
+                .replace('\t', ' ');
+        log.info("Contraseña actualizada exitosamente para usuario: {}", correoSeguroLog);
     }
 
     /**
