@@ -3,6 +3,7 @@
 // - Vista previa de imágenes con `URL.createObjectURL`, liberada al quitar el archivo
 //   y al desmontar (specs/02-registro-solicitudes/02-plan.md §4).
 // - Errores por archivo con `role="alert"` (aria-live) y mensajes de UX §9.
+// - `error` (opcional): mensaje del campo (p. ej. "falta evidencia") asociado a la entrada.
 // - Controlado: el formulario es dueño de `archivos` y deshabilita su envío con
 //   `validarArchivos(archivos)` (CA-4); el límite de 3 se aplica al seleccionar.
 import { useEffect, useRef, useState } from 'react';
@@ -32,6 +33,7 @@ export default function FileUploader({
   deshabilitado = false,
   id = 'evidencias',
   etiqueta = 'Evidencias (opcional)',
+  error = null,
 }) {
   const [arrastrando, setArrastrando] = useState(false);
   const [aviso, setAviso] = useState(null);
@@ -101,6 +103,7 @@ export default function FileUploader({
   }
 
   const idAyuda = `${id}-ayuda`;
+  const idError = `${id}-error`;
 
   return (
     <div className="file-uploader">
@@ -129,13 +132,20 @@ export default function FileUploader({
           disabled={deshabilitado}
           onChange={alSeleccionar}
           aria-labelledby={`${id}-etiqueta`}
-          aria-describedby={idAyuda}
+          aria-invalid={error ? 'true' : undefined}
+          aria-describedby={error ? `${idAyuda} ${idError}` : idAyuda}
         />
         <span className="file-uploader__instruccion">Arrastra o toca para subir</span>
         <span className="file-uploader__ayuda" id={idAyuda}>
           JPG · PNG · PDF · máx. {maxArchivos} archivos · 5 MB c/u
         </span>
       </label>
+
+      {error && (
+        <p className="file-uploader__aviso" id={idError}>
+          {error}
+        </p>
+      )}
 
       {aviso && (
         <p className="file-uploader__aviso" role="alert">
