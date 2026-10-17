@@ -12,11 +12,31 @@ const SEMILLA_PRIORIDADES = [
   { id: 4, nivel: 'CRITICA', ponderador: 4, slaMaxHoras: 4, activo: true },
 ];
 
+// Estados (ADR-009): conjunto fijo; solo se edita la presentación. Los campos salen del modelo de
+// datos §3.6 y del objeto `estado` de api-rest §3.2; el cuerpo de `GET /estados` no está documentado.
+const SEMILLA_ESTADOS = [
+  ['REGISTRADA', 'Registrada', 'La solicitud fue recibida.', '#6B7280'],
+  ['EN_EVALUACION', 'En evaluación', 'Un supervisor revisa la solicitud.', '#D97706'],
+  ['ASIGNADA', 'Asignada', 'Un técnico fue asignado.', '#2563EB'],
+  ['EN_ATENCION', 'En atención', 'El técnico trabaja en la solicitud.', '#7C3AED'],
+  ['RESUELTA', 'Resuelta', 'El técnico informó la resolución.', '#059669'],
+  ['CERRADA', 'Cerrada', 'La solicitud terminó.', '#047857'],
+].map(([codigo, nombreVisible, descripcion, colorHex], i) => ({
+  codigo,
+  nombreVisible,
+  descripcion,
+  colorHex,
+  orden: i + 1,
+  esFinal: codigo === 'CERRADA',
+}));
+
 let prioridades = structuredClone(SEMILLA_PRIORIDADES);
+let estados = structuredClone(SEMILLA_ESTADOS);
 
 /** Restablece el estado en memoria; llamar en `beforeEach` de las pruebas que mutan. */
 export function reiniciarAdmin() {
   prioridades = structuredClone(SEMILLA_PRIORIDADES);
+  estados = structuredClone(SEMILLA_ESTADOS);
 }
 
 const ruta = (request) => new URL(request.url).pathname;
@@ -107,4 +127,48 @@ export const handlersAdmin = [
     prioridad.activo = false;
     return new HttpResponse(null, { status: 204 });
   }),
+
+  http.get('*/api/v1/estados', () => HttpResponse.json(estados)),
+
+  http.put('*/api/v1/estados/:codigo', async ({ params, request }) => {
+    const estado = estados.find((e) => e.codigo === params.codigo);
+    if (!estado) {
+      return problema(404, 'no-encontrado', 'No encontrado', 'El estado no existe.', ruta(request));
+    }
+    const { nombreVisible, descripcion = null, colorHex } = await request.json();
+    const errores = {};
+    if (typeof nombreVisible !== 'string' || !nombreVisible.trim() || nombreVisible.length > 40) {
+      errores.nombreVisible = 'El nombre visible es obligatorio (hasta 40 caracteres).';
+    }
+    if ((descripcion ?? '').length > 255) errores.descripcion = 'Hasta 255 caracteres.';
+    if (!/^#[0-9A-Fa-f]{6}$/.test(colorHex ?? '')) errores.colorHex = 'Usa el formato #RRGGBB.';
+    if (Object.keys(errores).length > 0) {
+      return problema(400, 'validacion', 'Validación fallida', 'Campos inválidos.', ruta(request), {
+        errores,
+      });
+    }
+    // El código y las transiciones no cambian (CA-7): solo se actualiza la presentación.
+    Object.assign(estado, { nombreVisible: nombreVisible.trim(), descripcion, colorHex });
+    return HttpResponse.json(estado);
+  }),
+
+  // El conjunto de estados es fijo: no hay POST ni DELETE (api-rest §3.5; CA-7 admite 405/404).
+  http.post('*/api/v1/estados', ({ request }) =>
+    problema(
+      405,
+      'metodo-no-permitido',
+      'Método no permitido',
+      'No se crean estados.',
+      ruta(request),
+    ),
+  ),
+  http.delete('*/api/v1/estados/:codigo', ({ request }) =>
+    problema(
+      405,
+      'metodo-no-permitido',
+      'Método no permitido',
+      'No se borran estados.',
+      ruta(request),
+    ),
+  ),
 ];

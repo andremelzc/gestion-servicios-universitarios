@@ -1,5 +1,36 @@
 import { describe, expect, it } from 'vitest';
-import { validarPrioridad } from './validacion.js';
+import { validarEstado, validarPrioridad } from './validacion.js';
+
+describe('validarEstado (api-rest §3.5, US-32)', () => {
+  const valido = { nombreVisible: ' En revisión ', descripcion: '', colorHex: '#d97706' };
+
+  it('[US-32 CA-7] normaliza: recorta, color en mayúsculas y descripción vacía como null', () => {
+    expect(validarEstado(valido)).toEqual({
+      datos: { nombreVisible: 'En revisión', descripcion: null, colorHex: '#D97706' },
+    });
+  });
+
+  it('[US-32] exige el nombre visible y limita su largo (40) y el de la descripción (255)', () => {
+    expect(validarEstado({ ...valido, nombreVisible: ' ' }).errores.nombreVisible).toBe(
+      'Ingresa el nombre visible.',
+    );
+    expect(validarEstado({ ...valido, nombreVisible: 'A'.repeat(41) }).errores.nombreVisible).toBe(
+      'El nombre visible admite hasta 40 caracteres.',
+    );
+    expect(validarEstado({ ...valido, descripcion: 'A'.repeat(256) }).errores.descripcion).toBe(
+      'La descripción admite hasta 255 caracteres.',
+    );
+  });
+
+  it.each(['rojo', '#FFF', '#12345G', 'D97706', '#D977060'])(
+    '[US-32 CA-7] rechaza el color "%s" (formato #RRGGBB)',
+    (colorHex) => {
+      expect(validarEstado({ ...valido, colorHex }).errores.colorHex).toBe(
+        'Usa el formato #RRGGBB, por ejemplo #2563EB.',
+      );
+    },
+  );
+});
 
 describe('validarPrioridad (api-rest §3.5, US-31)', () => {
   it('[US-31] acepta valores correctos y devuelve números', () => {
