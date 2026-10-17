@@ -7,8 +7,10 @@ import ModalResolucion from './ModalResolucion.jsx';
 const solicitud = { ...solicitudDetalleEjemplo, estado: { codigo: 'EN_ATENCION' } };
 const INFORME = 'Se reemplazó el cable HDMI dañado.';
 
+// `lastModified` fijo: el modal deduplica por nombre, tamaño y fecha, y con `Date.now()` dos
+// archivos creados en milisegundos distintos dejarían de ser "repetidos" (prueba intermitente).
 const archivo = (nombre = 'foto.png', tipo = 'image/png', tamano = 1024) =>
-  new File([new Uint8Array(tamano)], nombre, { type: tipo });
+  new File([new Uint8Array(tamano)], nombre, { type: tipo, lastModified: 1_700_000_000_000 });
 
 function renderModal(props = {}) {
   const todas = { isOpen: true, solicitud, onClose: vi.fn(), onSubmit: vi.fn(), ...props };
