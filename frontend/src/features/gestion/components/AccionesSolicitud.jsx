@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal from '../../../components/ui/Modal.jsx';
 import './AccionesSolicitud.css';
 
@@ -11,7 +11,7 @@ const ACCIONES = [
   { codigo: 'RESOLVER', etiqueta: 'Resolver' },
   { codigo: 'COMENTAR', etiqueta: 'Comentar' },
   // Cierra la solicitud de forma definitiva: pide confirmación y se dibuja como destructiva.
-  { codigo: 'CERRAR', etiqueta: 'Cerrar solicitud', simbolo: '🔒', destructiva: true },
+  { codigo: 'CERRAR', etiqueta: 'Cerrar solicitud', simbolo: '⊗', destructiva: true },
 ];
 
 const PRIMARIAS = new Set(['EVALUAR', 'ASIGNAR', 'INICIAR_ATENCION', 'RESOLVER']);
@@ -34,6 +34,28 @@ export default function AccionesSolicitud({
   deshabilitado = false,
 }) {
   const [confirmandoCierre, setConfirmandoCierre] = useState(false);
+  const grupoRef = useRef(null);
+  const botonCerrarRef = useRef(null);
+  const cancelarRef = useRef(null);
+  // Al cerrar la confirmación el foco vuelve al botón "Cerrar solicitud"; si ya no existe (el
+  // cierre se concretó y la acción dejó de estar permitida) pasa al grupo, nunca a <body>.
+  // `current` se lee recién al cerrar el modal, con el DOM ya actualizado.
+  const [destinoFocoRef] = useState(() => ({
+    get current() {
+      return botonCerrarRef.current ?? grupoRef.current;
+    },
+  }));
+
+  const tieneCerrar = Array.isArray(acciones) && acciones.includes('CERRAR');
+  const teniaCerrarRef = useRef(tieneCerrar);
+  // Si "Cerrar solicitud" desaparece con el foco puesto en él, el navegador lo suelta en <body>:
+  // se rescata hacia el grupo para que el usuario de teclado no pierda su lugar.
+  useEffect(() => {
+    if (teniaCerrarRef.current && !tieneCerrar && document.activeElement === document.body) {
+      grupoRef.current?.focus();
+    }
+    teniaCerrarRef.current = tieneCerrar;
+  }, [tieneCerrar]);
 
   const permitidas = new Set(Array.isArray(acciones) ? acciones : []);
   const visibles = ACCIONES.filter((accion) => permitidas.has(accion.codigo));
@@ -48,13 +70,20 @@ export default function AccionesSolicitud({
   }
 
   function confirmarCierre() {
+    if (bloqueado) return;
     setConfirmandoCierre(false);
     onAccion('CERRAR');
   }
 
   return (
     <div className="acciones-solicitud">
-      <div role="group" aria-label="Acciones de la solicitud" className="acciones-solicitud__grupo">
+      <div
+        ref={grupoRef}
+        tabIndex={-1}
+        role="group"
+        aria-label="Acciones de la solicitud"
+        className="acciones-solicitud__grupo"
+      >
         {visibles.map(({ codigo, etiqueta, simbolo, destructiva }) => {
           const clases = ['acciones-solicitud__boton'];
           if (destructiva) clases.push('acciones-solicitud__boton--destructiva');
@@ -62,6 +91,7 @@ export default function AccionesSolicitud({
           return (
             <button
               key={codigo}
+              ref={codigo === 'CERRAR' ? botonCerrarRef : undefined}
               type="button"
               className={clases.join(' ')}
               aria-disabled={bloqueado ? 'true' : undefined}
@@ -81,20 +111,24 @@ export default function AccionesSolicitud({
         isOpen={confirmandoCierre}
         titulo="Cerrar solicitud"
         role="alertdialog"
-        descripcion="Confirmas que el problema quedó resuelto. Al cerrarla, la solicitud ya no admite más cambios."
+        descripcion="La solicitud pasará a Cerrada y ya no admitirá cambios. Esta acción no se puede deshacer."
+        initialFocusRef={cancelarRef}
+        returnFocusRef={destinoFocoRef}
         onClose={() => setConfirmandoCierre(false)}
       >
         <div className="acciones-solicitud__confirmacion">
           <button
+            ref={cancelarRef}
             type="button"
             className="acciones-solicitud__boton"
             onClick={() => setConfirmandoCierre(false)}
           >
-            Volver
+            Cancelar
           </button>
           <button
             type="button"
             className="acciones-solicitud__boton acciones-solicitud__boton--destructiva"
+            aria-disabled={bloqueado ? 'true' : undefined}
             onClick={confirmarCierre}
           >
             Sí, cerrar solicitud

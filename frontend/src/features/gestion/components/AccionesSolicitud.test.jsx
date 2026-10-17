@@ -10,11 +10,6 @@ function renderAcciones(props = {}) {
   return todas;
 }
 
-const nombres = () =>
-  screen
-    .getAllByRole('button')
-    .map((b) => b.textContent.replace(b.querySelector('[aria-hidden]')?.textContent ?? '', ''));
-
 describe('AccionesSolicitud', () => {
   it('[US-11 CA-13] muestra solo las acciones que declara el backend', () => {
     renderAcciones({ acciones: solicitudDetalleEjemplo.accionesPermitidas });
@@ -41,7 +36,10 @@ describe('AccionesSolicitud', () => {
   it('ordena las acciones de forma estable sin importar el orden recibido', () => {
     renderAcciones({ acciones: ['CERRAR', 'COMENTAR', 'RESOLVER'] });
 
-    expect(nombres()).toEqual(['Resolver', 'Comentar', 'Cerrar solicitud']);
+    const botones = screen.getAllByRole('button');
+    expect(botones[0]).toHaveAccessibleName('Resolver');
+    expect(botones[1]).toHaveAccessibleName('Comentar');
+    expect(botones[2]).toHaveAccessibleName('Cerrar solicitud');
   });
 
   it('ignora códigos desconocidos, repetidos o inválidos sin fallar', () => {
@@ -91,16 +89,53 @@ describe('AccionesSolicitud', () => {
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
 
-    it('permite volver sin cerrar y devuelve el foco al botón', async () => {
+    it('permite cancelar sin cerrar y devuelve el foco al botón', async () => {
       const { onAccion } = renderAcciones({ acciones: ['CERRAR'] });
       const boton = screen.getByRole('button', { name: 'Cerrar solicitud' });
 
       await userEvent.click(boton);
-      await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
 
       expect(onAccion).not.toHaveBeenCalled();
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
       expect(boton).toHaveFocus();
+    });
+
+    it('usa un texto neutro respecto al rol y enfoca "Cancelar" al abrir', async () => {
+      renderAcciones({ acciones: ['CERRAR'] });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cerrar solicitud' }));
+
+      expect(
+        screen.getByText(
+          'La solicitud pasará a Cerrada y ya no admitirá cambios. Esta acción no se puede deshacer.',
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancelar' })).toHaveFocus();
+    });
+
+    it('no confirma el cierre si otra acción empezó con la confirmación abierta', async () => {
+      const props = { acciones: ['CERRAR'], onAccion: vi.fn() };
+      const { rerender } = render(<AccionesSolicitud {...props} />);
+      await userEvent.click(screen.getByRole('button', { name: 'Cerrar solicitud' }));
+
+      rerender(<AccionesSolicitud {...props} accionEnCurso="COMENTAR" />);
+      const confirmar = screen.getByRole('button', { name: 'Sí, cerrar solicitud' });
+      expect(confirmar).toHaveAttribute('aria-disabled', 'true');
+      await userEvent.click(confirmar);
+
+      expect(props.onAccion).not.toHaveBeenCalled();
+    });
+
+    it('si CERRAR desaparece tras confirmar, el foco queda en el grupo y no en body', async () => {
+      const props = { acciones: ['RESOLVER', 'CERRAR'], onAccion: vi.fn() };
+      const { rerender } = render(<AccionesSolicitud {...props} />);
+      await userEvent.click(screen.getByRole('button', { name: 'Cerrar solicitud' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Sí, cerrar solicitud' }));
+
+      rerender(<AccionesSolicitud {...props} acciones={['COMENTAR']} />);
+
+      expect(screen.getByRole('group', { name: 'Acciones de la solicitud' })).toHaveFocus();
     });
 
     it('Esc cierra la confirmación sin cerrar la solicitud', async () => {
@@ -118,7 +153,8 @@ describe('AccionesSolicitud', () => {
 
       const cerrar = screen.getByRole('button', { name: 'Cerrar solicitud' });
       expect(cerrar).toHaveClass('acciones-solicitud__boton--destructiva');
-      expect(cerrar.querySelector('[aria-hidden="true"]')).toHaveTextContent(/\S/);
+      expect(cerrar.querySelector('[aria-hidden="true"]')).toHaveTextContent('⊗');
+      expect(cerrar).toHaveAccessibleName('Cerrar solicitud');
       expect(screen.getByRole('button', { name: 'Resolver' })).not.toHaveClass(
         'acciones-solicitud__boton--destructiva',
       );
@@ -141,6 +177,18 @@ describe('AccionesSolicitud', () => {
 
       expect(onAccion).not.toHaveBeenCalled();
     });
+
+    it.each(['{Enter}', ' '])(
+      'la tecla %j sobre un botón aria-disabled no dispara nada',
+      async (tecla) => {
+        const { onAccion } = renderAcciones({ accionEnCurso: 'RESOLVER' });
+
+        screen.getByRole('button', { name: 'Comentar' }).focus();
+        await userEvent.keyboard(tecla);
+
+        expect(onAccion).not.toHaveBeenCalled();
+      },
+    );
 
     it('anuncia el progreso a lectores de pantalla', () => {
       renderAcciones({ accionEnCurso: 'RESOLVER' });

@@ -32,10 +32,14 @@
   color: #ffffff;
 }
 
-/* Destructiva: borde grueso, texto en negrita y símbolo 🔒; no depende solo del color. */
+/* Destructiva: borde grueso, texto en negrita y símbolo ⊗; no depende solo del color. */
 .acciones-solicitud__boton--destructiva {
   border: 2px solid var(--color-danger, #b91c1c);
   color: var(--color-danger, #b91c1c);
+}
+
+.acciones-solicitud__grupo:focus {
+  outline: none;
 }
 
 .acciones-solicitud__boton:focus-visible {
