@@ -1,0 +1,88 @@
+/* Shell de la aplicación autenticada (UX §3). Tokens con respaldo de UX §2.1/§2.2. */
+.app-shell__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2, 8px);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #d1d5db);
+}
+
+.app-shell__marca {
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.app-shell__usuario {
+  position: relative;
+}
+
+.app-shell__boton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-height: var(--touch-target, 44px);
+  padding: var(--space-1, 4px) var(--space-3, 12px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  color: var(--color-text, #111827);
+  cursor: pointer;
+}
+
+.app-shell__boton:hover {
+  border-color: var(--color-primary, #1d4ed8);
+}
+
+.app-shell__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.app-shell__nombre {
+  font-size: var(--font-size-small, 0.875rem);
+  font-weight: 600;
+}
+
+.app-shell__rol {
+  font-size: var(--font-size-small, 0.875rem);
+  color: var(--color-text-muted, #4b5563);
+}
+
+.app-shell__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 10;
+  min-width: 180px;
+  padding: var(--space-1, 4px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06), 0 1px 3px rgb(17 24 39 / 0.1));
+}
+
+.app-shell__menu-opcion {
+  display: block;
+  width: 100%;
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius, 8px) - 2px);
+  color: var(--color-text, #111827);
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-shell__menu-opcion:hover,
+.app-shell__menu-opcion:focus-visible {
+  background: var(--color-bg, #f3f4f6);
+}
+
+.app-shell__menu-opcion:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: -3px;
+}
