@@ -1,0 +1,25 @@
+/* Insignia de estado (UX §2.1 y §8): fondo tintado al 12 % + texto oscuro + punto del color. */
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  padding: var(--space-1, 4px) var(--space-3, 12px);
+  border-radius: 999px;
+  background: var(--color-bg, #f3f4f6); /* respaldo si no hay color-mix */
+  background: color-mix(in srgb, var(--estado-color) 12%, white);
+  color: var(--color-text, #111827);
+  font-size: var(--font-size-small, 0.875rem);
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.estado-badge__punto {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--estado-color);
+  /* Anillo oscuro: el punto cumple 3:1 contra el tinte con cualquier color (p. ej. #D97706 = 2.81). */
+  box-shadow: 0 0 0 1px var(--color-text, #111827);
+}

@@ -187,6 +187,24 @@ describe('FileUploader (REG-16 · US-06)', () => {
   });
 });
 
+describe('FileUploader · error del campo (US-10)', () => {
+  it('[US-10 CA-11] con `error` marca la entrada inválida y lo asocia como descripción', () => {
+    render(<FileUploader archivos={[]} onChange={() => {}} error="Falta la evidencia." />);
+
+    const entrada = entradaDeArchivos();
+    expect(entrada).toBeInvalid();
+    expect(entrada).toHaveAccessibleDescription(expect.stringContaining('Falta la evidencia.'));
+    expect(screen.getByText('Falta la evidencia.')).toHaveAttribute('id', 'evidencias-error');
+  });
+
+  it('[US-10 CA-11] sin `error` no marca la entrada ni agrega mensajes', () => {
+    render(<FileUploader archivos={[]} onChange={() => {}} />);
+
+    expect(entradaDeArchivos()).toBeValid();
+    expect(entradaDeArchivos()).not.toHaveAttribute('aria-invalid');
+  });
+});
+
 describe('reglas de evidencias (evidencias.js)', () => {
   it('[REG-16] validarArchivo acepta JPG/PNG/PDF ≤ 5 MB y rechaza excesos y tipos', () => {
     expect(validarArchivo(crearArchivo('a.jpg'))).toBeNull();
