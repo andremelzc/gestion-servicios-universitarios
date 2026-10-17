@@ -86,7 +86,7 @@
   top: 50%;
   right: 4px;
   transform: translateY(-50%);
-  min-height: 36px;
+  min-height: var(--touch-target, 44px);
   padding: 0 10px;
   border: 0;
   border-radius: calc(var(--login-radius) - 2px);

@@ -49,8 +49,8 @@ Se implementa como **variables CSS** (`tokens.css`) usadas por todos los compone
 |:---|:---:|:---|:---:|
 | `--color-primary` | `#1D4ED8` | Acciones principales, enlaces | 6.7:1 ✅ AA |
 | `--color-primary-hover` | `#1E40AF` | Hover/foco de botón primario | 8.7:1 ✅ |
-| `--color-text` | `#111827` | Texto principal | 17:1 ✅ |
-| `--color-text-muted` | `#4B5563` | Texto secundario | 7.5:1 ✅ |
+| `--color-text` | `#111827` | Texto principal | 17.7:1 ✅ |
+| `--color-text-muted` | `#4B5563` | Texto secundario | 7.6:1 ✅ |
 | `--color-surface` / `--color-bg` | `#FFFFFF` / `#F3F4F6` | Tarjetas / fondo | — |
 | `--color-border` | `#D1D5DB` | Bordes | — |
 | `--color-success` | `#047857` | Éxito | 5.5:1 ✅ |
@@ -442,9 +442,9 @@ Antes de pasar a React se construye una **maqueta funcional mínima** en HTML/CS
 
 ### 6.3 Definición de terminado del diseño
 
-- [ ] Los 4 flujos clave (login, registrar, asignar, resolver) navegables en el prototipo.
+- [x] Los 4 flujos clave (login, registrar, asignar, resolver) navegables en el prototipo.
 - [ ] Revisión con el equipo y al menos 2 personas ajenas; ajustes registrados.
-- [ ] Contrastes verificados (§8) y tamaños táctiles ≥ 44 px.
+- [x] Contrastes verificados (§8) y tamaños táctiles ≥ 44 px.
 - [ ] Wireframes y mockups consistentes con los contratos de la API (campos y reglas).
 
 ---
@@ -502,7 +502,7 @@ Cada integrante revisa las 4 pantallas clave y puntúa cada heurística (0 = sin
 
 Lista de verificación mínima (WCAG 2.1 AA):
 
-- [ ] **Contraste** de texto ≥ 4.5:1 (≥ 3:1 para texto grande e iconos); verificado con una herramienta de contraste (p. ej. axe).
+- [x] **Contraste** de texto ≥ 4.5:1 (≥ 3:1 para texto grande e iconos); verificado con una herramienta de contraste (p. ej. axe) — ver §8.1.
 - [ ] **Teclado:** todo operable con `Tab`/`Enter`/`Esc`; orden lógico; **foco visible** (anillo ≥ 2 px); modales atrapan el foco.
 - [ ] **Semántica:** `<header>`, `<nav>`, `<main>`, `<form>`, `<table>` con `<th scope>`; un solo `<h1>` por pantalla.
 - [ ] **Formularios:** `<label for>` en todos los campos; errores asociados con `aria-describedby`; `aria-invalid`; no depender solo del color.
@@ -511,6 +511,46 @@ Lista de verificación mínima (WCAG 2.1 AA):
 - [ ] **Color no es el único indicador** (estado = texto + icono + color).
 - [ ] **Responsive:** sin *scroll* horizontal en 375 px; objetivos táctiles ≥ 44 px; texto escalable al 200 % sin pérdida.
 - [ ] Idioma de la página `lang="es"`.
+
+### 8.1 Verificación de contraste y tamaños táctiles (UX-06)
+
+Verificación hecha el 17/10/2026 con la **fórmula de luminancia relativa de WCAG 2.1**, cotejada con una segunda implementación independiente y con valores de referencia conocidos (p. ej. `#767676` sobre blanco = 4.54:1). El cálculo queda **reproducible** en `frontend/src/styles/tokens.contraste.test.js` (`npm test`, también en CI): si un par baja de su umbral, el test falla. No se usó una extensión de navegador (axe/Stark): se aplica la misma fórmula de WCAG y la comprobación queda automatizada (sin inspección manual).
+
+**Texto (mínimo 4.5:1):**
+
+| Par | Colores | Mínimo | Medido |
+|:---|:---|:---:|:---:|
+| Texto principal sobre superficie | `#111827` / `#FFFFFF` | 4.5:1 | 17.7:1 ✅ |
+| Texto principal sobre fondo | `#111827` / `#F3F4F6` | 4.5:1 | 16.1:1 ✅ |
+| Texto secundario sobre superficie | `#4B5563` / `#FFFFFF` | 4.5:1 | 7.6:1 ✅ |
+| Texto secundario sobre fondo | `#4B5563` / `#F3F4F6` | 4.5:1 | 6.9:1 ✅ |
+| Enlace (primario) sobre superficie | `#1D4ED8` / `#FFFFFF` | 4.5:1 | 6.7:1 ✅ |
+| Primario sobre fondo | `#1D4ED8` / `#F3F4F6` | 4.5:1 | 6.1:1 ✅ |
+| Etiqueta blanca sobre botón primario | `#FFFFFF` / `#1D4ED8` | 4.5:1 | 6.7:1 ✅ |
+| Etiqueta blanca sobre primario (*hover*) | `#FFFFFF` / `#1E40AF` | 4.5:1 | 8.7:1 ✅ |
+| Éxito como texto sobre superficie | `#047857` / `#FFFFFF` | 4.5:1 | 5.5:1 ✅ |
+| Advertencia como texto sobre superficie | `#B45309` / `#FFFFFF` | 4.5:1 | 5.0:1 ✅ |
+| Peligro como texto sobre superficie | `#B91C1C` / `#FFFFFF` | 4.5:1 | 6.5:1 ✅ |
+| Peligro sobre alerta (tinte al 8 %) | `#B91C1C` / `#EEE3E5` | 4.5:1 | 5.2:1 ✅ |
+| Texto de insignia sobre tinte al 12 % (peor caso: «En atención» sobre el fondo) | `#111827` / `#E5DEF5` | 4.5:1 | 13.6:1 ✅ |
+| Texto deshabilitado (exento en WCAG; informativo) | `#4B5563` / `#E5E7EB` | — | 6.1:1 ✅ |
+
+**No textual — iconos de estado y anillo de foco (mínimo 3:1):**
+
+| Par | Colores | Mínimo | Medido |
+|:---|:---|:---:|:---:|
+| Anillo de foco sobre superficie | `#2563EB` / `#FFFFFF` | 3:1 | 5.2:1 ✅ |
+| Anillo de foco sobre fondo | `#2563EB` / `#F3F4F6` | 3:1 | 4.7:1 ✅ |
+| Punto «Registrada» sobre superficie | `#6B7280` / `#FFFFFF` | 3:1 | 4.8:1 ✅ |
+| Punto «En evaluación» sobre superficie | `#D97706` / `#FFFFFF` | 3:1 | 3.2:1 ✅ |
+| Punto «Asignada» sobre superficie | `#2563EB` / `#FFFFFF` | 3:1 | 5.2:1 ✅ |
+| Punto «En atención» sobre superficie | `#7C3AED` / `#FFFFFF` | 3:1 | 5.7:1 ✅ |
+| Punto «Resuelta» sobre superficie | `#059669` / `#FFFFFF` | 3:1 | 3.8:1 ✅ |
+| Punto «Cerrada» sobre superficie | `#047857` / `#FFFFFF` | 3:1 | 5.5:1 ✅ |
+
+**Tamaños táctiles (≥ 44 px, §2.2):** revisados los controles de los componentes construidos (shell, login, registro, dashboard, tabla, modales, carga de archivos y 403). Corregidos 2 huecos: el botón «Mostrar/Ocultar» del login (36 → 44 px) y las opciones del menú de usuario (≈ 40 → 44 px); el resto ya declaraba 44 px (token `--touch-target`). Los enlaces en línea de los párrafos se rigen por la excepción de texto en línea (WCAG 2.5.8).
+
+Con esto queda verificada la casilla «Contraste» de esta lista; la casilla «Responsive» (scroll en 375 px, zoom al 200 %) se verifica con la maqueta (UX-05). Los valores de §2.1 se cotejaron con el cálculo y se ajustaron «Texto principal» (17 → 17.7) y «Texto secundario» (7.5 → 7.6) a su precisión.
 
 ---
 
