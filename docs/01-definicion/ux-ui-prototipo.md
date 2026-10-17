@@ -12,7 +12,7 @@
 | Arquitectura de información y flujos (§3, §4) | ✅ Listo | este documento |
 | Wireframes de baja fidelidad (§5) | ✅ Listo | este documento (ASCII, versionable en Git) + [wireframes en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177) |
 | Sistema de diseño: tokens y componentes (§2) | ✅ Especificado | este documento + [biblioteca en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o) → se implementa en `frontend/src/styles/tokens.css` |
-| Mockups de alta fidelidad | ⏳ Pendiente (Rol 4, TASK-003, 09/10) | Figma — **añadir enlace aquí:** `<URL de Figma>` |
+| Mockups de alta fidelidad | ✅ Listo | [mockups en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-2) |
 | Prototipo clicable | ⏳ Pendiente (Rol 4, TASK-003, 09/10) | Figma — **añadir enlace aquí** |
 | Maqueta HTML/CSS/JS con API simulada (§6) | ⏳ Pendiente (Roles 4 y 5, TASK-033) | `frontend-prototipo/` cuando exista |
 | Evaluación de usabilidad (§7) | ⏳ Pendiente (Fase IV) | informe de pruebas |
