@@ -90,4 +90,43 @@ describe('MSW · handlers de gestión (API §3.2 y §3.6)', () => {
     expect(problema.errores).toBeUndefined();
     expect(problema.detail).toContain('técnico');
   });
+
+  it('[US-10 CA-10] PUT resolver (multipart: datos + archivos) responde 200 RESUELTA con el informe', async () => {
+    const cuerpo = new FormData();
+    const datos = { informe: 'Se reemplazó el conector HDMI dañado.' };
+    // jsdom: un Blob de jsdom no sobrevive a la serialización de undici (llega como "undefined"), por eso
+    // la parte JSON se envía como texto; en el navegador real es un Blob `application/json`.
+    cuerpo.append('datos', JSON.stringify(datos));
+    cuerpo.append('archivos', new File(['x'], 'foto.png', { type: 'image/png' }));
+
+    const respuesta = await fetch(`${API}/solicitudes/150/resolver`, {
+      method: 'PUT',
+      body: cuerpo,
+    });
+    const detalle = await respuesta.json();
+
+    expect(respuesta.status).toBe(200);
+    expect(detalle.estado.codigo).toBe('RESUELTA');
+    expect(detalle.informeResolucion).toBe(datos.informe);
+  });
+
+  it('[US-10 CA-11] resolver con informe corto y sin archivos: 400 con errores por campo', async () => {
+    const cuerpo = new FormData();
+    const datos = { informe: 'corto' };
+    // jsdom: un Blob de jsdom no sobrevive a la serialización de undici (llega como "undefined"), por eso
+    // la parte JSON se envía como texto; en el navegador real es un Blob `application/json`.
+    cuerpo.append('datos', JSON.stringify(datos));
+
+    const respuesta = await fetch(`${API}/solicitudes/150/resolver`, {
+      method: 'PUT',
+      body: cuerpo,
+    });
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(400);
+    expect(problema.errores).toEqual({
+      informe: expect.any(String),
+      archivos: expect.any(String),
+    });
+  });
 });

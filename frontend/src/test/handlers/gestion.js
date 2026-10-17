@@ -83,4 +83,38 @@ export const handlersGestion = [
       tecnico: { id: tecnico.id, nombre: tecnico.nombre, apellido: tecnico.apellido },
     });
   }),
+
+  // `multipart/form-data` (api-rest §3.2): parte `datos` (JSON `{informe}`, ≥ 20) y parte `archivos` (1–3).
+  http.put('*/api/v1/solicitudes/:id/resolver', async ({ params, request }) => {
+    const instance = new URL(request.url).pathname;
+    const formulario = await request.formData();
+    const datos = formulario.get('datos');
+    const texto = typeof datos === 'string' ? datos : await datos?.text();
+    const { informe = '' } = texto ? JSON.parse(texto) : {};
+    const archivos = formulario.getAll('archivos');
+    const errores = {};
+    if (informe.trim().length < 20) {
+      errores.informe = 'El informe de resolución debe contener al menos 20 caracteres.';
+    }
+    if (archivos.length < 1 || archivos.length > 3) {
+      errores.archivos = 'Adjunta entre 1 y 3 evidencias de la solución.';
+    }
+    if (Object.keys(errores).length > 0) {
+      return problema(
+        400,
+        'validacion',
+        'Validación fallida',
+        'Uno o más campos no son válidos.',
+        instance,
+        { errores },
+      );
+    }
+    return HttpResponse.json({
+      ...solicitudDetalleEjemplo,
+      id: Number(params.id),
+      estado: { codigo: 'RESUELTA', nombreVisible: 'Resuelta', colorHex: '#16A34A' },
+      informeResolucion: informe.trim(),
+      fechaResolucion: '2026-10-04T10:00:00Z',
+    });
+  }),
 ];
