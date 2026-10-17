@@ -264,6 +264,28 @@ describe('useCrud · mutaciones', () => {
     expect(result.current.errorMutacion).toBeNull();
   });
 
+  it('un cambio de ruta descarta el error de mutación de la pantalla anterior', async () => {
+    simularListado();
+    server.use(
+      http.get(`${BASE}/areas`, () => HttpResponse.json(sobre([{ id: 1 }]))),
+      http.delete(`${BASE}/categorias/5`, () =>
+        HttpResponse.json({ status: 409, detail: 'En uso.' }, { status: 409 }),
+      ),
+    );
+    const { result, rerender } = renderHook(({ ruta }) => useCrud(ruta), {
+      initialProps: { ruta: '/categorias' },
+    });
+    await cargado(result);
+    await act(async () => {
+      await result.current.desactivar(5);
+    });
+    expect(result.current.errorMutacion).not.toBeNull();
+
+    rerender({ ruta: '/areas' });
+    expect(result.current.errorMutacion).toBeNull();
+    await cargado(result);
+  });
+
   it('no actualiza estado si se desmonta con la mutación en vuelo', async () => {
     simularListado();
     const puerta = crearPuerta();

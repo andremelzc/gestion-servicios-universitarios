@@ -108,6 +108,7 @@ export default function useCrud(ruta, opciones = {}) {
     setConsulta((actual) => ({ ...CONSULTA_INICIAL, version: actual.version }));
     setBusquedaEnVivo('');
     setResultado(SIN_RESULTADO);
+    setErrorMutacion(null);
   } else if (origen.filtrosClave !== filtrosClave) {
     setOrigen({ ruta, filtrosClave });
     setConsulta((actual) => ({ ...actual, page: 0 }));
