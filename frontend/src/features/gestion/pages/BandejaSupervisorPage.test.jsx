@@ -36,8 +36,8 @@ describe('BandejaSupervisorPage', () => {
     expect(within(fila).getByText('En evaluación')).toBeInTheDocument();
     expect(within(fila).getByText('Vencida')).toBeInTheDocument();
     expect(consultas[0].getAll('estado')).toEqual(['REGISTRADA', 'EN_EVALUACION']);
-    expect(screen.getByRole('button', { name: 'Por asignar' })).toHaveAttribute(
-      'aria-pressed',
+    expect(screen.getByRole('tab', { name: 'Por asignar' })).toHaveAttribute(
+      'aria-selected',
       'true',
     );
   });
@@ -47,14 +47,14 @@ describe('BandejaSupervisorPage', () => {
     render(<BandejaSupervisorPage />);
     await screen.findByText('SOL-2026-0150');
 
-    await userEvent.click(screen.getByRole('button', { name: 'En curso' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
     await waitFor(() =>
       expect(ultima(consultas).getAll('estado')).toEqual(['ASIGNADA', 'EN_ATENCION']),
     );
 
-    await userEvent.click(screen.getByRole('button', { name: 'Todas' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Todas' }));
     await waitFor(() => expect(ultima(consultas).has('estado')).toBe(false));
-    expect(screen.getByRole('button', { name: 'Todas' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('tab', { name: 'Todas' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('aplica los filtros de prioridad, categoría, técnico y vencidas', async () => {
@@ -83,18 +83,51 @@ describe('BandejaSupervisorPage', () => {
     expect(consultas.filter((c) => c.has('q'))).toHaveLength(1);
   });
 
-  it('pagina y vuelve a la primera página al cambiar de pestaña', async () => {
-    const consultas = espiarBandeja(() =>
-      paginaDe([resumenEjemplo], { totalPages: 3, totalElements: 41 }),
-    );
+  // Dos páginas con filas distintas: la lista debe cambiar de verdad al paginar.
+  const filaPagina = (n) => ({ ...resumenEjemplo, id: 200 + n, codigo: `SOL-2026-02${n}0` });
+  const porPagina = (params) => {
+    const n = Number(params.get('page') ?? 0);
+    return paginaDe([filaPagina(n)], { page: n, totalPages: 3, totalElements: 41 });
+  };
+
+  it('pagina mostrando las filas de cada página y vuelve a la primera al cambiar de pestaña', async () => {
+    const consultas = espiarBandeja(porPagina);
     render(<BandejaSupervisorPage />);
-    await screen.findByText('SOL-2026-0150');
+    expect(await screen.findByText('SOL-2026-0200')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
-    await waitFor(() => expect(ultima(consultas).get('page')).toBe('1'));
+    expect(await screen.findByText('SOL-2026-0210')).toBeInTheDocument();
+    expect(screen.queryByText('SOL-2026-0200')).not.toBeInTheDocument();
+    expect(ultima(consultas).get('page')).toBe('1');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Todas' }));
-    await waitFor(() => expect(ultima(consultas).has('page')).toBe(false));
+    await userEvent.click(screen.getByRole('tab', { name: 'Todas' }));
+    expect(await screen.findByText('SOL-2026-0200')).toBeInTheDocument();
+    expect(ultima(consultas).has('page')).toBe(false);
+  });
+
+  it('si la página actual queda vacía (p. ej. tras asignar la última fila) retrocede a la anterior', async () => {
+    const consultas = espiarBandeja((params) =>
+      params.get('page') === '1'
+        ? paginaDe([], { page: 1, totalPages: 1, totalElements: 20 })
+        : paginaDe([filaPagina(0)], { page: 0, totalPages: 2, totalElements: 21 }),
+    );
+    render(<BandejaSupervisorPage />);
+    await screen.findByText('SOL-2026-0200');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
+
+    expect(await screen.findByText('SOL-2026-0200')).toBeInTheDocument();
+    expect(ultima(consultas).has('page')).toBe(false);
+    expect(screen.queryByText('No hay solicitudes en esta vista.')).not.toBeInTheDocument();
+  });
+
+  it('el contenido va dentro de un landmark <main> con el título como encabezado', async () => {
+    espiarBandeja();
+    render(<BandejaSupervisorPage />);
+    const principal = await screen.findByRole('main');
+    expect(
+      within(principal).getByRole('heading', { level: 1, name: 'Bandeja de solicitudes' }),
+    ).toBeInTheDocument();
   });
 
   it('muestra el error de la consulta y permite reintentar', async () => {
