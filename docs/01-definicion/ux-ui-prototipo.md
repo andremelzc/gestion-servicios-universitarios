@@ -10,7 +10,7 @@
 |:---|:---:|:---|
 | Usuarios y necesidades (§1) | ✅ Listo | este documento |
 | Arquitectura de información y flujos (§3, §4) | ✅ Listo | este documento |
-| Wireframes de baja fidelidad (§5) | ✅ Listo | este documento (ASCII, versionable en Git) |
+| Wireframes de baja fidelidad (§5) | ✅ Listo | este documento (ASCII, versionable en Git) + [wireframes en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177) |
 | Sistema de diseño: tokens y componentes (§2) | ✅ Especificado | este documento + [biblioteca en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o) → se implementa en `frontend/src/styles/tokens.css` |
 | Mockups de alta fidelidad | ⏳ Pendiente (Rol 4, TASK-003, 09/10) | Figma — **añadir enlace aquí:** `<URL de Figma>` |
 | Prototipo clicable | ⏳ Pendiente (Rol 4, TASK-003, 09/10) | Figma — **añadir enlace aquí** |
