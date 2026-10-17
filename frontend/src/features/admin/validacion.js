@@ -38,6 +38,25 @@ const prioridadSchema = z.object({
   ),
 });
 
+// ADR-009: solo se edita la presentación. Largos de modelo-datos §3.6; color `#RRGGBB` (CHECK).
+const estadoSchema = z.object({
+  nombreVisible: z
+    .string()
+    .trim()
+    .min(1, 'Ingresa el nombre visible.')
+    .max(40, 'El nombre visible admite hasta 40 caracteres.'),
+  descripcion: z
+    .string()
+    .trim()
+    .max(255, 'La descripción admite hasta 255 caracteres.')
+    .transform((texto) => texto || null),
+  colorHex: z
+    .string()
+    .trim()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Usa el formato #RRGGBB, por ejemplo #2563EB.')
+    .transform((color) => color.toUpperCase()),
+});
+
 function resolver(schema, valores) {
   const resultado = schema.safeParse(valores);
   if (resultado.success) return { datos: resultado.data };
@@ -48,3 +67,6 @@ function resolver(schema, valores) {
 
 /** `valores`: `{nivel, ponderador, slaMaxHoras}` como texto (api-rest §3.5: `slaMaxHoras` > 0). */
 export const validarPrioridad = (valores) => resolver(prioridadSchema, valores);
+
+/** `valores`: `{nombreVisible, descripcion, colorHex}` como texto; `descripcion` vacía se envía `null`. */
+export const validarEstado = (valores) => resolver(estadoSchema, valores);
