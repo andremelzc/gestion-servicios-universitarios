@@ -30,9 +30,9 @@ const MSG_SIN_CONEXION = 'Sin conexión. Revisa tu internet; reintentaremos auto
 
 const handlerLogin = (respuesta) => http.post('*/api/v1/auth/login', () => respuesta);
 
-function renderLogin() {
+function renderLogin(entrada = '/login') {
   return render(
-    <MemoryRouter initialEntries={['/login']}>
+    <MemoryRouter initialEntries={[entrada]}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -40,6 +40,8 @@ function renderLogin() {
           <Route path="/mis-solicitudes" element={<p>Mis solicitudes</p>} />
           <Route path="/bandeja" element={<p>Bandeja de solicitudes</p>} />
           <Route path="/dashboard" element={<p>Dashboard</p>} />
+          <Route path="/admin/usuarios" element={<p>Usuarios (admin)</p>} />
+          <Route path="/solicitudes/:id" element={<p>Detalle de solicitud</p>} />
         </Routes>
       </AuthProvider>
     </MemoryRouter>,
@@ -294,5 +296,73 @@ describe('LoginPage (AUTH-16 · CA-1, CA-2, UAT-01)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ocultar contraseña' }));
     expect(campo).toHaveAttribute('type', 'password');
+  });
+
+  describe('retorno a la ubicación de origen (AUTH-18)', () => {
+    const origen = (pathname, search = '') => ({
+      pathname: '/login',
+      state: { from: { pathname, search } },
+    });
+
+    it('[AUTH-18] tras entrar vuelve a la ruta protegida que se intentó abrir', async () => {
+      const user = userEvent.setup();
+      server.use(handlerLogin(HttpResponse.json(RESPUESTA_OK)));
+      renderLogin(origen('/solicitudes/42'));
+
+      await llenarFormulario(user);
+      await user.click(botonEnviar());
+
+      expect(await screen.findByText('Detalle de solicitud')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['//evil.example.com'],
+      ['https://evil.example.com'],
+      ['/login'],
+      ['/registro'],
+      ['/\\evil.example.com'],
+      ['/%2F%2Fevil.example.com'],
+      ['/%5Cevil.example.com'],
+      ['/ruta con espacio'],
+      ['/ruta\u0009tab'],
+      ['/ruta\u0000nul'],
+    ])('[AUTH-18] ignora un origen no válido (%j) y usa el destino por rol', async (pathname) => {
+      const user = userEvent.setup();
+      server.use(handlerLogin(HttpResponse.json(RESPUESTA_OK)));
+      renderLogin(origen(pathname));
+
+      await llenarFormulario(user);
+      await user.click(botonEnviar());
+
+      expect(await screen.findByText('Mis solicitudes')).toBeInTheDocument();
+    });
+
+    it('[AUTH-18] si el rol no puede acceder al origen (TECNICO con /admin) usa su destino por rol', async () => {
+      const user = userEvent.setup();
+      server.use(
+        handlerLogin(
+          HttpResponse.json({ ...RESPUESTA_OK, usuario: { ...USUARIO, rol: 'TECNICO' } }),
+        ),
+      );
+      renderLogin(origen('/admin/usuarios'));
+
+      await llenarFormulario(user);
+      await user.click(botonEnviar());
+
+      expect(await screen.findByText('Bandeja de solicitudes')).toBeInTheDocument();
+    });
+
+    it('[AUTH-18] si el rol sí puede acceder al origen (ADMIN con /admin/usuarios) vuelve a él', async () => {
+      const user = userEvent.setup();
+      server.use(
+        handlerLogin(HttpResponse.json({ ...RESPUESTA_OK, usuario: { ...USUARIO, rol: 'ADMIN' } })),
+      );
+      renderLogin(origen('/admin/usuarios'));
+
+      await llenarFormulario(user);
+      await user.click(botonEnviar());
+
+      expect(await screen.findByText('Usuarios (admin)')).toBeInTheDocument();
+    });
   });
 });

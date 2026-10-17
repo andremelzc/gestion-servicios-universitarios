@@ -9,7 +9,8 @@
 //   TECNICO/SUPERVISOR → /bandeja · ADMIN → /dashboard.
 // - `consumirAvisoSesion()` (AUTH-15) muestra una sola vez el aviso de sesión expirada.
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { rolPuedeAcceder } from '../../../app/rutasAcceso.js';
 import { consumirAvisoSesion } from '../../../services/apiClient.js';
 import { interpretarError } from '../../../services/errores.js';
 import { useAuth } from '../AuthContext.jsx';
@@ -29,6 +30,24 @@ const DESTINO_POR_ROL = {
   ADMIN: '/dashboard',
 };
 
+// Origen guardado por ProtectedRoute (`state.from`). Solo se acepta una ruta interna de la app:
+// - Se rechazan `//`, barras invertidas, caracteres de control y espacios (los navegadores
+//   normalizan `/\host` a `//host`) y las barras codificadas (`%2F`, `%5C`): ninguna ruta real
+//   las usa, así que descartarlas es defensa en profundidad contra *open redirect*.
+// - Se descartan las pantallas públicas de acceso y las rutas a las que el rol no puede entrar
+//   (acceso por rol en `rutasAcceso.js`); en esos casos aplica el destino por rol de UX §4.1.
+// eslint-disable-next-line no-control-regex -- los caracteres de control son justo lo que se rechaza
+const RUTA_PELIGROSA = /[\\\u0000-\u001f\s]|%2f|%5c/i;
+
+function destinoDeOrigen(from, rol) {
+  const ruta = from?.pathname;
+  if (typeof ruta !== 'string' || !ruta.startsWith('/') || ruta.startsWith('//')) return null;
+  if (RUTA_PELIGROSA.test(ruta)) return null;
+  if (ruta === '/' || ruta === '/login' || ruta === '/registro') return null;
+  if (!rolPuedeAcceder(rol, ruta)) return null;
+  return `${ruta}${from.search ?? ''}${from.hash ?? ''}`;
+}
+
 const VALORES_INICIALES = { correo: '', password: '' };
 
 function aErroresPorCampo(errorZod) {
@@ -43,6 +62,7 @@ function aErroresPorCampo(errorZod) {
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [valores, setValores] = useState(VALORES_INICIALES);
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState(null);
@@ -85,7 +105,11 @@ export default function LoginPage() {
     setEnviando(true);
     try {
       const usuario = await login(resultado.data);
-      navigate(DESTINO_POR_ROL[usuario?.rol] ?? '/mis-solicitudes', { replace: true });
+      const destino =
+        destinoDeOrigen(location.state?.from, usuario?.rol) ??
+        DESTINO_POR_ROL[usuario?.rol] ??
+        '/mis-solicitudes';
+      navigate(destino, { replace: true });
     } catch (error) {
       if (error?.status === 401) {
         setErrorGeneral(MSG_CREDENCIALES);
