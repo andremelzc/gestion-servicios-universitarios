@@ -1,0 +1,61 @@
+.acciones-solicitud__grupo,
+.acciones-solicitud__confirmacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.acciones-solicitud__confirmacion {
+  justify-content: flex-end;
+}
+
+.acciones-solicitud__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  min-width: var(--touch-target, 44px);
+  min-height: var(--touch-target, 44px);
+  padding: 8px 16px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #111827);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acciones-solicitud__boton--primaria {
+  border-color: var(--color-primary, #1d4ed8);
+  background: var(--color-primary, #1d4ed8);
+  color: #ffffff;
+}
+
+/* Destructiva: borde grueso, texto en negrita y símbolo ⊗; no depende solo del color. */
+.acciones-solicitud__boton--destructiva {
+  border: 2px solid var(--color-danger, #b91c1c);
+  color: var(--color-danger, #b91c1c);
+}
+
+.acciones-solicitud__grupo:focus {
+  outline: none;
+}
+
+.acciones-solicitud__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.acciones-solicitud__boton[aria-disabled='true'] {
+  border-color: var(--color-disabled-bg, #e5e7eb);
+  background: var(--color-disabled-bg, #e5e7eb);
+  color: var(--color-disabled-text, #4b5563);
+  cursor: not-allowed;
+}
+
+.acciones-solicitud__estado {
+  margin: 0;
+  font-size: var(--font-size-small, 0.875rem);
+  color: var(--color-text-muted, #4b5563);
+}
