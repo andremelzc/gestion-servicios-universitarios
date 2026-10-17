@@ -123,3 +123,17 @@
 .admin-exito::before {
   content: '✓ ';
 }
+
+/* Muestra de color: círculo y texto (el color nunca es el único indicador). */
+.admin-muestra,
+.admin-vista-previa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-vista-previa {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
