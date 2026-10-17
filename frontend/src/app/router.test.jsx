@@ -1,11 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import Providers from './providers.jsx';
 import { routes } from './router.jsx';
 
+// Igual que App.jsx: las páginas pueden usar useAuth() (p. ej. /login, AUTH-16),
+// que exige el AuthProvider de Providers.
 const renderAt = (path) => {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
-  render(<RouterProvider router={router} />);
+  render(
+    <Providers>
+      <RouterProvider router={router} />
+    </Providers>,
+  );
   return router;
 };
 
