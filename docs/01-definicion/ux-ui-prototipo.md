@@ -13,7 +13,7 @@
 | Wireframes de baja fidelidad (§5) | ✅ Listo | este documento (ASCII, versionable en Git) + [wireframes en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177) |
 | Sistema de diseño: tokens y componentes (§2) | ✅ Especificado | este documento + [biblioteca en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o) → se implementa en `frontend/src/styles/tokens.css` |
 | Mockups de alta fidelidad | ✅ Listo | [mockups en Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-2) |
-| Prototipo clicable | ⏳ Pendiente (Rol 4, TASK-003, 09/10) | Figma — **añadir enlace aquí** |
+| Prototipo clicable | ✅ Listo | [prototipo en Figma](https://www.figma.com/proto/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-28893&p=f&t=koVwxnafwYMrZhOJ-1&scaling=min-zoom&content-scaling=fixed&page-id=83%3A2&starting-point-node-id=83%3A28893&show-proto-sidebar=1) |
 | Maqueta HTML/CSS/JS con API simulada (§6) | ⏳ Pendiente (Roles 4 y 5, TASK-033) | `frontend-prototipo/` cuando exista |
 | Evaluación de usabilidad (§7) | ⏳ Pendiente (Fase IV) | informe de pruebas |
 
@@ -420,7 +420,7 @@ El enunciado exige para la Fase I: **wireframes, mockups, prototipo, HTML DOM, C
 | Biblioteca de estilos | Colores, tipografía y componentes de §2 como *styles* y *components* | Todas las pantallas usan solo componentes de la biblioteca |
 | Mockups de alta fidelidad | W-01, W-02, W-03, W-04, W-05, W-06, W-07, W-08, W-09 en **móvil y escritorio** | Incluyen estados de §2.5 (cargando, vacío, error) |
 | Prototipo interactivo | Flujos de §4.2 y §4.3 enlazados entre pantallas | Un tercero completa "registrar solicitud" navegando solo el prototipo |
-| Enlace | `<URL de Figma>` (completar) | Acceso de lectura para el docente |
+| Enlace | [prototipo en Figma](https://www.figma.com/proto/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-28893&p=f&t=koVwxnafwYMrZhOJ-1&scaling=min-zoom&content-scaling=fixed&page-id=83%3A2&starting-point-node-id=83%3A28893&show-proto-sidebar=1) | Acceso de lectura para el docente |
 
 ### 6.2 Maqueta HTML + CSS + JavaScript con API simulada (TASK-033)
 
