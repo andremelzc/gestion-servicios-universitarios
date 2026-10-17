@@ -20,8 +20,8 @@ function hoyLocal() {
  * backend (DashboardService): sin ninguna, los últimos 30 días; solo `hasta`, los 30 días que
  * terminan ese día (`desde = hasta - 29`); solo `desde`, hasta hoy.
  *
- * Filtro Área (RN-16): solo aparece si el padre pasa `areas` (arreglo `{ id, nombre }`), cosa que
- * hace únicamente para ADMIN. `errorAreas` es el aviso si la lista no pudo cargarse.
+ * Filtro Área (RN-16): solo aparece si el padre pasa `areas` no vacío (`{ id, nombre }`), cosa que
+ * hace únicamente para ADMIN y con la lista ya cargada (sin control muerto). `errorAreas` es el aviso si no pudo cargarse.
  */
 export default function FiltrosDashboard({ onAplicar, areas, errorAreas }) {
   const id = useId();
@@ -46,7 +46,9 @@ export default function FiltrosDashboard({ onAplicar, areas, errorAreas }) {
     setError(null);
     // `idArea` solo viaja si el selector existe (ADMIN, RN-16); el resto de roles nunca lo envía.
     onAplicar(
-      areas ? { desde, hasta, idArea: idArea === '' ? '' : Number(idArea) } : { desde, hasta },
+      areas?.length > 0
+        ? { desde, hasta, idArea: idArea === '' ? '' : Number(idArea) }
+        : { desde, hasta },
     );
   }
 
@@ -83,15 +85,10 @@ export default function FiltrosDashboard({ onAplicar, areas, errorAreas }) {
           aria-describedby={descripcion}
         />
       </div>
-      {areas ? (
+      {areas?.length > 0 ? (
         <div className="filtros-dashboard__campo">
           <label htmlFor={`${id}-area`}>Área</label>
-          <select
-            id={`${id}-area`}
-            value={idArea}
-            onChange={(e) => setIdArea(e.target.value)}
-            aria-describedby={errorAreas ? errorAreasId : undefined}
-          >
+          <select id={`${id}-area`} value={idArea} onChange={(e) => setIdArea(e.target.value)}>
             <option value="">Todas las áreas</option>
             {areas.map((area) => (
               <option key={area.id} value={area.id}>

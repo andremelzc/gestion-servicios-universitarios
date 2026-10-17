@@ -167,7 +167,16 @@ describe('FiltrosDashboard · filtro Área (RN-16, solo ADMIN)', () => {
     expect(alAplicar).toHaveBeenLastCalledWith({ desde: '', hasta: '', idArea: '' });
   });
 
-  it('[DASH-15 CA-4] si las áreas no cargaron avisa con un alert y el formulario sigue operativo', () => {
+  it('[DASH-15 CA-4] sin áreas (cargando o error) no hay selector muerto y las fechas siguen operativas', async () => {
+    const alAplicar = vi.fn();
+    render(<FiltrosDashboard onAplicar={alAplicar} areas={[]} />);
+
+    expect(screen.queryByLabelText('Área')).not.toBeInTheDocument();
+    await aplicar();
+    expect(alAplicar).toHaveBeenCalledWith({ desde: '', hasta: '' });
+  });
+
+  it('[DASH-15 CA-4] si las áreas no cargaron avisa con un alert', () => {
     render(
       <FiltrosDashboard
         onAplicar={() => {}}
@@ -177,9 +186,7 @@ describe('FiltrosDashboard · filtro Área (RN-16, solo ADMIN)', () => {
     );
 
     expect(screen.getByRole('alert')).toHaveTextContent('No se pudieron cargar las áreas.');
-    expect(screen.getByLabelText('Área')).toHaveAccessibleDescription(
-      expect.stringContaining('No se pudieron cargar las áreas.'),
-    );
+    expect(screen.queryByLabelText('Área')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aplicar' })).toBeEnabled();
   });
 });
