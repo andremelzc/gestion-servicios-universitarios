@@ -1,0 +1,89 @@
+/* Los tokens de tokens.css aún no existen en develop: se usan con el valor de UX §2.1 como respaldo. */
+.modal-resolucion {
+  display: grid;
+  gap: 16px;
+}
+
+.modal-resolucion__campo {
+  display: grid;
+  gap: 4px;
+}
+
+.modal-resolucion textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #111827);
+  font: inherit;
+  resize: vertical;
+}
+
+.modal-resolucion textarea[readonly] {
+  background: var(--color-disabled-bg, #e5e7eb);
+}
+
+.modal-resolucion [aria-invalid='true'] {
+  border-color: var(--color-danger, #b91c1c);
+}
+
+.modal-resolucion :focus-visible,
+.modal-resolucion .file-uploader__zona:has(:focus-visible) {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.modal-resolucion__resumen,
+.modal-resolucion__contador {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.modal-resolucion__contador {
+  justify-self: end;
+}
+
+.modal-resolucion__error,
+.modal-resolucion__alerta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-danger, #b91c1c);
+}
+
+.modal-resolucion__error::before,
+.modal-resolucion__alerta::before {
+  content: '⚠ ';
+}
+
+.modal-resolucion__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-resolucion__acciones button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.modal-resolucion__acciones .modal-resolucion__primario {
+  background: var(--color-primary, #1d4ed8);
+  color: var(--color-surface, #ffffff);
+}
+
+.modal-resolucion__acciones button:disabled {
+  border-color: var(--color-border, #d1d5db);
+  background: var(--color-disabled-bg, #e5e7eb);
+  color: var(--color-disabled-text, #4b5563);
+  cursor: not-allowed;
+}
