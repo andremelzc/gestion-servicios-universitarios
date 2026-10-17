@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { API_URL } from '../../services/config.js';
+import { apiClient } from '../../services/apiClient.js';
 
 // Clave única de sesión (backlog AUTH-03; ADR-004: solo JWT + usuario, sin datos sensibles extra).
 export const STORAGE_KEY = 'gestion_univ_auth';
@@ -70,37 +70,14 @@ function aSesion(cuerpo) {
   return { token: cuerpo.token, usuario: cuerpo.usuario };
 }
 
-// Lee el cuerpo de error RFC 7807 y lo deja en la forma que entiende `interpretarError`.
-function aErrorHttp(status, cuerpo) {
-  const tipo = typeof cuerpo?.type === 'string' ? cuerpo.type.split('/').pop() : undefined;
-  return {
-    status,
-    detail: cuerpo?.detail ?? null,
-    errores: cuerpo?.errores ?? {},
-    traceId: cuerpo?.traceId ?? null,
-    ...(tipo ? { tipo } : {}),
-  };
-}
-
+// POST de autenticación por el cliente único (AUTH-15): normaliza errores RFC 7807 igual
+// que el resto de la app, y `/auth/login` ya está excluido del 401 global ahí mismo
+// (ese 401 lo pinta LoginPage).
 async function postAuth(ruta, payload) {
-  let respuesta;
-  try {
-    respuesta = await fetch(`${API_URL}${ruta}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    throw { status: 0, sinConexion: true };
-  }
-  let cuerpo = null;
-  try {
-    cuerpo = await respuesta.json();
-  } catch {
-    cuerpo = null;
-  }
-  if (!respuesta.ok || !cuerpo || typeof cuerpo.token !== 'string') {
-    throw aErrorHttp(respuesta.status, cuerpo);
+  const cuerpo = await apiClient.post(ruta, payload);
+  if (!cuerpo || typeof cuerpo.token !== 'string') {
+    // 2xx sin token: contrato roto; `interpretarError` lo pinta como error inesperado.
+    throw { status: 500, detail: null, errores: {}, traceId: null };
   }
   return aSesion(cuerpo);
 }

@@ -1,0 +1,165 @@
+/* Estilos de LoginPage (usar tokens.css cuando llegue con UX-04).
+   Respaldo: valores de UX §2.1, mismo patrón que RegistroPage.css. */
+.login {
+  --login-text: var(--color-text, #111827);
+  --login-muted: var(--color-text-muted, #4b5563);
+  --login-border: var(--color-border, #d1d5db);
+  --login-primary: var(--color-primary, #1d4ed8);
+  --login-primary-hover: var(--color-primary-hover, #1e40af);
+  --login-focus: var(--color-focus, #2563eb);
+  --login-danger: var(--color-danger, #b91c1c);
+  --login-radius: var(--radius, 8px);
+  color: var(--login-text);
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.login__titulo {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.login__alerta {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--login-danger);
+  border-radius: var(--login-radius);
+  /* Tinte del color de peligro (#B91C1C al 8 %), sin depender de color-mix. */
+  background: rgb(185 28 28 / 8%);
+  color: var(--login-danger);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login__campo label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.login__campo input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--login-border);
+  border-radius: var(--login-radius);
+  color: inherit;
+}
+
+.login__campo input:focus-visible {
+  outline: 3px solid var(--login-focus);
+  outline-offset: 1px;
+}
+
+.login__campo input[aria-invalid='true'] {
+  border-color: var(--login-danger);
+}
+
+.login__error {
+  margin: 0;
+  color: var(--login-danger);
+  font-size: 0.875rem;
+}
+
+/* Botón Mostrar/Ocultar dentro del campo de contraseña (W-01). */
+.login__password {
+  position: relative;
+  display: flex;
+}
+
+.login__password input {
+  padding-right: 88px;
+}
+
+.login__ver {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: calc(var(--login-radius) - 2px);
+  background: none;
+  color: var(--login-primary);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login__ver:focus-visible {
+  outline: 3px solid var(--login-focus);
+  outline-offset: 1px;
+}
+
+.login__enviar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--login-radius);
+  background: var(--login-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login__enviar:hover:not(:disabled) {
+  background: var(--login-primary-hover);
+}
+
+.login__enviar:focus-visible {
+  outline: 3px solid var(--login-focus);
+  outline-offset: 2px;
+}
+
+.login__enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner del envío: decorativo (el texto del botón ya anuncia "Iniciando sesión…"). */
+.login__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: login-girar 0.8s linear infinite;
+}
+
+@keyframes login-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Movimiento reducido: se conserva la señal visual con un giro mucho más lento. */
+@media (prefers-reduced-motion: reduce) {
+  .login__spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.login__pie {
+  margin: 16px 0 0;
+  font-size: 0.875rem;
+  color: var(--login-muted);
+}
+
+.login__pie a {
+  color: var(--login-primary);
+}
