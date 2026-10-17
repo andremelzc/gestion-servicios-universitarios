@@ -4,6 +4,9 @@ import EstadoFormModal, { MuestraColor } from '../components/EstadoFormModal.jsx
 import useCrud from '../hooks/useCrud.js';
 import '../components/adminUi.css';
 
+// Referencia estable: un objeto nuevo en cada render reiniciaría el efecto de foco del formulario.
+const SIN_ERROR = { general: null, campos: {} };
+
 const COLUMNAS = [
   { key: 'orden', header: 'Orden' },
   { key: 'nombreVisible', header: 'Nombre visible' },
@@ -29,7 +32,7 @@ export default function EstadosPage() {
   const crud = useCrud('/estados');
   const [estado, setEstado] = useState(null);
   const [aviso, setAviso] = useState('');
-  const { general, campos } = crud.errorMutacion ?? { general: null, campos: {} };
+  const { general, campos } = crud.errorMutacion ?? SIN_ERROR;
 
   const abrir = (fila) => {
     crud.limpiarErrorMutacion();

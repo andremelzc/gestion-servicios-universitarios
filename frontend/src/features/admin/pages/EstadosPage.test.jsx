@@ -106,4 +106,32 @@ describe('EstadosPage (US-32)', () => {
     expect(nombre).toBeInvalid();
     expect(nombre).toHaveAccessibleDescription('Ese nombre ya lo usa otro estado.');
   });
+
+  it('[US-32] el error se limpia al escribir y el foco no se roba al seguir tecleando', async () => {
+    render(<EstadosPage />);
+    const dialogo = await abrirEdicion('ASIGNADA');
+    const color = dialogo.getByLabelText('Color (#RRGGBB)');
+    const nombre = dialogo.getByLabelText('Nombre visible');
+    await escribir(color, 'rojo');
+    await escribir(nombre, '');
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+    expect(nombre).toHaveFocus();
+
+    await userEvent.type(nombre, 'Con técnico');
+
+    expect(nombre).toBeValid();
+    expect(nombre).toHaveFocus();
+    expect(color).toBeInvalid();
+  });
+
+  it('[US-32 CA-7] el aviso de contraste se anuncia en una región de estado cortés', async () => {
+    render(<EstadosPage />);
+    const dialogo = await abrirEdicion('ASIGNADA');
+    const region = dialogo.getByRole('status');
+    expect(region).toBeEmptyDOMElement();
+
+    await escribir(dialogo.getByLabelText('Color (#RRGGBB)'), '#FFFF00');
+
+    expect(region).toHaveTextContent(/poco contraste con el fondo blanco/);
+  });
 });

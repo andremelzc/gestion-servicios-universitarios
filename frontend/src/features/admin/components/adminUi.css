@@ -69,13 +69,13 @@
 
 .admin-boton--primario {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .admin-boton--peligro {
   border-color: var(--color-danger);
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .admin-boton:disabled {
