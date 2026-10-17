@@ -1,0 +1,4 @@
+.kpi-resumen__titulo {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: 1.25rem;
+}
