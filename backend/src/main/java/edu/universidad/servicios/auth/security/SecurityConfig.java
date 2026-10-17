@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Reglas RBAC
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/dashboard/**").hasAnyRole("TECNICO", "SUPERVISOR", "ADMIN")
                 // Todo lo demás autenticado
                 .anyRequest().authenticated()
             )

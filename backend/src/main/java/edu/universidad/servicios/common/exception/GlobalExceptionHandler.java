@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
@@ -28,6 +29,20 @@ public class GlobalExceptionHandler {
 		ProblemDetail pd = ProblemDetail.forStatusAndDetail(
 			HttpStatus.BAD_REQUEST,
 			ex.getMessage()
+		);
+		pd.setTitle("Petición inválida");
+		pd.setType(URI.create("https://api.servicios.edu/errors/bad-request"));
+		addCommonProperties(pd);
+		return pd;
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ProblemDetail handleInvalidRequestParameter(
+		MethodArgumentTypeMismatchException ex
+	) {
+		ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+			HttpStatus.BAD_REQUEST,
+			"Formato inválido para el parámetro '" + ex.getName() + "'."
 		);
 		pd.setTitle("Petición inválida");
 		pd.setType(URI.create("https://api.servicios.edu/errors/bad-request"));

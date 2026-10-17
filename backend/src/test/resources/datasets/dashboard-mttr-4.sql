@@ -43,4 +43,7 @@ FROM (
 JOIN usuarios usuario ON usuario.codigo_institucional = 'DASH01-EST-001'
 JOIN categorias categoria ON categoria.nombre = 'Electricidad'
 JOIN prioridades prioridad ON prioridad.nivel = 'BAJA'
-JOIN estados_solicitud estado ON estado.codigo = fixture.estado;
+JOIN estados_solicitud estado ON estado.codigo = fixture.estado
+WHERE NOT EXISTS (
+    SELECT 1 FROM solicitudes existente WHERE existente.codigo = fixture.codigo
+);
