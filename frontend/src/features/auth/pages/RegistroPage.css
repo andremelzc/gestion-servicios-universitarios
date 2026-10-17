@@ -1,0 +1,141 @@
+/* Estilos de RegistroPage (usar tokens.css cuando llegue con UX-04).
+   Respaldo: valores de UX §2.1, mismo patrón que DataTable.css. */
+.registro {
+  --reg-text: var(--color-text, #111827);
+  --reg-muted: var(--color-text-muted, #4b5563);
+  --reg-border: var(--color-border, #d1d5db);
+  --reg-primary: var(--color-primary, #1d4ed8);
+  --reg-primary-hover: var(--color-primary-hover, #1e40af);
+  --reg-focus: var(--color-focus, #2563eb);
+  --reg-danger: var(--color-danger, #b91c1c);
+  --reg-success: var(--color-success, #047857);
+  --reg-radius: var(--radius, 8px);
+  color: var(--reg-text);
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.registro__titulo {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.registro__alerta {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--reg-danger);
+  border-radius: var(--reg-radius);
+  /* Tinte del color de peligro (#B91C1C al 8 %) sin depender de color-mix. */
+  background: rgb(185 28 28 / 8%);
+  color: var(--reg-danger);
+}
+
+.registro__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.registro__fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.registro__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.registro__campo label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.registro__campo input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--reg-border);
+  border-radius: var(--reg-radius);
+  color: inherit;
+}
+
+.registro__campo input:focus-visible {
+  outline: 3px solid var(--reg-focus);
+  outline-offset: 1px;
+}
+
+.registro__campo input[aria-invalid='true'] {
+  border-color: var(--reg-danger);
+}
+
+.registro__error {
+  margin: 0;
+  color: var(--reg-danger);
+  font-size: 0.875rem;
+}
+
+.registro__checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8125rem;
+}
+
+.registro__checklist li {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+/* El estado no depende solo del color: hay icono ✔/✖ y texto para lectores de pantalla. */
+.registro__checklist li[data-cumple='true'] {
+  color: var(--reg-success);
+}
+
+.registro__checklist li[data-cumple='false'] {
+  color: var(--reg-danger);
+}
+
+.registro__checklist-icono {
+  flex: none;
+}
+
+.registro__enviar {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--reg-radius);
+  background: var(--reg-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.registro__enviar:hover:not(:disabled) {
+  background: var(--reg-primary-hover);
+}
+
+.registro__enviar:focus-visible {
+  outline: 3px solid var(--reg-focus);
+  outline-offset: 2px;
+}
+
+.registro__enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.registro__pie {
+  margin: 16px 0 0;
+  font-size: 0.875rem;
+  color: var(--reg-muted);
+}
+
+.registro__pie a {
+  color: var(--reg-primary);
+}
