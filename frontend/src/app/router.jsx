@@ -13,24 +13,28 @@ import CategoriasPage from '../features/admin/pages/CategoriasPage.jsx';
 import PrioridadesPage from '../features/admin/pages/PrioridadesPage.jsx';
 import EstadosPage from '../features/admin/pages/EstadosPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
+import AppShell from '../components/layout/AppShell.jsx';
 
 // Mapa de rutas: docs/01-definicion/ux-ui-prototipo.md §3.
-// Sin protección por sesión/rol todavía (ProtectedRoute/RoleRoute: issue #32).
+// El área "Aplicación (requiere sesión)" se envuelve en el AppShell (menú de usuario y
+// cierre de sesión: AUTH-19). Sin protección por sesión/rol todavía (issue #32).
+const conShell = (elemento) => <AppShell>{elemento}</AppShell>;
+
 export const routes = [
   { path: '/', element: <Navigate to="/login" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/registro', element: <RegistroPage /> },
-  { path: '/mis-solicitudes', element: <MisSolicitudesPage /> },
-  { path: '/solicitudes/nueva', element: <NuevaSolicitudPage /> },
-  { path: '/solicitudes/:id', element: <DetalleSolicitudPage /> },
-  { path: '/perfil', element: <PerfilPage /> },
-  { path: '/bandeja', element: <BandejaPage /> },
-  { path: '/dashboard', element: <DashboardPage /> },
+  { path: '/mis-solicitudes', element: conShell(<MisSolicitudesPage />) },
+  { path: '/solicitudes/nueva', element: conShell(<NuevaSolicitudPage />) },
+  { path: '/solicitudes/:id', element: conShell(<DetalleSolicitudPage />) },
+  { path: '/perfil', element: conShell(<PerfilPage />) },
+  { path: '/bandeja', element: conShell(<BandejaPage />) },
+  { path: '/dashboard', element: conShell(<DashboardPage />) },
   { path: '/admin', element: <Navigate to="/admin/usuarios" replace /> },
-  { path: '/admin/usuarios', element: <UsuariosPage /> },
-  { path: '/admin/areas', element: <AreasPage /> },
-  { path: '/admin/categorias', element: <CategoriasPage /> },
-  { path: '/admin/prioridades', element: <PrioridadesPage /> },
-  { path: '/admin/estados', element: <EstadosPage /> },
+  { path: '/admin/usuarios', element: conShell(<UsuariosPage />) },
+  { path: '/admin/areas', element: conShell(<AreasPage />) },
+  { path: '/admin/categorias', element: conShell(<CategoriasPage />) },
+  { path: '/admin/prioridades', element: conShell(<PrioridadesPage />) },
+  { path: '/admin/estados', element: conShell(<EstadosPage />) },
   { path: '*', element: <NotFoundPage /> },
 ];

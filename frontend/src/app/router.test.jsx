@@ -1,8 +1,26 @@
 import { render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { STORAGE_KEY } from '../features/auth/AuthContext.jsx';
 import Providers from './providers.jsx';
 import { routes } from './router.jsx';
+
+// JWT sin firmar solo para caducidad local (la firma la valida el backend).
+function tokenVigente() {
+  const aBase64Url = (obj) =>
+    btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const exp = Math.floor(Date.now() / 1000) + 3600;
+  return `${aBase64Url({ alg: 'none' })}.${aBase64Url({ sub: 'juan@universidad.edu', exp })}.firma`;
+}
+
+const USUARIO = {
+  id: 7,
+  nombre: 'Juan',
+  apellido: 'Pérez',
+  correo: 'juan@universidad.edu',
+  rol: 'ESTUDIANTE',
+  idArea: null,
+};
 
 // Igual que App.jsx: las páginas pueden usar useAuth() (p. ej. /login, AUTH-16),
 // que exige el AuthProvider de Providers.
@@ -33,6 +51,10 @@ const placeholders = [
   ['/admin/estados', 'Administración de estados'],
 ];
 
+beforeEach(() => {
+  localStorage.clear();
+});
+
 describe('router', () => {
   it.each(placeholders)('[BASE-04 CA-4] la ruta %s muestra su encabezado "%s"', (path, heading) => {
     renderAt(path);
@@ -58,5 +80,25 @@ describe('router', () => {
     const router = renderAt('/admin');
 
     expect(router.state.location.pathname).toBe('/admin/usuarios');
+  });
+
+  it('[AUTH-19] las rutas del área autenticada se envuelven en el AppShell', () => {
+    renderAt('/perfil');
+
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+  });
+
+  it('[AUTH-19] la ruta pública /login no usa el AppShell', () => {
+    renderAt('/login');
+
+    expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
+  });
+
+  it('[AUTH-19] con sesión, el AppShell muestra el nombre y el rol del usuario', async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: tokenVigente(), usuario: USUARIO }));
+    renderAt('/perfil');
+
+    const boton = await screen.findByRole('button', { name: /juan pérez/i });
+    expect(boton).toHaveTextContent('Estudiante');
   });
 });
