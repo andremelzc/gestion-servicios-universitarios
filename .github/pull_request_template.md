@@ -33,7 +33,7 @@ Resumen conciso y claro de qué resuelve este Pull Request y por qué es necesar
 
 ## 🤖 Registro de Uso de IA
 - ¿Se utilizó IA (Copilot, ChatGPT, Claude, etc.) para este cambio?: `[SÍ / NO]`
-- En caso afirmativo, ¿se registró la entrada correspondiente en `docs/04-gestion/ia-register.md`?: `[SÍ / N/A]`
+- En caso afirmativo, ¿se registró la entrada en tu archivo personal de `docs/04-gestion/ia-registro/` (y se enlazó su N°, p. ej. `R5-03`)?: `[SÍ / N/A]`
 
 ---
 

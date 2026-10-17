@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Nueva solicitud · Servicios Universitarios</title>
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+  <main class="page" id="contenido" tabindex="-1">
+    <div class="page-head">
+      <h1>Nueva solicitud</h1>
+    </div>
+    <div id="estado-catalogos"></div>
+    <div id="confirmacion" hidden></div>
+    <form id="form-solicitud" class="form" novalidate hidden>
+      <div id="aviso" role="alert"></div>
+      <div class="form-layout">
+        <div class="form">
+          <div class="field">
+            <label for="titulo">Título <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="titulo" name="titulo" type="text" required minlength="5" maxlength="150" placeholder="Proyector sin imagen" aria-describedby="titulo-error" aria-invalid="false">
+            <p class="field-error" id="titulo-error"></p>
+          </div>
+          <div class="form-row form-row--2">
+            <div class="field">
+              <label for="idCategoria">Categoría <span class="req" aria-hidden="true">*</span></label>
+              <select class="select" id="idCategoria" name="idCategoria" required aria-describedby="idCategoria-error" aria-invalid="false"><option value="">Selecciona…</option></select>
+              <p class="field-error" id="idCategoria-error"></p>
+            </div>
+            <div class="field">
+              <label for="idPrioridad">Prioridad <span class="req" aria-hidden="true">*</span></label>
+              <select class="select" id="idPrioridad" name="idPrioridad" required aria-describedby="idPrioridad-error" aria-invalid="false"><option value="">Selecciona…</option></select>
+              <p class="field-error" id="idPrioridad-error"></p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="ubicacionCampus">Campus <span class="req" aria-hidden="true">*</span></label>
+            <select class="select" id="ubicacionCampus" name="ubicacionCampus" required aria-describedby="ubicacionCampus-error" aria-invalid="false"><option value="">Selecciona…</option></select>
+            <p class="field-error" id="ubicacionCampus-error"></p>
+          </div>
+          <div class="field">
+            <label for="ubicacionAmbiente">Ubicación (aula/lab) <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="ubicacionAmbiente" name="ubicacionAmbiente" type="text" required maxlength="100" placeholder="Pabellón B - Aula 402" aria-describedby="ubicacionAmbiente-error" aria-invalid="false">
+            <p class="field-error" id="ubicacionAmbiente-error"></p>
+          </div>
+        </div>
+        <div class="form">
+          <div class="field">
+            <label for="descripcion">Descripción <span class="req" aria-hidden="true">*</span></label>
+            <textarea class="textarea" id="descripcion" name="descripcion" required minlength="15" maxlength="500" aria-describedby="descripcion-ayuda descripcion-error" aria-invalid="false"></textarea>
+            <p class="counter" id="descripcion-ayuda">0 / 500 · mínimo 15</p>
+            <p class="field-error" id="descripcion-error"></p>
+          </div>
+          <div class="field">
+            <span class="label" id="evidencias-etiqueta">Evidencias (opcional)</span>
+            <label class="dropzone" id="dropzone">
+              <input class="sr-only" id="archivos" type="file" accept="image/jpeg,image/png,application/pdf" multiple aria-labelledby="evidencias-etiqueta" aria-describedby="evidencias-ayuda">
+              <span><strong>Arrastra o toca para subir</strong></span>
+              <span class="hint" id="evidencias-ayuda">JPG · PNG · PDF, hasta 5 MB cada uno, máximo 3 archivos</span>
+            </label>
+            <ul class="file-list" id="lista-archivos" aria-label="Archivos adjuntos"></ul>
+            <div id="errores-archivos" role="alert"></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn btn--secondary" href="mis-solicitudes.html">Cancelar</a>
+        <button class="btn" id="enviar" type="submit">Enviar</button>
+      </div>
+    </form>
+  </main>
+  <script type="module" src="js/pages/nueva-solicitud.js"></script>
+</body>
+</html>

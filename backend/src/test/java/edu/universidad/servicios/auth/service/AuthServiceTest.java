@@ -1,0 +1,229 @@
+package edu.universidad.servicios.auth.service;
+
+import edu.universidad.servicios.auth.dto.AuthResponse;
+import edu.universidad.servicios.auth.dto.CambiarPasswordRequest;
+import edu.universidad.servicios.auth.dto.LoginRequest;
+import edu.universidad.servicios.auth.dto.RegistroRequest;
+import edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException;
+import edu.universidad.servicios.auth.security.JwtService;
+import edu.universidad.servicios.builder.UsuarioTestBuilder;
+import edu.universidad.servicios.common.exception.RecursoEnConflictoException;
+import edu.universidad.servicios.usuario.domain.Rol;
+import edu.universidad.servicios.usuario.domain.Usuario;
+import edu.universidad.servicios.usuario.repository.RolRepository;
+import edu.universidad.servicios.usuario.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private RolRepository rolRepository;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private AuthService authService;
+
+    private Usuario estudiante;
+
+    @BeforeEach
+    void setUp() {
+        estudiante = UsuarioTestBuilder.unUsuario().comoEstudiante()
+                .conCorreo("estudiante@universidad.edu")
+                .build();
+    }
+
+    private RegistroRequest crearRegistroRequest(String codigo, String correo) {
+        RegistroRequest req = new RegistroRequest();
+        req.setCodigoInstitucional(codigo);
+        req.setNombre("Juan");
+        req.setApellido("Perez");
+        req.setCorreo(correo);
+        req.setPassword("Password123");
+        return req;
+    }
+
+    @Test
+    @DisplayName("Login exitoso devuelve token y datos del usuario")
+    void loginExitoso() {
+        LoginRequest request = new LoginRequest("estudiante@universidad.edu", "Password123");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getPassword()));
+        when(usuarioRepository.findByCorreo("estudiante@universidad.edu")).thenReturn(Optional.of(estudiante));
+        when(jwtService.generateToken(estudiante)).thenReturn("jwt.token.mock");
+
+        AuthResponse response = authService.login(request);
+
+        assertNotNull(response);
+        assertEquals("jwt.token.mock", response.getToken());
+        assertEquals("Bearer", response.getTipo());
+        assertEquals("estudiante@universidad.edu", response.getCorreo());
+        assertEquals("ESTUDIANTE", response.getRol());
+        assertNotNull(estudiante.getUltimoAcceso());
+        ArgumentCaptor<UsernamePasswordAuthenticationToken> authenticationCaptor =
+                ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+        verify(authenticationManager).authenticate(authenticationCaptor.capture());
+        assertEquals("estudiante@universidad.edu", authenticationCaptor.getValue().getPrincipal());
+        assertEquals("Password123", authenticationCaptor.getValue().getCredentials());
+        verify(usuarioRepository).save(estudiante);
+    }
+
+    @Test
+    @DisplayName("Login con credenciales incorrectas propaga BadCredentialsException")
+    void loginCredencialesIncorrectas() {
+        LoginRequest request = new LoginRequest("estudiante@universidad.edu", "WrongPassword");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
+
+        assertThrows(BadCredentialsException.class, () -> authService.login(request));
+        verify(usuarioRepository, never()).findByCorreo(anyString());
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(jwtService, never()).generateToken(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Registro exitoso crea usuario con rol estudiante y devuelve token")
+    void registroExitoso() {
+        RegistroRequest request = crearRegistroRequest("20230001", " Juan.Perez@Universidad.edu ");
+        request.setNombre(" Juan ");
+        request.setApellido(" Perez ");
+
+        Rol rolEstudiante = new Rol();
+        rolEstudiante.setId(4);
+        rolEstudiante.setNombre("ROLE_ESTUDIANTE");
+
+        when(usuarioRepository.existsByCorreo("juan.perez@universidad.edu")).thenReturn(false);
+        when(usuarioRepository.existsByCodigoInstitucional("20230001")).thenReturn(false);
+        when(rolRepository.findByNombre("ROLE_ESTUDIANTE")).thenReturn(Optional.of(rolEstudiante));
+        when(passwordEncoder.encode("Password123")).thenReturn("encodedPassword");
+        when(jwtService.generateToken(any(Usuario.class))).thenReturn("jwt.token.nuevo");
+
+        AuthResponse response = authService.registrar(request);
+
+        assertNotNull(response);
+        assertEquals("jwt.token.nuevo", response.getToken());
+        assertEquals("juan.perez@universidad.edu", response.getCorreo());
+        assertEquals("ROLE_ESTUDIANTE", response.getRol());
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        verify(usuarioRepository).save(usuarioCaptor.capture());
+        Usuario usuarioGuardado = usuarioCaptor.getValue();
+        assertEquals("20230001", usuarioGuardado.getCodigoInstitucional());
+        assertEquals("Juan", usuarioGuardado.getNombre());
+        assertEquals("Perez", usuarioGuardado.getApellido());
+        assertEquals("juan.perez@universidad.edu", usuarioGuardado.getCorreo());
+        assertEquals("encodedPassword", usuarioGuardado.getPasswordHash());
+        assertEquals("ROLE_ESTUDIANTE", usuarioGuardado.getRol().getNombre());
+        assertTrue(usuarioGuardado.getActivo());
+        assertNull(usuarioGuardado.getArea());
+        verify(passwordEncoder).encode("Password123");
+    }
+
+    @Test
+    @DisplayName("Registro con correo existente lanza RecursoEnConflictoException")
+    void registroCorreoDuplicado() {
+        RegistroRequest request = crearRegistroRequest("20230001", "duplicado@universidad.edu");
+
+        when(usuarioRepository.existsByCorreo("duplicado@universidad.edu")).thenReturn(true);
+
+        assertThrows(RecursoEnConflictoException.class, () -> authService.registrar(request));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Registro con código institucional existente lanza RecursoEnConflictoException")
+    void registroCodigoDuplicado() {
+        RegistroRequest request = crearRegistroRequest("20230001", "nuevo@universidad.edu");
+
+        when(usuarioRepository.existsByCorreo("nuevo@universidad.edu")).thenReturn(false);
+        when(usuarioRepository.existsByCodigoInstitucional("20230001")).thenReturn(true);
+
+        assertThrows(RecursoEnConflictoException.class, () -> authService.registrar(request));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(rolRepository, never()).findByNombre(anyString());
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    @DisplayName("Registro sin rol en base de datos lanza IllegalStateException")
+    void registroSinRolEnBD() {
+        RegistroRequest request = crearRegistroRequest("20230001", "juan@universidad.edu");
+
+        when(usuarioRepository.existsByCorreo("juan@universidad.edu")).thenReturn(false);
+        when(usuarioRepository.existsByCodigoInstitucional("20230001")).thenReturn(false);
+        when(rolRepository.findByNombre("ROLE_ESTUDIANTE")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> authService.registrar(request));
+    }
+
+    @Test
+    @DisplayName("Cambiar password exitoso actualiza el hash de la contraseña")
+    void cambiarPasswordExitoso() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordActual123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("estudiante@universidad.edu")).thenReturn(Optional.of(estudiante));
+        when(passwordEncoder.matches("PasswordActual123", estudiante.getPasswordHash())).thenReturn(true);
+        when(passwordEncoder.encode("NuevaPasswordSegura456")).thenReturn("nuevoHashEncriptado");
+
+        authService.cambiarPassword("estudiante@universidad.edu", request);
+
+        assertEquals("nuevoHashEncriptado", estudiante.getPasswordHash());
+        verify(usuarioRepository).save(estudiante);
+    }
+
+    @Test
+    @DisplayName("Cambiar password con contraseña actual incorrecta lanza PasswordActualIncorrectaException")
+    void cambiarPasswordActualIncorrecta() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordErrada123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("estudiante@universidad.edu")).thenReturn(Optional.of(estudiante));
+        when(passwordEncoder.matches("PasswordErrada123", estudiante.getPasswordHash())).thenReturn(false);
+
+        assertThrows(PasswordActualIncorrectaException.class,
+                () -> authService.cambiarPassword("estudiante@universidad.edu", request));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Cambiar password con usuario inexistente lanza IllegalArgumentException")
+    void cambiarPasswordUsuarioInexistente() {
+        CambiarPasswordRequest request = new CambiarPasswordRequest("PasswordActual123", "NuevaPasswordSegura456");
+
+        when(usuarioRepository.findByCorreo("noexiste@universidad.edu")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> authService.cambiarPassword("noexiste@universidad.edu", request));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+}

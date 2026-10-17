@@ -1,0 +1,539 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Marco",
+      "apellido": "Salas",
+      "correo": "marco@universidad.edu",
+      "rol": "ADMIN",
+      "idArea": null,
+      "password": "Demo1234",
+      "alias": "admin"
+    },
+    {
+      "id": 3,
+      "nombre": "Ana",
+      "apellido": "Torres",
+      "correo": "ana@universidad.edu",
+      "rol": "SUPERVISOR",
+      "idArea": 1,
+      "password": "Demo1234",
+      "alias": "supervisor"
+    },
+    {
+      "id": 14,
+      "nombre": "Carlos",
+      "apellido": "Ruiz",
+      "correo": "carlos@universidad.edu",
+      "rol": "TECNICO",
+      "idArea": 1,
+      "password": "Demo1234",
+      "alias": "tecnico"
+    },
+    {
+      "id": 15,
+      "nombre": "Lucía",
+      "apellido": "Vega",
+      "correo": "lucia@universidad.edu",
+      "rol": "TECNICO",
+      "idArea": 1,
+      "password": "Demo1234",
+      "alias": "tecnico-2"
+    },
+    {
+      "id": 7,
+      "nombre": "Juan",
+      "apellido": "Pérez",
+      "correo": "juan@universidad.edu",
+      "rol": "ESTUDIANTE",
+      "idArea": null,
+      "password": "Demo1234",
+      "alias": "estudiante"
+    },
+    {
+      "id": 8,
+      "nombre": "Camila",
+      "apellido": "Rojas",
+      "correo": "camila@universidad.edu",
+      "rol": "ESTUDIANTE",
+      "idArea": null,
+      "password": "Demo1234",
+      "alias": "estudiante-nuevo"
+    },
+    {
+      "id": 9,
+      "nombre": "Diego",
+      "apellido": "Quispe",
+      "correo": "diego@universidad.edu",
+      "rol": "ESTUDIANTE",
+      "idArea": null,
+      "password": "Demo1234",
+      "alias": "estudiante-2"
+    }
+  ],
+  "areas": [
+    {
+      "id": 1,
+      "nombre": "Tecnologías de la Información",
+      "activo": true
+    },
+    {
+      "id": 2,
+      "nombre": "Mantenimiento e Infraestructura",
+      "activo": true
+    },
+    {
+      "id": 3,
+      "nombre": "Servicios Generales",
+      "activo": true
+    }
+  ],
+  "categorias": [
+    {
+      "id": 1,
+      "nombre": "Soporte de Software",
+      "descripcion": "Instalación y fallas de software",
+      "idArea": 1,
+      "area": "Tecnologías de la Información",
+      "tiempoSlaHoras": 24,
+      "activo": true
+    },
+    {
+      "id": 2,
+      "nombre": "Redes y Wi-Fi",
+      "descripcion": "Cobertura y fallas de red",
+      "idArea": 1,
+      "area": "Tecnologías de la Información",
+      "tiempoSlaHoras": 24,
+      "activo": true
+    },
+    {
+      "id": 3,
+      "nombre": "Equipos de Cómputo",
+      "descripcion": "Computadoras, proyectores y periféricos",
+      "idArea": 1,
+      "area": "Tecnologías de la Información",
+      "tiempoSlaHoras": 24,
+      "activo": true
+    },
+    {
+      "id": 4,
+      "nombre": "Electricidad",
+      "descripcion": "Iluminación y tomacorrientes",
+      "idArea": 2,
+      "area": "Mantenimiento e Infraestructura",
+      "tiempoSlaHoras": 48,
+      "activo": true
+    },
+    {
+      "id": 5,
+      "nombre": "Mobiliario",
+      "descripcion": "Carpetas, sillas y pizarras",
+      "idArea": 2,
+      "area": "Mantenimiento e Infraestructura",
+      "tiempoSlaHoras": 72,
+      "activo": true
+    },
+    {
+      "id": 6,
+      "nombre": "Limpieza e Higiene",
+      "descripcion": "Limpieza de aulas y baños",
+      "idArea": 3,
+      "area": "Servicios Generales",
+      "tiempoSlaHoras": 48,
+      "activo": true
+    }
+  ],
+  "prioridades": [
+    {
+      "id": 1,
+      "nivel": "BAJA",
+      "ponderador": 1,
+      "slaMaxHoras": 72,
+      "activo": true
+    },
+    {
+      "id": 2,
+      "nivel": "MEDIA",
+      "ponderador": 2,
+      "slaMaxHoras": 48,
+      "activo": true
+    },
+    {
+      "id": 3,
+      "nivel": "ALTA",
+      "ponderador": 3,
+      "slaMaxHoras": 24,
+      "activo": true
+    },
+    {
+      "id": 4,
+      "nivel": "CRITICA",
+      "ponderador": 4,
+      "slaMaxHoras": 4,
+      "activo": true
+    }
+  ],
+  "estados": [
+    {
+      "codigo": "REGISTRADA",
+      "nombreVisible": "Registrada",
+      "descripcion": "Recibida, pendiente de evaluación",
+      "colorHex": "#6B7280",
+      "orden": 1
+    },
+    {
+      "codigo": "EN_EVALUACION",
+      "nombreVisible": "En evaluación",
+      "descripcion": "El supervisor la está evaluando",
+      "colorHex": "#D97706",
+      "orden": 2
+    },
+    {
+      "codigo": "ASIGNADA",
+      "nombreVisible": "Asignada",
+      "descripcion": "Asignada a un técnico",
+      "colorHex": "#2563EB",
+      "orden": 3
+    },
+    {
+      "codigo": "EN_ATENCION",
+      "nombreVisible": "En atención",
+      "descripcion": "El técnico trabaja en ella",
+      "colorHex": "#7C3AED",
+      "orden": 4
+    },
+    {
+      "codigo": "RESUELTA",
+      "nombreVisible": "Resuelta",
+      "descripcion": "Solucionada, pendiente de cierre",
+      "colorHex": "#059669",
+      "orden": 5
+    },
+    {
+      "codigo": "CERRADA",
+      "nombreVisible": "Cerrada",
+      "descripcion": "Cerrada con conformidad",
+      "colorHex": "#047857",
+      "orden": 6
+    }
+  ],
+  "solicitudes": [
+    {
+      "id": 150,
+      "codigo": "SOL-2026-0150",
+      "titulo": "Proyector sin imagen",
+      "categoria": "Equipos de Cómputo",
+      "area": "Tecnologías de la Información",
+      "prioridad": "ALTA",
+      "estado": "ASIGNADA",
+      "solicitante": "Juan Pérez",
+      "tecnico": "Carlos Ruiz",
+      "fechaRegistro": "2026-10-03T15:04:05.000Z",
+      "fechaLimiteSla": "2026-10-04T15:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 149,
+      "codigo": "SOL-2026-0149",
+      "titulo": "Aire acondicionado ruidoso en laboratorio",
+      "categoria": "Electricidad",
+      "area": "Mantenimiento e Infraestructura",
+      "prioridad": "MEDIA",
+      "estado": "EN_EVALUACION",
+      "solicitante": "Diego Quispe",
+      "tecnico": null,
+      "fechaRegistro": "2026-10-03T12:04:05.000Z",
+      "fechaLimiteSla": "2026-10-05T12:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    },
+    {
+      "id": 148,
+      "codigo": "SOL-2026-0148",
+      "titulo": "Wi-Fi caído en laboratorio 2",
+      "categoria": "Redes y Wi-Fi",
+      "area": "Tecnologías de la Información",
+      "prioridad": "CRITICA",
+      "estado": "EN_EVALUACION",
+      "solicitante": "Juan Pérez",
+      "tecnico": null,
+      "fechaRegistro": "2026-10-02T11:04:05.000Z",
+      "fechaLimiteSla": "2026-10-02T15:04:05.000Z",
+      "vencida": true,
+      "solicitanteId": 7
+    },
+    {
+      "id": 147,
+      "codigo": "SOL-2026-0147",
+      "titulo": "No abre la licencia de MATLAB",
+      "categoria": "Soporte de Software",
+      "area": "Tecnologías de la Información",
+      "prioridad": "MEDIA",
+      "estado": "EN_ATENCION",
+      "solicitante": "Diego Quispe",
+      "tecnico": "Lucía Vega",
+      "fechaRegistro": "2026-10-02T21:04:05.000Z",
+      "fechaLimiteSla": "2026-10-04T21:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    },
+    {
+      "id": 146,
+      "codigo": "SOL-2026-0146",
+      "titulo": "Carpeta rota en aula A-201",
+      "categoria": "Mobiliario",
+      "area": "Mantenimiento e Infraestructura",
+      "prioridad": "BAJA",
+      "estado": "REGISTRADA",
+      "solicitante": "Diego Quispe",
+      "tecnico": null,
+      "fechaRegistro": "2026-10-02T15:04:05.000Z",
+      "fechaLimiteSla": "2026-10-05T15:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    },
+    {
+      "id": 145,
+      "codigo": "SOL-2026-0145",
+      "titulo": "Foco quemado en pasillo del pabellón C",
+      "categoria": "Electricidad",
+      "area": "Mantenimiento e Infraestructura",
+      "prioridad": "BAJA",
+      "estado": "ASIGNADA",
+      "solicitante": "Juan Pérez",
+      "tecnico": "Carlos Ruiz",
+      "fechaRegistro": "2026-10-01T15:04:05.000Z",
+      "fechaLimiteSla": "2026-10-04T15:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 144,
+      "codigo": "SOL-2026-0144",
+      "titulo": "Impresora de biblioteca sin tinta",
+      "categoria": "Equipos de Cómputo",
+      "area": "Tecnologías de la Información",
+      "prioridad": "MEDIA",
+      "estado": "RESUELTA",
+      "solicitante": "Diego Quispe",
+      "tecnico": "Lucía Vega",
+      "fechaRegistro": "2026-09-30T19:04:05.000Z",
+      "fechaLimiteSla": "2026-10-02T19:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    },
+    {
+      "id": 143,
+      "codigo": "SOL-2026-0143",
+      "titulo": "Baño del pabellón D sin papel",
+      "categoria": "Limpieza e Higiene",
+      "area": "Servicios Generales",
+      "prioridad": "MEDIA",
+      "estado": "CERRADA",
+      "solicitante": "Juan Pérez",
+      "tecnico": null,
+      "fechaRegistro": "2026-09-28T17:04:05.000Z",
+      "fechaLimiteSla": "2026-09-30T17:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 142,
+      "codigo": "SOL-2026-0142",
+      "titulo": "Computadora del aula B-301 no enciende",
+      "categoria": "Equipos de Cómputo",
+      "area": "Tecnologías de la Información",
+      "prioridad": "ALTA",
+      "estado": "EN_ATENCION",
+      "solicitante": "Diego Quispe",
+      "tecnico": "Carlos Ruiz",
+      "fechaRegistro": "2026-10-02T11:04:05.000Z",
+      "fechaLimiteSla": "2026-10-03T11:04:05.000Z",
+      "vencida": true,
+      "solicitanteId": 9
+    },
+    {
+      "id": 141,
+      "codigo": "SOL-2026-0141",
+      "titulo": "Wi-Fi intermitente en la biblioteca",
+      "categoria": "Redes y Wi-Fi",
+      "area": "Tecnologías de la Información",
+      "prioridad": "MEDIA",
+      "estado": "CERRADA",
+      "solicitante": "Juan Pérez",
+      "tecnico": "Carlos Ruiz",
+      "fechaRegistro": "2026-09-25T09:04:05.000Z",
+      "fechaLimiteSla": "2026-09-27T09:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 140,
+      "codigo": "SOL-2026-0140",
+      "titulo": "Pizarra acrílica manchada",
+      "categoria": "Mobiliario",
+      "area": "Mantenimiento e Infraestructura",
+      "prioridad": "BAJA",
+      "estado": "RESUELTA",
+      "solicitante": "Juan Pérez",
+      "tecnico": null,
+      "fechaRegistro": "2026-09-27T11:04:05.000Z",
+      "fechaLimiteSla": "2026-09-30T11:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 139,
+      "codigo": "SOL-2026-0139",
+      "titulo": "Instalar Visual Studio en laboratorio 1",
+      "categoria": "Soporte de Software",
+      "area": "Tecnologías de la Información",
+      "prioridad": "BAJA",
+      "estado": "REGISTRADA",
+      "solicitante": "Diego Quispe",
+      "tecnico": null,
+      "fechaRegistro": "2026-10-03T07:04:05.000Z",
+      "fechaLimiteSla": "2026-10-06T07:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    },
+    {
+      "id": 138,
+      "codigo": "SOL-2026-0138",
+      "titulo": "Tomacorrientes sin energía en aula B-402",
+      "categoria": "Electricidad",
+      "area": "Mantenimiento e Infraestructura",
+      "prioridad": "ALTA",
+      "estado": "ASIGNADA",
+      "solicitante": "Juan Pérez",
+      "tecnico": "Carlos Ruiz",
+      "fechaRegistro": "2026-10-03T09:04:05.000Z",
+      "fechaLimiteSla": "2026-10-04T09:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 7
+    },
+    {
+      "id": 137,
+      "codigo": "SOL-2026-0137",
+      "titulo": "Limpieza urgente tras derrame en cafetería",
+      "categoria": "Limpieza e Higiene",
+      "area": "Servicios Generales",
+      "prioridad": "CRITICA",
+      "estado": "CERRADA",
+      "solicitante": "Diego Quispe",
+      "tecnico": null,
+      "fechaRegistro": "2026-09-21T05:04:05.000Z",
+      "fechaLimiteSla": "2026-09-21T09:04:05.000Z",
+      "vencida": false,
+      "solicitanteId": 9
+    }
+  ],
+  "campus": [
+    {
+      "id": 1,
+      "nombre": "Campus Central"
+    },
+    {
+      "id": 2,
+      "nombre": "Campus Norte"
+    }
+  ],
+  "dashboardKpis": {
+    "desde": "2026-09-03T05:00:00Z",
+    "hasta": "2026-10-04T04:59:59Z",
+    "registradas": 150,
+    "pendientes": 52,
+    "atendidas": 98,
+    "porcentajeResueltas": 65.3,
+    "mttrHoras": 24.5,
+    "vencidas": 7
+  },
+  "dashboardPorCategoria": [
+    {
+      "nombre": "Redes y Wi-Fi",
+      "valor": 38
+    },
+    {
+      "nombre": "Equipos de Cómputo",
+      "valor": 34
+    },
+    {
+      "nombre": "Soporte de Software",
+      "valor": 27
+    },
+    {
+      "nombre": "Electricidad",
+      "valor": 21
+    },
+    {
+      "nombre": "Mobiliario",
+      "valor": 16
+    },
+    {
+      "nombre": "Limpieza e Higiene",
+      "valor": 14
+    }
+  ],
+  "dashboardPorPrioridad": [
+    {
+      "nombre": "CRITICA",
+      "valor": 14
+    },
+    {
+      "nombre": "ALTA",
+      "valor": 52
+    },
+    {
+      "nombre": "MEDIA",
+      "valor": 61
+    },
+    {
+      "nombre": "BAJA",
+      "valor": 23
+    }
+  ],
+  "dashboardPorEstado": [
+    {
+      "nombre": "REGISTRADA",
+      "valor": 12,
+      "colorHex": "#6B7280"
+    },
+    {
+      "nombre": "EN_EVALUACION",
+      "valor": 8,
+      "colorHex": "#D97706"
+    },
+    {
+      "nombre": "ASIGNADA",
+      "valor": 25,
+      "colorHex": "#2563EB"
+    },
+    {
+      "nombre": "EN_ATENCION",
+      "valor": 7,
+      "colorHex": "#7C3AED"
+    },
+    {
+      "nombre": "RESUELTA",
+      "valor": 30,
+      "colorHex": "#059669"
+    },
+    {
+      "nombre": "CERRADA",
+      "valor": 68,
+      "colorHex": "#047857"
+    }
+  ],
+  "dashboardPorResponsable": [
+    {
+      "nombre": "Carlos Ruiz",
+      "valor": 18
+    },
+    {
+      "nombre": "Lucía Vega",
+      "valor": 11
+    }
+  ]
+}

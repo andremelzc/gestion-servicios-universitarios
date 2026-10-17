@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Dashboard · Servicios Universitarios</title>
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+  <main class="page" id="contenido" tabindex="-1">
+    <div class="page-head">
+      <h1>Dashboard</h1>
+      <p class="hint" id="periodo"></p>
+    </div>
+    <div id="estado"></div>
+    <div id="panel" class="stack" hidden>
+      <section aria-labelledby="titulo-kpis" class="stack">
+        <h2 class="sr-only" id="titulo-kpis">Indicadores</h2>
+        <div class="kpis" id="kpis"></div>
+      </section>
+      <section aria-labelledby="titulo-graficos" class="stack">
+        <h2 class="sr-only" id="titulo-graficos">Gráficos</h2>
+        <div class="charts" id="graficos"></div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="js/pages/dashboard.js"></script>
+</body>
+</html>

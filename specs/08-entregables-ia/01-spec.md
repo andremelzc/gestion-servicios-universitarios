@@ -36,7 +36,7 @@
 #### CA-1 — Entrada completa *(TS-10)*
 ```gherkin
 Dado un integrante que usó IA de forma significativa (código, prueba, arquitectura, documentación, seguridad)
-Cuando registra el uso en docs/04-gestion/ia-register.md
+Cuando registra el uso en su archivo personal de docs/04-gestion/ia-registro/
 Entonces la entrada tiene los campos: herramienta, prompt, resultado generado, ¿se utilizó? (Sí/No/Parcialmente), validación realizada, modificaciones, responsable y fecha
   Y la validación indica qué prueba o comprobación CONCRETA se hizo (no solo "se revisó")
   Y el prompt no contiene secretos ni datos personales reales

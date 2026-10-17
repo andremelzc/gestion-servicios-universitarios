@@ -1,32 +1,52 @@
-# React + TypeScript + Vite
+# Frontend — Gestión de Servicios Universitarios
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+SPA con React 18 + JavaScript (JSX), Vite y React Router. Estructura por _features_ según
+[Arquitectura técnica §4.2](../docs/02-diseno/arquitectura-tecnica.md#42-frontend-por-features).
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Node >= 20.19 y < 23 (el proyecto usa `engine-strict`) y npm.
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Comando                 | Qué hace                                                       |
+| :---------------------- | :------------------------------------------------------------- |
+| `npm run dev`           | Levanta la SPA en desarrollo (proxy `/api` → `localhost:8080`) |
+| `npm run build`         | Genera el paquete de producción en `dist/`                     |
+| `npm run preview`       | Sirve localmente el resultado de `build`                       |
+| `npm run lint`          | ESLint (react, react-hooks)                                    |
+| `npm run format`        | Prettier (escribe cambios); `format:check` solo verifica       |
+| `npm test`              | Vitest en modo único (`vitest run`)                            |
+| `npm run test:watch`    | Vitest en modo observador                                      |
+| `npm run test:coverage` | Vitest con cobertura v8 (falla bajo 50 %)                      |
 
-## Expanding the Oxlint configuration
+## Variables de entorno
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+| Variable       | Valor por defecto | Descripción                                                                            |
+| :------------- | :---------------- | :------------------------------------------------------------------------------------- |
+| `VITE_API_URL` | `/api/v1`         | URL base de la API. Se fija en _build_. Ver `.env.example` y `src/services/config.js`. |
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+Copia `.env.example` a `.env` para personalizarla. En desarrollo, Vite reenvía `/api` a
+`http://localhost:8080` (`vite.config.js`); en producción lo hace Nginx.
+
+## Estructura
+
+```
+src/
+├── app/          App.jsx, router.jsx (mapa de rutas), providers.jsx, NotFoundPage.jsx
+├── components/   ui/ (componentes reutilizables), layout/ (AppShell, rutas protegidas)
+├── features/     auth · solicitudes · gestion · dashboard · admin  (pages/ en cada una)
+├── services/     config.js (VITE_API_URL); apiClient y *.api.js por recurso
+├── styles/       base.css (reglas base neutras); tokens.css pendiente
+└── test/         setup.js (jest-dom, MSW) y server.js (servidor MSW)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Todas las rutas del [mapa de UX](../docs/01-definicion/ux-ui-prototipo.md) existen como
+_placeholder_. La protección por sesión y rol (`ProtectedRoute`/`RoleRoute`) se agrega en un issue posterior.
+
+## Pruebas
+
+Vitest + Testing Library (jsdom) + MSW. `src/test/setup.js` levanta el servidor MSW con
+`onUnhandledRequest: 'error'`: toda petición sin _handler_ falla la prueba. Los _handlers_
+por recurso se agregan en `src/test/server.js` o con `server.use(...)` en cada prueba.
+Los nombres de las pruebas citan el criterio: `[BASE-04 CA-n] ...`.

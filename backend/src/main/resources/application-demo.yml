@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:30000}
+  flyway:
+    user: ${FLYWAY_USER:${DB_USER:app_servicios}}
+    password: ${FLYWAY_PASSWORD:${DB_PASSWORD:dev_app_password}}
+
+app:
+  demo:
+    user-password: ${DEMO_USER_PASSWORD}
+    solicitudes:
+      cantidad: ${DEMO_SOLICITUDES:200}

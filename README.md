@@ -71,7 +71,7 @@ El curso fijó **dos únicas presentaciones**: la de la **semana 8 (17/10/2026)*
 
 ## 🤖 Uso responsable de IA
 
-Todo uso significativo de IA se registra en [`docs/04-gestion/ia-register.md`](docs/04-gestion/ia-register.md) con prompt, resultado, validación y modificaciones. La IA es una herramienta de ingeniería, no un sustituto del aprendizaje.
+Todo uso significativo de IA se registra en el archivo personal de cada rol dentro de [`docs/04-gestion/ia-registro/`](docs/04-gestion/ia-register.md#7-bitácora-de-entradas-reales) (reglas en [`ia-register.md`](docs/04-gestion/ia-register.md)) con prompt, resultado, validación y modificaciones. La IA es una herramienta de ingeniería, no un sustituto del aprendizaje.
 
 ## 🤝 Cómo contribuir
 

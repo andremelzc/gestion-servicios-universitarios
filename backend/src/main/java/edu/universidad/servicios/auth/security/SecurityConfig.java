@@ -23,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -43,12 +44,14 @@ public class SecurityConfig {
                         "/api/v1/auth/registro",
                         "/api/v1/auth/recuperar-password",
                         "/api/v1/auth/restablecer-password",
-                        "/actuator/health"
+                        "/actuator",
+                        "/actuator/**"
                 ).permitAll()
                 // Swagger (se debería limitar en prod)
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Reglas RBAC
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/dashboard/**").hasAnyRole("TECNICO", "SUPERVISOR", "ADMIN")
                 // Todo lo demás autenticado
                 .anyRequest().authenticated()
             )

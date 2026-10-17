@@ -6,8 +6,13 @@ on:
       - 'v*' # Se ejecuta automáticamente cuando creas un tag de versión, ej: v1.0.0
 
 jobs:
+  ci:
+    name: Pruebas (CI)
+    uses: ./.github/workflows/ci.yml
+
   deploy-render:
     name: Desplegar Backend a Render
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -23,13 +28,25 @@ jobs:
 
   deploy-vercel:
     name: Desplegar Frontend a Vercel
+    needs: [ci]
     runs-on: ubuntu-latest
     environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - name: Aviso de Vercel
-        run: |
-          echo "Vercel intercepta automáticamente los tags y commits a main."
-          echo "El despliegue del frontend ya está siendo gestionado por la integración nativa de Vercel con GitHub."
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Vercel CLI
+        run: npm i -g vercel
+      - name: Vercel pull
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   smoke-test:
     name: Smoke Test (Salud del Backend)

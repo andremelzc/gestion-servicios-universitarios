@@ -8,11 +8,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
         # EXCLUSIÓN ESTRICTA: No exponer env, loggers, ni otros datos sensibles en prod
   endpoint:
     health:
       show-details: never # Ocultar detalles del disco y BD al público
+  tracing:
+    sampling:
+      probability: 0.1
 
 springdoc:
   api-docs:

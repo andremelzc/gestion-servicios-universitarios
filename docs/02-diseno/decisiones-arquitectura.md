@@ -185,7 +185,7 @@ Todas las contradicciones detectadas al analizar la documentación inicial y la 
 | 14 | XSS en entradas | "Sanitizar" vs "rechazar con 400" | **Rechazar** con 400 | ADR-005, RN-18 |
 | 15 | Carga de prueba | 50/100/500 VU vs 100/500/1000; RNF-02 con 50 | Escalonado 50 → 100 → 300 → 500 VU; RNF-02 se mide a 50 VU | [Pruebas §8](../03-calidad-y-operacion/estrategia-pruebas.md#8-pruebas-de-carga-y-estrés) |
 | 16 | Quién ve el dashboard | Técnico con KPIs propios vs solo supervisor/admin | Técnico ve **sus** KPIs | API §3.4, RN-16 |
-| 17 | Archivo del registro de IA | `docs/04-gestion/ia-register.md` vs `docs/REGISTRO_IA.md` | `docs/04-gestion/ia-register.md` | [Registro de IA](../04-gestion/ia-register.md) |
+| 17 | Archivo del registro de IA | `docs/04-gestion/ia-register.md` vs `docs/REGISTRO_IA.md` | `docs/04-gestion/ia-register.md` (reglas) + un archivo por rol en `docs/04-gestion/ia-registro/` (bitácora, para evitar conflictos de _merge_) | [Registro de IA](../04-gestion/ia-register.md) |
 | 18 | Evidencia de solución | Obligatoria (arquitectura) vs solo informe (spec 03) | **Informe + ≥ 1 evidencia** | RN-12 |
 | 19 | Descripción de "pendientes" en dashboard | JPQL incluía `RECHAZADA`/`CANCELADA` como pendientes | Definición explícita de 4 estados | RN-11 |
 | 20 | Semanas del proyecto | "16 semanas" desde el 5/10 pero hito en "semana 10" el 31/10 | 16 semanas = ciclo del curso (24/08–12/12); el proyecto se ejecuta desde la semana 7. **Actualización 03/10:** el curso fijó solo dos presentaciones (17/10 y 14/11) | [Calendario §1](../04-gestion/calendario-y-contingencia.md#1-calendario-y-hitos) |

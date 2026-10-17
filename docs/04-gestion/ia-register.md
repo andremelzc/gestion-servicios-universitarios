@@ -7,15 +7,15 @@
 
 ## 1. ¿Qué se registra?
 
-Se registra **todo uso significativo** de IA. Es *significativo* si el resultado se incorporó (total o parcialmente) o influyó en una decisión de **código, pruebas, arquitectura, especificación, documentación, seguridad o despliegue**.
+Se registra **todo uso significativo** de IA. Es _significativo_ si el resultado se incorporó (total o parcialmente) o influyó en una decisión de **código, pruebas, arquitectura, especificación, documentación, seguridad o despliegue**.
 
-| Se registra | No hace falta registrar |
-|:---|:---|
-| Código, consultas SQL, configuraciones, *workflows* generados o modificados con IA | Corrector ortográfico o autocompletado trivial de una línea |
-| Pruebas generadas o escenarios BDD propuestos/revisados por IA | Preguntas puntuales de sintaxis cuyo resultado no se usa |
-| Borradores de documentación, ADRs, planes o informes | Búsquedas de documentación sin generar contenido |
-| Revisión de seguridad o de arquitectura asistida por IA | |
-| Diseño (textos de interfaz, ideas de UX) generado con IA | |
+| Se registra                                                                       | No hace falta registrar                                     |
+| :-------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| Código, consultas SQL, configuraciones,_workflows_ generados o modificados con IA | Corrector ortográfico o autocompletado trivial de una línea |
+| Pruebas generadas o escenarios BDD propuestos/revisados por IA                    | Preguntas puntuales de sintaxis cuyo resultado no se usa    |
+| Borradores de documentación, ADRs, planes o informes                              | Búsquedas de documentación sin generar contenido            |
+| Revisión de seguridad o de arquitectura asistida por IA                           |                                                             |
+| Diseño (textos de interfaz, ideas de UX) generado con IA                          |                                                             |
 
 **Regla de oro:** en la duda, se registra.
 
@@ -23,19 +23,19 @@ Se registra **todo uso significativo** de IA. Es *significativo* si el resultado
 
 Son los campos exigidos por el enunciado, más número y fecha para trazabilidad.
 
-| Campo | Qué escribir |
-|:---|:---|
-| **N°** | Correlativo (01, 02, …) |
-| **Herramienta** | Nombre y versión/modelo (Copilot, ChatGPT-4o, Claude…) |
-| **Prompt** | El prompt **real** (resumido si es muy largo). **Sin secretos ni datos personales** |
-| **Resultado generado** | Qué produjo: código, prueba, arquitectura, BDD, texto… |
-| **¿Se utilizó?** | `Sí` · `No` · `Parcialmente` (indicar qué parte) |
+| Campo                    | Qué escribir                                                                                                                             |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| **N°** | Con prefijo de rol y correlativo propio: `R5-01`, `R5-02`, … |
+| **Herramienta**          | Nombre y versión/modelo (Copilot, ChatGPT-4o, Claude…)                                                                                   |
+| **Prompt**               | El prompt**real** (resumido si es muy largo). **Sin secretos ni datos personales**                                                       |
+| **Resultado generado**   | Qué produjo: código, prueba, arquitectura, BDD, texto…                                                                                   |
+| **¿Se utilizó?**         | `Sí` · `No` · `Parcialmente` (indicar qué parte)                                                                                         |
 | **Validación realizada** | Cómo se comprobó: ejecución de pruebas, revisión línea a línea, prueba manual, comparación con la documentación oficial, pasada de SAST… |
-| **Modificaciones** | Qué se cambió respecto a lo generado (número y descripción) |
-| **Responsable** | Rol e integrante que lo usó y responde por el resultado |
-| **Fecha** | `AAAA-MM-DD` |
+| **Modificaciones**       | Qué se cambió respecto a lo generado (número y descripción)                                                                              |
+| **Responsable**          | Rol e integrante que lo usó y responde por el resultado                                                                                  |
+| **Fecha**                | `AAAA-MM-DD`                                                                                                                             |
 
-> *Una entrada sin validación concreta no es válida: "se revisó" no basta; debe indicar **qué** prueba o comprobación se hizo.*
+> _Una entrada sin validación concreta no es válida: "se revisó" no basta; debe indicar **qué** prueba o comprobación se hizo._
 
 ---
 
@@ -51,27 +51,27 @@ Son los campos exigidos por el enunciado, más número y fecha para trazabilidad
 
 ## 4. Proceso y auditoría
 
-| Cuándo | Qué | Quién |
-|:---|:---|:---|
-| Al usar IA | Registrar **inmediatamente** (no al final) | Quien la usó |
-| En cada PR | Marcar "¿Se usó IA?" y enlazar la entrada (N°) en la descripción | Autor del PR |
-| Cada semana (15 min en la *review*) | Auditar entradas: ¿completas? ¿validaciones reales? ¿faltan usos evidentes? | Rol 6 |
-| Cierre de cada fase | Resumen de usos y lecciones aprendidas | Rol 1 |
-| Antes de la sustentación | Revisión final del registro y de las estadísticas (§6) | Todos |
+| Cuándo                             | Qué                                                                         | Quién        |
+| :--------------------------------- | :-------------------------------------------------------------------------- | :----------- |
+| Al usar IA                         | Registrar **inmediatamente** (no al final) en **tu archivo personal** (§7)                                   | Quien la usó |
+| En cada PR                         | Marcar "¿Se usó IA?" y enlazar la entrada (N°) en la descripción            | Autor del PR |
+| Cada semana (15 min en la*review*) | Auditar entradas: ¿completas? ¿validaciones reales? ¿faltan usos evidentes? | Rol 6        |
+| Cierre de cada fase                | Resumen de usos y lecciones aprendidas                                      | Rol 1        |
+| Antes de la sustentación           | Revisión final del registro y de las estadísticas (§6)                      | Todos        |
 
 ## 5. Áreas de uso esperadas (alineadas con el enunciado)
 
 El enunciado menciona desarrollo asistido (Copilot), generación de pruebas con IA, seguridad al usar IA y revisión de escenarios con IA. Se espera evidencia de cada una:
 
-| Área | Ejemplos de uso legítimo | Entradas mínimas esperadas |
-|:---|:---|:---:|
-| **Especificación** | Revisar la completitud de escenarios BDD; proponer casos de borde; detectar contradicciones entre documentos | ≥ 3 |
-| **Diseño/arquitectura** | Contrastar alternativas (ADRs); detectar riesgos | ≥ 2 |
-| **Desarrollo asistido** | Autocompletado de código, *boilerplate*, refactorización | ≥ 5 |
-| **Pruebas** | Generar esqueletos de pruebas unitarias/API, datos de prueba, scripts k6 — con la [lista de verificación](../03-calidad-y-operacion/estrategia-pruebas.md#102-lista-de-verificación-de-una-prueba-generada-por-ia) | ≥ 5 |
-| **Seguridad** | Revisar código contra OWASP, interpretar hallazgos de SAST/DAST (sin exponer secretos) | ≥ 2 |
-| **DevOps** | Dockerfiles, *workflows*, configuración de Nginx/Prometheus | ≥ 2 |
-| **Documentación** | Borradores de manuales e informes, revisados por humanos | ≥ 2 |
+| Área                    | Ejemplos de uso legítimo                                                                                                                                                                                          | Entradas mínimas esperadas |
+| :---------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------: |
+| **Especificación**      | Revisar la completitud de escenarios BDD; proponer casos de borde; detectar contradicciones entre documentos                                                                                                      |            ≥ 3             |
+| **Diseño/arquitectura** | Contrastar alternativas (ADRs); detectar riesgos                                                                                                                                                                  |            ≥ 2             |
+| **Desarrollo asistido** | Autocompletado de código,_boilerplate_, refactorización                                                                                                                                                           |            ≥ 5             |
+| **Pruebas**             | Generar esqueletos de pruebas unitarias/API, datos de prueba, scripts k6 — con la[lista de verificación](../03-calidad-y-operacion/estrategia-pruebas.md#102-lista-de-verificación-de-una-prueba-generada-por-ia) |            ≥ 5             |
+| **Seguridad**           | Revisar código contra OWASP, interpretar hallazgos de SAST/DAST (sin exponer secretos)                                                                                                                            |            ≥ 2             |
+| **DevOps**              | Dockerfiles,_workflows_, configuración de Nginx/Prometheus                                                                                                                                                        |            ≥ 2             |
+| **Documentación**       | Borradores de manuales e informes, revisados por humanos                                                                                                                                                          |            ≥ 2             |
 
 Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que cada entrada tenga validación real.
 
@@ -79,24 +79,38 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 
 ## 6. Resumen estadístico (actualizar al cerrar cada fase)
 
+> Las cifras se calculan sumando las entradas de los seis archivos de la §7.
+
 | Fase | Entradas | `Sí` | `Parcialmente` | `No` | Con prueba/validación automatizada | Lecciones principales |
-|:---|:---:|:---:|:---:|:---:|:---:|:---|
-| I | 1 | 0 | 1 | 0 | 0 | *(completar)* |
-| II | | | | | | |
-| III | | | | | | |
-| IV | | | | | | |
+| :--- | :------: | :--: | :------------: | :--: | :--------------------------------: | :-------------------- |
+| I    |    4     |  2   |       2        |  0   |                 2                  | _(completar)_         |
+| II   |          |      |                |      |                                    |                       |
+| III  |          |      |                |      |                                    |                       |
+| IV   |          |      |                |      |                                    |                       |
 
 ---
 
 ## 7. Bitácora de entradas reales
 
-> Entradas **reales** del equipo. (Los ejemplos de formato están en §8 y **no** cuentan como registros.)
+> La bitácora está **repartida por rol**: cada integrante registra sus usos en **su propio archivo** y no edita el de los demás. Así dos PR nunca modifican el mismo `.md` y se evitan los conflictos de _merge_. Los ejemplos de formato (§8) **no** cuentan como registros.
 
-| N° | Herramienta | Prompt utilizado | Resultado generado | ¿Se utilizó? | Validación realizada | Modificaciones realizadas | Responsable | Fecha |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| **01** | Claude Code (Claude Sonnet 5.5) | *"Necesito que analices toda la documentación respecto a lo que se pide en [el PDF del proyecto del curso]"* y, tras el diagnóstico: *"Sí, tiene que ser una muy buena documentación, tiene que estar todo muy bien documentado"* (+ aclaración: *"solo quiero la documentación"*) | (a) Informe de brechas y contradicciones entre el enunciado y la documentación inicial; (b) reescritura y ampliación de la documentación: documento del proyecto, SRS 2.0, arquitectura, modelo de datos, API REST, ADRs, seguridad/OWASP, DevOps, observabilidad, estrategia de pruebas, UX/UI, roadmap, equipo, gobernanza, registro de IA, entregables; migraciones SQL `V1`/`V2` | **Parcialmente** — pendiente de adopción tras revisión del equipo | Cotejo del enunciado con cada documento; verificación mecánica de enlaces internos y anclas. **Pendiente (no realizado):** revisión humana documento por documento; ejecución de `V1`/`V2` contra MySQL 8.0 real (**el SQL no se ha probado**, Docker no estaba disponible); confirmación de supuestos (equipo de 6, calendario semanas 7–16, dominio de correo, nube) | *(completar tras la revisión: número y descripción de cambios)* | Integrante que ejecutó la sesión (usuario Git `andremelzc`) — *confirmar rol* | 2026-10-03 |
-| *02* | | | | | | | | |
-| *03* | | | | | | | | |
+| Rol | Archivo | Entradas |
+|:---|:---|:--:|
+| R1 · Tech Lead / Scrum Master | [`ia-registro/r1-tech-lead.md`](ia-registro/r1-tech-lead.md) | 1 |
+| R2 · Backend 1 | [`ia-registro/r2-backend-1.md`](ia-registro/r2-backend-1.md) | 1 |
+| R3 · Backend 2 / DBA | [`ia-registro/r3-backend-2-dba.md`](ia-registro/r3-backend-2-dba.md) | 1 |
+| R4 · Frontend 1 | [`ia-registro/r4-frontend-1.md`](ia-registro/r4-frontend-1.md) | 0 |
+| R5 · Frontend 2 | [`ia-registro/r5-frontend-2.md`](ia-registro/r5-frontend-2.md) | 6 |
+| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 0 |
+
+**Reglas de uso**
+
+1. Añade tus filas **al final de la tabla de tu archivo**, con el N° `R<n>-NN` siguiente al último que tengas.
+2. En el PR, enlaza la entrada (por ejemplo `R5-03`) en la casilla de IA de la plantilla.
+3. Las columnas «Entradas» de arriba se actualizan al cerrar cada fase (junto con §6), no en cada PR; así esta tabla tampoco genera conflictos.
+4. Las entradas migradas del registro único conservan su N° anterior entre paréntesis («antes N° 03») para no perder la trazabilidad con PR y comentarios previos.
+
+**Documento único del grupo.** Para la entrega o la auditoría, el registro del grupo es la unión de los seis archivos: este documento (reglas) más las seis tablas en orden R1 → R6. Se junta al cierre de cada fase y antes de la sustentación; no hace falta mantener una copia consolidada en el repositorio entre entregas.
 
 ---
 
@@ -104,17 +118,17 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 
 Se conservan como guía de cuánto detalle se espera. **No** deben contarse en las estadísticas ni presentarse como evidencia del equipo; están fechados a propósito como `AAAA-MM-DD`.
 
-| N° | Herramienta | Prompt utilizado | Resultado generado | ¿Se utilizó? | Validación realizada | Modificaciones realizadas | Responsable | Fecha |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| *Ej-A* | GitHub Copilot | *"Escribir prueba unitaria JUnit 5 y Mockito para `SolicitudWorkflowService.resolver` verificando que solo se permita pasar a `RESUELTA` si la solicitud estaba en `EN_ATENCION`."* | Clase de prueba con mocks de repositorio y aserción de `TransicionInvalidaException`. | Sí (parcialmente) | Ejecución `mvn test -Dtest=SolicitudWorkflowServiceTest`; se rompió a propósito la regla en el servicio y la prueba **falló** (verifica que detecta el defecto). | 3: se alinearon nombres con el enum `EstadoSolicitud`; se añadió aserción sobre el guardado del historial; se eliminó un *mock* innecesario. | Rol 2 | AAAA-MM-DD |
-| *Ej-B* | ChatGPT (modelo indicado) | *"Genera un hook `useFetch` con estados loading/error y cancelación con `AbortController`."* | Hook en JavaScript con `useEffect` y cancelación. | Sí (parcialmente) | Pruebas con Testing Library de carga, error y desmontaje (sin fugas); revisión línea a línea. | 2: se integró con el `apiClient` centralizado (interceptor JWT); se añadió manejo de 401/403. | Rol 4 | AAAA-MM-DD |
+| N°     | Herramienta               | Prompt utilizado                                                                                                                                                                    | Resultado generado                                                                   | ¿Se utilizó?      | Validación realizada                                                                                                                                            | Modificaciones realizadas                                                                                                                   | Responsable | Fecha      |
+| :----- | :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :---------- | :--------- |
+| _Ej-A_ | GitHub Copilot            | _"Escribir prueba unitaria JUnit 5 y Mockito para `SolicitudWorkflowService.resolver` verificando que solo se permita pasar a `RESUELTA` si la solicitud estaba en `EN_ATENCION`."_ | Clase de prueba con mocks de repositorio y aserción de`TransicionInvalidaException`. | Sí (parcialmente) | Ejecución`mvn test -Dtest=SolicitudWorkflowServiceTest`; se rompió a propósito la regla en el servicio y la prueba **falló** (verifica que detecta el defecto). | 3: se alinearon nombres con el enum`EstadoSolicitud`; se añadió aserción sobre el guardado del historial; se eliminó un _mock_ innecesario. | Rol 2       | AAAA-MM-DD |
+| _Ej-B_ | ChatGPT (modelo indicado) | _"Genera un hook `useFetch` con estados loading/error y cancelación con `AbortController`."_                                                                                        | Hook en JavaScript con`useEffect` y cancelación.                                     | Sí (parcialmente) | Pruebas con Testing Library de carga, error y desmontaje (sin fugas); revisión línea a línea.                                                                   | 2: se integró con el`apiClient` centralizado (interceptor JWT); se añadió manejo de 401/403.                                                | Rol 4       | AAAA-MM-DD |
 
 ---
 
 ## 9. Plantilla para copiar
 
 ```markdown
-| NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
+| R<n>-NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
 ```
 
 ## 10. Reflexión final (se completa en la Fase IV)

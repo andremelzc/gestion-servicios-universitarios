@@ -14,18 +14,18 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 1.1 | `backend/Dockerfile` multi-stage con capas, usuario no root y `HEALTHCHECK` | TS-01 | CA-3 |
-| [ ] | 1.2 | `frontend/Dockerfile` multi-stage (Node → Nginx) con `VITE_API_URL` como `ARG` | TS-01 | CA-1 |
-| [ ] | 1.3 | `docker-compose.yml` base (db, backend, frontend) con `depends_on: condition: service_healthy`, volúmenes y `restart` | TS-01 | CA-1, CA-2 |
-| [ ] | 1.4 | Overrides `dev` (puertos abiertos) y `prod` (sin puerto de BD, límites de recursos) | TS-01 | CA-3 |
-| [ ] | 1.5 | `frontend/nginx/default.conf`: proxy `/api/`, cabeceras, `limit_req`, `client_max_body_size`, `/actuator` bloqueado | TS-04 | CA-8, CA-9, CA-10 |
-| [ ] | 1.6 | Probar `docker compose up --build` en una máquina limpia | TS-01 | TC-033 (video/capturas) |
+| [x] | 1.1 | `backend/Dockerfile` multi-stage con capas, usuario no root y `HEALTHCHECK` | TS-01 | CA-3 |
+| [x] | 1.2 | `frontend/Dockerfile` multi-stage (Node → Nginx) con `VITE_API_URL` como `ARG` | TS-01 | CA-1 |
+| [x] | 1.3 | `docker-compose.yml` base (db, backend, frontend) con `depends_on: condition: service_healthy`, volúmenes y `restart` | TS-01 | CA-1, CA-2 |
+| [x] | 1.4 | Overrides `dev` (puertos abiertos) y `prod` (sin puerto de BD, límites de recursos) | TS-01 | CA-3 |
+| [x] | 1.5 | `frontend/nginx/default.conf`: proxy `/api/`, cabeceras, `limit_req`, `client_max_body_size`, `/actuator` bloqueado | TS-04 | CA-8, CA-9, CA-10 |
+| [x] | 1.6 | Probar `docker compose up --build` en una máquina limpia | TS-01 | TC-033 (video/capturas) |
 
 ## Fase 2 — Seguridad aplicativa · R1 / R6
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 2.1 | `application.yml` solo con `${VARIABLES}`; validación de arranque de `JWT_SECRET` | TS-04 | CA-5 |
+| [x] | 2.1 | `application.yml` solo con `${VARIABLES}`; validación de arranque de `JWT_SECRET` | TS-04 | CA-5 |
 | [ ] | 2.2 | `@Valid` en todos los endpoints POST/PUT y `GlobalExceptionHandler` (RFC 7807) | TS-04 | CA-6 |
 | [ ] | 2.3 | `@SinHtml` en todos los campos de texto libre; *payloads* de prueba | TS-04 | CA-6 (TC-011) |
 | [ ] | 2.4 | CORS global por `ALLOWED_ORIGINS` en Spring Security | TS-04 | CA-7 |
@@ -37,16 +37,16 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 3.1 | `ci.yml`: jobs `backend`, `frontend`, `docker-build`; **sin** el atajo "omitir si no existe" ([diagnóstico](../../docs/03-calidad-y-operacion/devops-despliegue.md#44-estado-actual-del-ci-diagnóstico-y-pendientes)) | TS-02 | CA-11 |
-| [ ] | 3.2 | JaCoCo con umbral de 70 % global y Vitest coverage | TS-02 | CA-12 |
-| [ ] | 3.3 | Caché de Maven y npm (`cache: npm`); `npm test` = `vitest run` | TS-02 | Tiempos de CI |
-| [ ] | 3.4 | Reglas de protección: checks requeridos `backend`, `frontend`, `security` | TS-02 | CA-11 |
+| [x] | 3.1 | `ci.yml`: jobs `backend`, `frontend`, `docker-build`; **sin** el atajo "omitir si no existe" ([diagnóstico](../../docs/03-calidad-y-operacion/devops-despliegue.md#44-estado-actual-del-ci-diagnóstico-y-pendientes)) | TS-02 | CA-11 |
+| [x] | 3.2 | JaCoCo con umbral de 70 % global y Vitest coverage | TS-02 | CA-12 |
+| [x] | 3.3 | Caché de Maven y npm (`cache: npm`); `npm test` = `vitest run` | TS-02 | Tiempos de CI |
+| [x] | 3.4 | Reglas de protección: checks requeridos `backend`, `frontend`, `security` | TS-02 | CA-11 |
 
 ## Fase 4 — SAST/DAST y dependencias · R6
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 4.1 | `security.yml`: CodeQL y gitleaks (Dependabot cubre las dependencias) | TS-08 | CA-16, CA-17 (PR de prueba bloqueado) |
+| [x] | 4.1 | `security.yml`: CodeQL y gitleaks (Dependabot cubre las dependencias) | TS-08 | CA-16, CA-17 (PR de prueba bloqueado) |
 | [ ] | 4.2 | `.zap/rules.tsv` y job ZAP baseline tras desplegar a *staging* | TS-08 | CA-18 |
 
 ## Fase 5 — CD y cloud · R1 / R6

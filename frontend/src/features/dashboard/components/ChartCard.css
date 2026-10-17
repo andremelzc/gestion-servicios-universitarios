@@ -1,0 +1,91 @@
+.chart-card {
+  min-width: 0;
+  padding: var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 1px 2px rgb(17 24 39 / 8%);
+  color: var(--color-text, #111827);
+}
+
+.chart-card__titulo {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: 1.25rem;
+}
+
+.chart-card__vacio {
+  margin: 0;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.chart-card__grafico {
+  width: 100%;
+  min-width: 0;
+}
+
+.chart-card__leyenda {
+  display: grid;
+  gap: var(--space-2, 8px);
+  margin: var(--space-3, 12px) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-card__leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  font-size: 0.875rem;
+}
+
+.chart-card__muestra {
+  flex: none;
+}
+
+.chart-card__valor {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.chart-card__boton {
+  min-height: 44px;
+  padding: 0 var(--space-4, 16px);
+  background: transparent;
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.chart-card__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.chart-card__tabla-contenedor {
+  margin-top: var(--space-3, 12px);
+  overflow-x: auto;
+}
+
+.chart-card__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.chart-card__tabla caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--space-2, 8px);
+}
+
+.chart-card__tabla th,
+.chart-card__tabla td {
+  padding: var(--space-2, 8px);
+  border-bottom: 1px solid var(--color-border, #d1d5db);
+  text-align: left;
+}
+
+.chart-card__tabla .chart-card__col-numerica {
+  text-align: right;
+}
