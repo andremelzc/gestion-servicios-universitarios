@@ -24,8 +24,8 @@ const USUARIO = {
 
 // Igual que App.jsx: las páginas pueden usar useAuth() (p. ej. /login, AUTH-16),
 // que exige el AuthProvider de Providers.
-const renderAt = (path) => {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+const renderAt = (entrada) => {
+  const router = createMemoryRouter(routes, { initialEntries: [entrada] });
   render(
     <Providers>
       <RouterProvider router={router} />
@@ -100,5 +100,15 @@ describe('router', () => {
 
     const boton = await screen.findByRole('button', { name: /juan pérez/i });
     expect(boton).toHaveTextContent('Estudiante');
+  });
+
+  it('[REG-17] la confirmación se muestra dentro del AppShell con el código', () => {
+    renderAt({
+      pathname: '/solicitudes/confirmacion',
+      state: { id: 150, codigo: 'SOL-2026-0150' },
+    });
+
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Registrada: SOL-2026-0150');
   });
 });
