@@ -219,7 +219,7 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 | 7 | **Historias de usuario** | [SRS §6.2](../01-definicion/especificaciones-tecnicas.md#62-historias-de-usuario-y-su-división) (10 HU divididas en 29 US + 12 historias técnicas) | ✅ |
 | 8 | **Criterios de aceptación** | `specs/*/01-spec.md` (escenarios BDD en Gherkin) — [índice](../../specs/README.md) | ✅ |
 | 9 | **Arquitectura preliminar** | [Arquitectura técnica](../02-diseno/arquitectura-tecnica.md) · [Modelo de datos](../02-diseno/modelo-datos.md) · [ADRs](../02-diseno/decisiones-arquitectura.md) | ✅ |
-| 10 | **Wireframes / mockups** | Wireframes: [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad). Mockups de alta fidelidad: Figma (TASK-003, 09/10) | ⚠️ wireframes ✅ · mockups ⏳ |
+| 10 | **Wireframes / mockups** | Wireframes: [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad) + [Figma 04-Wireframes](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177). Mockups de alta fidelidad: Figma (TASK-003, 09/10) | ⚠️ wireframes ✅ · mockups ⏳ |
 | 11 | **Prototipo** | Prototipo clicable en Figma (TASK-003) y maqueta HTML/CSS/JS ([UX §6](../01-definicion/ux-ui-prototipo.md#6-prototipo-y-desarrollo-de-la-fase-i), TASK-033) | ⏳ |
 | 12 | **Evidencia del primer desarrollo** | Repositorio con la maqueta funcionando, esquema `V1`/`V2`, y el primer tramo del backend/CI (TASK-001, 002, 004, 033) | ⏳ |
 
@@ -247,7 +247,7 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 - [x] **Specs** (spec → plan → tareas por módulo) → [`specs/`](../../specs/README.md)
 
 #### 7.2.3 UI/UX
-- [x] Wireframes → UX §5
+- [x] Wireframes → [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad) + [Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177)
 - [ ] Mockups → Figma (TASK-003)
 - [ ] Prototipo → Figma + maqueta (TASK-003, 033)
 - [ ] HTML DOM y CSS → maqueta (TASK-033)
