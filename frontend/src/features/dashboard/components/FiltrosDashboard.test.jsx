@@ -129,3 +129,57 @@ describe('FiltrosDashboard', () => {
     });
   });
 });
+
+describe('FiltrosDashboard · filtro Área (RN-16, solo ADMIN)', () => {
+  const AREAS = [
+    { id: 1, nombre: 'Tecnología' },
+    { id: 2, nombre: 'Infraestructura' },
+  ];
+
+  it('[DASH-15 CA-4] sin la prop `areas` no hay selector de Área', () => {
+    render(<FiltrosDashboard onAplicar={() => {}} />);
+
+    expect(screen.queryByLabelText('Área')).not.toBeInTheDocument();
+  });
+
+  it('[DASH-15 CA-4] con `areas` muestra un selector con "Todas las áreas" y cada área', () => {
+    render(<FiltrosDashboard onAplicar={() => {}} areas={AREAS} />);
+
+    const selector = screen.getByLabelText('Área');
+    expect(selector).toHaveValue('');
+    expect(Array.from(selector.options).map((o) => o.textContent)).toEqual([
+      'Todas las áreas',
+      'Tecnología',
+      'Infraestructura',
+    ]);
+  });
+
+  it('[DASH-15 CA-4] Aplicar entrega `idArea` numérico, o cadena vacía con "Todas las áreas"', async () => {
+    const alAplicar = vi.fn();
+    render(<FiltrosDashboard onAplicar={alAplicar} areas={AREAS} />);
+
+    await userEvent.selectOptions(screen.getByLabelText('Área'), 'Infraestructura');
+    await aplicar();
+    expect(alAplicar).toHaveBeenLastCalledWith({ desde: '', hasta: '', idArea: 2 });
+
+    await userEvent.selectOptions(screen.getByLabelText('Área'), 'Todas las áreas');
+    await aplicar();
+    expect(alAplicar).toHaveBeenLastCalledWith({ desde: '', hasta: '', idArea: '' });
+  });
+
+  it('[DASH-15 CA-4] si las áreas no cargaron avisa con un alert y el formulario sigue operativo', () => {
+    render(
+      <FiltrosDashboard
+        onAplicar={() => {}}
+        areas={[]}
+        errorAreas="No se pudieron cargar las áreas."
+      />,
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent('No se pudieron cargar las áreas.');
+    expect(screen.getByLabelText('Área')).toHaveAccessibleDescription(
+      expect.stringContaining('No se pudieron cargar las áreas.'),
+    );
+    expect(screen.getByRole('button', { name: 'Aplicar' })).toBeEnabled();
+  });
+});

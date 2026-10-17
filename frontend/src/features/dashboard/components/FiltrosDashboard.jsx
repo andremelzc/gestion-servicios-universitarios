@@ -19,15 +19,20 @@ function hoyLocal() {
  * `onAplicar({ desde, hasta })` con cadenas vacías cuando falta una fecha; así las resuelve el
  * backend (DashboardService): sin ninguna, los últimos 30 días; solo `hasta`, los 30 días que
  * terminan ese día (`desde = hasta - 29`); solo `desde`, hasta hoy.
+ *
+ * Filtro Área (RN-16): solo aparece si el padre pasa `areas` (arreglo `{ id, nombre }`), cosa que
+ * hace únicamente para ADMIN. `errorAreas` es el aviso si la lista no pudo cargarse.
  */
-export default function FiltrosDashboard({ onAplicar }) {
+export default function FiltrosDashboard({ onAplicar, areas, errorAreas }) {
   const id = useId();
   const desdeRef = useRef(null);
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
+  const [idArea, setIdArea] = useState('');
   const [error, setError] = useState(null);
   const pistaId = `${id}-pista`;
   const errorId = `${id}-error`;
+  const errorAreasId = `${id}-error-areas`;
   const descripcion = error ? `${pistaId} ${errorId}` : pistaId;
   const hoy = hoyLocal();
 
@@ -39,7 +44,10 @@ export default function FiltrosDashboard({ onAplicar }) {
       return;
     }
     setError(null);
-    onAplicar({ desde, hasta });
+    // `idArea` solo viaja si el selector existe (ADMIN, RN-16); el resto de roles nunca lo envía.
+    onAplicar(
+      areas ? { desde, hasta, idArea: idArea === '' ? '' : Number(idArea) } : { desde, hasta },
+    );
   }
 
   return (
@@ -75,12 +83,35 @@ export default function FiltrosDashboard({ onAplicar }) {
           aria-describedby={descripcion}
         />
       </div>
+      {areas ? (
+        <div className="filtros-dashboard__campo">
+          <label htmlFor={`${id}-area`}>Área</label>
+          <select
+            id={`${id}-area`}
+            value={idArea}
+            onChange={(e) => setIdArea(e.target.value)}
+            aria-describedby={errorAreas ? errorAreasId : undefined}
+          >
+            <option value="">Todas las áreas</option>
+            {areas.map((area) => (
+              <option key={area.id} value={area.id}>
+                {area.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       <button type="submit" className="filtros-dashboard__boton">
         Aplicar
       </button>
       <p id={pistaId} className="filtros-dashboard__pista">
         {PISTA}
       </p>
+      {errorAreas ? (
+        <p id={errorAreasId} role="alert" className="filtros-dashboard__error">
+          {errorAreas}
+        </p>
+      ) : null}
       {error ? (
         <p id={errorId} role="alert" className="filtros-dashboard__error">
           {error}
