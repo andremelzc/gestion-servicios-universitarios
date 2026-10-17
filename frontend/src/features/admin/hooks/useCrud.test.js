@@ -35,6 +35,14 @@ function crearPuerta() {
   return { abierta, abrir };
 }
 
+// Con MSW los temporizadores falsos no pueden congelarse del todo: la capa de red también usa
+// `setTimeout`, así que sin `shouldAdvanceTime` ni siquiera termina la carga inicial. Se deja
+// que el reloj falso avance con el real (ticks de 20 ms) y los debounce de estas pruebas son de
+// 1000 ms: se comprueba "aún no aplicado" a mitad de camino (500 ms, muy lejos del borde aunque
+// el reloj derive unos ms) y "aplicado" tras completar el tiempo; nunca justo en el borde.
+const ESPERA = 1000;
+const MITAD = ESPERA / 2;
+
 const montar = (opciones, ruta = '/categorias') => renderHook(() => useCrud(ruta, opciones));
 const cargado = (result) => waitFor(() => expect(result.current.isLoading).toBe(false));
 const avanzar = (ms) =>
@@ -45,6 +53,8 @@ const avanzar = (ms) =>
 afterEach(() => vi.restoreAllMocks());
 
 describe('useCrud · listado', () => {
+  afterEach(() => vi.useRealTimers());
+
   it('carga la primera página (page=0, size=20) y expone el sobre paginado', async () => {
     const consultas = simularListado();
     const { result } = montar();
@@ -130,14 +140,14 @@ describe('useCrud · listado', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'], shouldAdvanceTime: true });
     const categorias = simularListado('/categorias');
     const areas = simularListado('/areas');
-    const { result, rerender } = renderHook(({ ruta }) => useCrud(ruta), {
+    const { result, rerender } = renderHook(({ ruta }) => useCrud(ruta, { debounceMs: ESPERA }), {
       initialProps: { ruta: '/categorias' },
     });
     await cargado(result);
     act(() => result.current.onIncludeInactiveChange(true));
     act(() => result.current.onPageChange(2));
     act(() => result.current.onSearchChange('wifi'));
-    avanzar(300);
+    avanzar(ESPERA);
     await waitFor(() => expect(result.current.appliedSearch).toBe('wifi'));
 
     rerender({ ruta: '/areas' });
@@ -147,7 +157,43 @@ describe('useCrud · listado', () => {
     await waitFor(() => expect(areas).toHaveLength(1));
     expect(areas[0]).toEqual({ page: '0', size: '20' });
     expect(categorias.length).toBeGreaterThan(0);
-    vi.useRealTimers();
+  });
+
+  it('con totalPages 0 y una página vacía vuelve a la página 0', async () => {
+    const consultas = [];
+    server.use(
+      http.get(`${BASE}/categorias`, ({ request }) => {
+        const page = Number(new URL(request.url).searchParams.get('page'));
+        consultas.push(page);
+        return HttpResponse.json(sobre([], { page, totalPages: 0 }));
+      }),
+    );
+    const { result } = montar();
+    await cargado(result);
+    act(() => result.current.onPageChange(3));
+    await waitFor(() => expect(consultas).toEqual([0, 3, 0]));
+    await cargado(result);
+    expect(result.current.page.page).toBe(0);
+  });
+
+  it('normaliza una respuesta que es un arreglo simple (catálogos) al sobre paginado', async () => {
+    server.use(http.get(`${BASE}/areas`, () => HttpResponse.json([{ id: 1 }, { id: 2 }])));
+    const { result } = montar(undefined, '/areas');
+    await cargado(result);
+    expect(result.current.data).toEqual([{ id: 1 }, { id: 2 }]);
+    expect(result.current.page).toEqual({ page: 0, size: 2, totalElements: 2, totalPages: 1 });
+
+    server.use(http.get(`${BASE}/areas`, () => HttpResponse.json([])));
+    act(() => result.current.refetch());
+    await waitFor(() => expect(result.current.page.totalPages).toBe(0));
+    expect(result.current.data).toEqual([]);
+  });
+
+  it('añade los parámetros con & si la ruta ya trae una consulta', async () => {
+    const consultas = simularListado('/categorias');
+    const { result } = montar(undefined, '/categorias?idArea=4');
+    await cargado(result);
+    expect(consultas[0]).toEqual({ idArea: '4', page: '0', size: '20' });
   });
 
   it('si la página pedida quedó vacía retrocede a la última con datos', async () => {
@@ -182,16 +228,16 @@ describe('useCrud · búsqueda con debounce', () => {
 
   it('aplica el último valor una sola vez, pasado el tiempo de espera', async () => {
     const consultas = simularListado();
-    const { result } = montar();
+    const { result } = montar({ debounceMs: ESPERA });
     await cargado(result);
 
     act(() => result.current.onSearchChange('a'));
     act(() => result.current.onSearchChange('ab'));
     act(() => result.current.onSearchChange('abc'));
     expect(result.current.search).toBe('abc');
-    avanzar(299);
+    avanzar(MITAD);
     expect(result.current.appliedSearch).toBe('');
-    avanzar(1);
+    avanzar(MITAD);
     expect(result.current.appliedSearch).toBe('abc');
 
     await cargado(result);
@@ -201,41 +247,41 @@ describe('useCrud · búsqueda con debounce', () => {
 
   it('al buscar vuelve a la página 0', async () => {
     const consultas = simularListado();
-    const { result } = montar();
+    const { result } = montar({ debounceMs: ESPERA });
     await cargado(result);
     act(() => result.current.onPageChange(2));
     await waitFor(() => expect(result.current.page.page).toBe(2));
 
     act(() => result.current.onSearchChange('wifi'));
-    avanzar(300);
+    avanzar(ESPERA);
     await waitFor(() => expect(consultas.at(-1)).toMatchObject({ page: '0', q: 'wifi' }));
   });
 
   it('recorta el texto, omite el parámetro si queda en blanco y respeta paramBusqueda', async () => {
     const consultas = simularListado();
-    const { result } = montar({ paramBusqueda: 'texto' });
+    const { result } = montar({ paramBusqueda: 'texto', debounceMs: ESPERA });
     await cargado(result);
 
     act(() => result.current.onSearchChange('  red  '));
-    avanzar(300);
+    avanzar(ESPERA);
     await waitFor(() => expect(consultas.at(-1)).toMatchObject({ texto: 'red' }));
     await cargado(result);
 
     act(() => result.current.onSearchChange('   '));
-    avanzar(300);
+    avanzar(ESPERA);
     await waitFor(() => expect(consultas.at(-1)).toEqual({ page: '0', size: '20' }));
   });
 
   it('si la búsqueda aplicada no cambia, no reinicia la página ni consulta de nuevo', async () => {
     const consultas = simularListado();
-    const { result } = montar();
+    const { result } = montar({ debounceMs: ESPERA });
     await cargado(result);
     act(() => result.current.onPageChange(1));
     await waitFor(() => expect(result.current.page.page).toBe(1));
     expect(consultas).toHaveLength(2);
 
     act(() => result.current.onSearchChange('   ')); // recortada: sigue siendo ''
-    avanzar(300);
+    avanzar(ESPERA);
     expect(result.current.page.page).toBe(1);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isRefreshing).toBe(false);
@@ -244,13 +290,14 @@ describe('useCrud · búsqueda con debounce', () => {
 
   it('no aplica nada si se desmonta antes de que venza el debounce', async () => {
     const consultas = simularListado();
-    const { result, unmount } = montar();
+    const { result, unmount } = montar({ debounceMs: ESPERA });
     await cargado(result);
 
     act(() => result.current.onSearchChange('x'));
+    expect(vi.getTimerCount()).toBe(1);
     unmount();
-    avanzar(1000);
     expect(vi.getTimerCount()).toBe(0);
+    avanzar(1000);
     expect(consultas).toHaveLength(1);
   });
 });

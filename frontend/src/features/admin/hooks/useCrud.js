@@ -13,6 +13,9 @@ import { apiClient } from '../../../services/apiClient.js';
 //   filtro. `/admin/usuarios` (§3.6) no tiene `incluirInactivos` sino `activo`; como la API no fija
 //   su valor por defecto, se asume que sin `activo` devuelve todos:
 //   `paramInactivos: (incluir) => (incluir ? {} : { activo: true })`.
+// - `ruta` puede traer ya una consulta (`?a=b`): los parámetros se añaden con `&`.
+// - Respuesta: el sobre de §2.3 o, para catálogos (§3.5 no lo precisa), un arreglo simple, que se
+//   normaliza a una única página.
 // - `filtros`: parámetros propios de la pantalla (p. ej. `{ idArea }`); se omiten los vacíos. Un
 //   cambio de su contenido vuelve a la página 0; cambiar `ruta` reinicia todo.
 //
@@ -31,6 +34,19 @@ const SIN_RESULTADO = { url: null, clave: null, data: [], page: null, error: nul
 
 const tieneValor = (valor) => valor !== undefined && valor !== null && valor !== '';
 
+// api-rest §3.5 no dice que los catálogos devuelvan el sobre de §2.3: un arreglo simple se
+// trata como una única página.
+function normalizarSobre(respuesta) {
+  if (!Array.isArray(respuesta)) return respuesta;
+  return {
+    content: respuesta,
+    page: 0,
+    size: respuesta.length,
+    totalElements: respuesta.length,
+    totalPages: respuesta.length ? 1 : 0,
+  };
+}
+
 function parametrosInactivos(paramInactivos, includeInactive) {
   if (typeof paramInactivos === 'function') return paramInactivos(includeInactive);
   return includeInactive ? { [paramInactivos]: true } : {};
@@ -46,7 +62,7 @@ function construirUrl(ruta, consulta, { size, paramBusqueda, paramInactivos, fil
   for (const [clave, valor] of Object.entries(extras)) {
     if (tieneValor(valor)) params.set(clave, String(valor));
   }
-  return `${ruta}?${params}`;
+  return `${ruta}${ruta.includes('?') ? '&' : '?'}${params}`;
 }
 
 export default function useCrud(ruta, opciones = {}) {
@@ -92,15 +108,15 @@ export default function useCrud(ruta, opciones = {}) {
     const controlador = new AbortController();
     apiClient
       .get(url, { signal: controlador.signal })
-      .then((sobre) => {
+      .then((respuesta) => {
         if (controlador.signal.aborted) return;
+        const sobre = normalizarSobre(respuesta);
         const { page, size: tamano, totalElements, totalPages } = sobre;
         const data = sobre.content ?? [];
-        // Página vacía tras borrar o filtrar: se retrocede a la última con datos.
-        if (data.length === 0 && page > 0 && totalPages > 0 && totalPages - 1 < page) {
-          setConsulta((actual) =>
-            actual.page === page ? { ...actual, page: totalPages - 1 } : actual,
-          );
+        // Página vacía tras borrar o filtrar: se retrocede a la última con datos (o a la 0).
+        const destino = Math.max(totalPages - 1, 0);
+        if (data.length === 0 && page > 0 && destino < page) {
+          setConsulta((actual) => (actual.page === page ? { ...actual, page: destino } : actual));
           return;
         }
         setResultado({
