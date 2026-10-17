@@ -5,6 +5,8 @@ import CampoAdmin from './CampoAdmin.jsx';
 import './adminUi.css';
 
 const CAMPOS = ['nivel', 'ponderador', 'slaMaxHoras'];
+// Constante de módulo: un `{}` nuevo en cada render reiniciaría el efecto del foco.
+const SIN_ERRORES = {};
 
 function Formulario({ prioridad, onClose, onSubmit, isSaving, errorCampos }) {
   const id = useId();
@@ -15,26 +17,46 @@ function Formulario({ prioridad, onClose, onSubmit, isSaving, errorCampos }) {
     slaMaxHoras: prioridad ? String(prioridad.slaMaxHoras) : '',
   });
   const [erroresLocales, setErroresLocales] = useState({});
+  const [intentos, setIntentos] = useState(0);
   const errores = { ...errorCampos, ...erroresLocales };
 
-  // Con errores (locales o del servidor) el foco va al primer campo inválido.
+  // El foco va al primer campo inválido solo tras un envío o un error nuevo del servidor; no
+  // depende de `erroresLocales` (cambia al teclear) ni de un objeto nuevo en cada render.
   useEffect(() => {
     formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
-  }, [erroresLocales, errorCampos]);
+  }, [intentos, errorCampos]);
 
-  const cambiar = (campo) => (e) => setValores((v) => ({ ...v, [campo]: e.target.value }));
+  const cambiar = (campo) => (e) => {
+    setValores((v) => ({ ...v, [campo]: e.target.value }));
+    setErroresLocales((previos) =>
+      Object.fromEntries(Object.entries(previos).filter(([otro]) => otro !== campo)),
+    );
+  };
 
   function enviar(evento) {
     evento.preventDefault();
     const resultado = validarPrioridad(valores);
     setErroresLocales(resultado.errores ?? {});
+    setIntentos((n) => n + 1);
     if (resultado.datos) onSubmit(resultado.datos);
   }
 
   return (
     <form ref={formRef} className="admin-formulario" onSubmit={enviar} noValidate>
-      <CampoAdmin id={`${id}-nivel`} etiqueta="Nivel" error={errores.nivel}>
-        <input value={valores.nivel} onChange={cambiar('nivel')} maxLength={20} />
+      <CampoAdmin
+        id={`${id}-nivel`}
+        etiqueta="Nivel"
+        error={errores.nivel}
+        ayuda={
+          prioridad ? 'El nivel es el código de la prioridad y no se puede cambiar.' : undefined
+        }
+      >
+        <input
+          value={valores.nivel}
+          onChange={cambiar('nivel')}
+          maxLength={20}
+          readOnly={Boolean(prioridad)}
+        />
       </CampoAdmin>
       <CampoAdmin id={`${id}-ponderador`} etiqueta="Urgencia" error={errores.ponderador}>
         <input
@@ -87,7 +109,7 @@ export default function PrioridadFormModal({
   onSubmit,
   isSaving = false,
   errorGeneral = null,
-  errorCampos = {},
+  errorCampos = SIN_ERRORES,
 }) {
   const ajenos = Object.entries(errorCampos)
     .filter(([campo]) => !CAMPOS.includes(campo))

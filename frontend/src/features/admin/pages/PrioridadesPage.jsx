@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import ConfirmarDesactivacion from '../components/ConfirmarDesactivacion.jsx';
 import PrioridadFormModal from '../components/PrioridadFormModal.jsx';
 import useCrud from '../hooks/useCrud.js';
 import '../components/adminUi.css';
+
+// Constantes de módulo: referencias estables para el efecto de foco del formulario.
+const SIN_CAMPOS = {};
+const SIN_ERROR = { general: null, campos: SIN_CAMPOS };
 
 const COLUMNAS = [
   { key: 'nivel', header: 'Nivel' },
@@ -21,21 +25,37 @@ export default function PrioridadesPage() {
   const crud = useCrud('/prioridades');
   const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar' | 'desactivar', fila? }
   const [aviso, setAviso] = useState('');
-  const { general, campos } = crud.errorMutacion ?? { general: null, campos: {} };
+  // Un 409 puede traer el campo en conflicto (`errores`): `useCrud` solo lo expone como aviso general.
+  const [conflicto, setConflicto] = useState(SIN_CAMPOS);
+  const { general: avisoGeneral, campos: camposServidor } = crud.errorMutacion ?? SIN_ERROR;
+  const hayConflicto = Object.keys(conflicto).length > 0;
+  const general = hayConflicto ? null : avisoGeneral;
+  const campos = useMemo(
+    () => (hayConflicto ? { ...camposServidor, ...conflicto } : camposServidor),
+    [hayConflicto, camposServidor, conflicto],
+  );
 
   const abrir = (siguiente) => {
     crud.limpiarErrorMutacion();
+    setConflicto(SIN_CAMPOS);
     setAviso('');
     setDialogo(siguiente);
   };
   const cerrar = () => {
     crud.limpiarErrorMutacion();
+    setConflicto(SIN_CAMPOS);
     setDialogo(null);
   };
 
   async function ejecutar(mutacion, mensaje) {
-    const { ok } = await mutacion();
-    if (!ok) return;
+    setConflicto(SIN_CAMPOS);
+    const { ok, error } = await mutacion();
+    if (!ok) {
+      if (error?.status === 409 && Object.keys(error.errores ?? {}).length > 0) {
+        setConflicto(error.errores);
+      }
+      return;
+    }
     setDialogo(null);
     setAviso(mensaje);
   }
@@ -110,6 +130,7 @@ export default function PrioridadesPage() {
               type="button"
               className="admin-boton"
               aria-label={`Reactivar ${fila.nivel}`}
+              disabled={crud.isSaving}
               onClick={() => reactivar(fila)}
             >
               Reactivar

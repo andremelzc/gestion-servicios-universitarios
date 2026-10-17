@@ -1,6 +1,6 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { problema } from '../../../test/handlers/gestion.js';
 import { reiniciarAdmin } from '../../../test/handlers/admin.js';
@@ -124,5 +124,84 @@ describe('PrioridadesPage (US-31)', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent('Prioridad «BAJA» reactivada.');
     expect(await screen.findByRole('button', { name: 'Desactivar BAJA' })).toBeVisible();
+  });
+
+  it('[US-31] el nivel es el código de dominio: solo lectura al editar y en mayúsculas al crear', async () => {
+    render(<PrioridadesPage />);
+    const edicion = within(await abrirEdicion('ALTA'));
+    expect(edicion.getByLabelText('Nivel')).toHaveAttribute('readonly');
+    await userEvent.click(edicion.getByRole('button', { name: 'Cancelar' }));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Nueva prioridad' }));
+    const alta = within(screen.getByRole('dialog', { name: 'Nueva prioridad' }));
+    expect(alta.getByLabelText('Nivel')).not.toHaveAttribute('readonly');
+    await userEvent.type(alta.getByLabelText('Nivel'), 'urgente');
+    await userEvent.type(alta.getByLabelText('Urgencia'), '5');
+    await userEvent.type(alta.getByLabelText('SLA máximo (horas)'), '2');
+    await userEvent.click(alta.getByRole('button', { name: 'Guardar' }));
+
+    expect(await fila('URGENTE')).toBeTruthy();
+  });
+
+  it('[US-31] el error local se limpia al escribir y el foco no se roba al seguir tecleando', async () => {
+    render(<PrioridadesPage />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Nueva prioridad' }));
+    const dialogo = within(screen.getByRole('dialog', { name: 'Nueva prioridad' }));
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+    expect(dialogo.getByLabelText('Nivel')).toHaveFocus();
+
+    const urgencia = dialogo.getByLabelText('Urgencia');
+    await userEvent.type(urgencia, '5');
+
+    expect(urgencia).toBeValid();
+    expect(urgencia).toHaveFocus();
+    expect(dialogo.getByLabelText('Nivel')).toBeInvalid();
+  });
+
+  it('[US-31] un 409 con campo se asocia al nivel; sin campo se muestra como aviso general', async () => {
+    server.use(
+      http.post('*/api/v1/prioridades', () =>
+        problema(409, 'conflicto', 'C', 'Ya existe esa prioridad.', '/x', {
+          errores: { nivel: 'Ya existe una prioridad con ese nivel.' },
+        }),
+      ),
+    );
+    render(<PrioridadesPage />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Nueva prioridad' }));
+    const dialogo = within(screen.getByRole('dialog', { name: 'Nueva prioridad' }));
+    await userEvent.type(dialogo.getByLabelText('Nivel'), 'ALTA');
+    await userEvent.type(dialogo.getByLabelText('Urgencia'), '5');
+    await userEvent.type(dialogo.getByLabelText('SLA máximo (horas)'), '2');
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+    const nivel = await dialogo.findByLabelText('Nivel');
+    expect(nivel).toHaveAccessibleDescription('Ya existe una prioridad con ese nivel.');
+    expect(dialogo.queryByRole('alert')).toBeNull();
+  });
+
+  it('[US-31] Reactivar se deshabilita mientras hay una mutación en curso', async () => {
+    server.use(
+      http.put('*/api/v1/prioridades/:id/reactivar', async () => {
+        await delay(150);
+        return HttpResponse.json({
+          id: 1,
+          nivel: 'BAJA',
+          ponderador: 1,
+          slaMaxHoras: 72,
+          activo: true,
+        });
+      }),
+    );
+    render(<PrioridadesPage />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Desactivar BAJA' }));
+    await userEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Desactivar' }),
+    );
+    await userEvent.click(await screen.findByRole('checkbox', { name: 'Mostrar inactivas' }));
+    const reactivar = await screen.findByRole('button', { name: 'Reactivar BAJA' });
+    await userEvent.click(reactivar);
+
+    expect(reactivar).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('reactivada'));
   });
 });
