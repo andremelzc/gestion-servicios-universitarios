@@ -5,7 +5,7 @@ import './adminUi.css';
  * Etiqueta, control y mensajes de un campo de los formularios de administración. Inyecta en el
  * control (único hijo) `id`, `aria-invalid` y `aria-describedby` (error primero, luego ayuda).
  */
-export default function CampoAdmin({ id, etiqueta, error, ayuda, children }) {
+export default function CampoAdmin({ id, etiqueta, error, ayuda, ayudaEnVivo = false, children }) {
   const descritoPor = [error && `${id}-error`, ayuda && `${id}-ayuda`].filter(Boolean).join(' ');
   return (
     <div className="admin-campo">
@@ -20,8 +20,10 @@ export default function CampoAdmin({ id, etiqueta, error, ayuda, children }) {
           {error}
         </p>
       )}
-      {ayuda && (
-        <p id={`${id}-ayuda`} className="admin-ayuda">
+      {/* Con `ayudaEnVivo` el nodo está siempre montado (`role="status"`, cortés): un aviso que
+          aparece al teclear solo se anuncia si su región ya existía. */}
+      {(ayuda || ayudaEnVivo) && (
+        <p id={`${id}-ayuda`} className="admin-ayuda" role={ayudaEnVivo ? 'status' : undefined}>
           {ayuda}
         </p>
       )}
