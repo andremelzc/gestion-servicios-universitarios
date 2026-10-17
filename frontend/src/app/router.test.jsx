@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { STORAGE_KEY } from '../features/auth/AuthContext.jsx';
 import Providers from './providers.jsx';
 import { routes } from './router.jsx';
 
@@ -25,7 +26,6 @@ const placeholders = [
   ['/solicitudes/42', 'Detalle de solicitud'],
   ['/perfil', 'Perfil'],
   ['/bandeja', 'Bandeja de solicitudes'],
-  ['/dashboard', 'Dashboard'],
   ['/admin/usuarios', 'Administración de usuarios'],
   ['/admin/areas', 'Administración de áreas'],
   ['/admin/categorias', 'Administración de categorías'],
@@ -38,6 +38,18 @@ describe('router', () => {
     renderAt(path);
 
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+  });
+
+  // El dashboard decide por rol dentro del componente (DASH-15): requiere una sesión con acceso.
+  it('[BASE-04 CA-4] la ruta /dashboard muestra su encabezado "Dashboard" a un técnico', async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ token: 't', usuario: { id: 1, nombre: 'Ana', rol: 'TECNICO' } }),
+    );
+    renderAt('/dashboard');
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument();
+    localStorage.clear();
   });
 
   it('[BASE-04 CA-4] una ruta desconocida muestra la página 404', () => {
