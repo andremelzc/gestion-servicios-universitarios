@@ -84,31 +84,65 @@ export const handlersGestion = [
     });
   }),
 
-  // `multipart/form-data` (api-rest §3.2): parte `datos` (JSON `{informe}`, ≥ 20) y parte `archivos` (1–3).
+  // `multipart/form-data` (api-rest §3.2): parte `datos` (JSON `{informe}`) y parte `archivos` (1–3).
+  // Espejo SIMPLIFICADO del backend (SolicitudController/SolicitudWorkflowService/GlobalExceptionHandler),
+  // con su mismo orden: validación del DTO (400 con `errores`), estado (409), y luego las reglas que el
+  // servicio lanza como IllegalArgumentException (400 plano con `detail` y sin mapa `errores`). Los `type`
+  // son los del backend (`https://api.servicios.edu/errors/...`), no los de `problema()` por defecto.
+  // Por convención de la prueba, la solicitud 151 está REGISTRADA y cualquier otra, EN_ATENCION.
+  // No simula 403/404/413/415 ni la firma real del contenido.
   http.put('*/api/v1/solicitudes/:id/resolver', async ({ params, request }) => {
     const instance = new URL(request.url).pathname;
+    const type = (slug) => ({ type: `https://api.servicios.edu/errors/${slug}` });
     const formulario = await request.formData();
     const datos = formulario.get('datos');
     const texto = typeof datos === 'string' ? datos : await datos?.text();
     const { informe = '' } = texto ? JSON.parse(texto) : {};
     const archivos = formulario.getAll('archivos');
-    const errores = {};
-    if (informe.trim().length < 20) {
-      errores.informe = 'El informe de resolución debe contener al menos 20 caracteres.';
-    }
-    if (archivos.length < 1 || archivos.length > 3) {
-      errores.archivos = 'Adjunta entre 1 y 3 evidencias de la solución.';
-    }
-    if (Object.keys(errores).length > 0) {
+
+    // @NotBlank + @Size(20, 2000) sobre el informe crudo (MethodArgumentNotValidException).
+    if (informe.trim() === '' || informe.length < 20 || informe.length > 2000) {
       return problema(
         400,
-        'validacion',
-        'Validación fallida',
-        'Uno o más campos no son válidos.',
+        'validation-error',
+        'Error de validación',
+        'Existen errores de validación en la solicitud.',
         instance,
-        { errores },
+        {
+          ...type('validation-error'),
+          errores: { informe: 'El informe de resolución debe contener al menos 20 caracteres.' },
+        },
       );
     }
+    if (Number(params.id) === 151) {
+      return problema(
+        409,
+        '409',
+        'Conflict',
+        'La solicitud debe estar EN_ATENCION para ser resuelta.',
+        instance,
+        type('409'),
+      );
+    }
+    // IllegalArgumentException: 400 plano, sin `errores`.
+    const plano = (detail) =>
+      problema(400, 'bad-request', 'Petición inválida', detail, instance, type('bad-request'));
+    if (informe.trim().length < 20) {
+      return plano('El informe de resolución debe contener al menos 20 caracteres.');
+    }
+    if (archivos.length < 1) {
+      return plano('Se requiere al menos 1 evidencia para resolver la solicitud.');
+    }
+    if (archivos.length > 3) {
+      return plano('Se permiten como máximo 3 evidencias para resolver la solicitud.');
+    }
+    console.log(
+      'DBG',
+      archivos.map((a) => [a.size, a.name, typeof a]),
+    );
+    if (archivos.some((archivo) => (archivo.size ?? archivo.length) === 0))
+      return plano('El archivo está vacío');
+
     return HttpResponse.json({
       ...solicitudDetalleEjemplo,
       id: Number(params.id),

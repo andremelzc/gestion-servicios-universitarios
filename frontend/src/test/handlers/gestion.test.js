@@ -110,23 +110,83 @@ describe('MSW · handlers de gestión (API §3.2 y §3.6)', () => {
     expect(detalle.informeResolucion).toBe(datos.informe);
   });
 
-  it('[US-10 CA-11] resolver con informe corto y sin archivos: 400 con errores por campo', async () => {
+  // jsdom: un Blob de jsdom no sobrevive a la serialización de undici (llega como "undefined"), por eso
+  // la parte JSON se envía como texto; en el navegador real es un Blob `application/json`.
+  function resolver(id, informe, archivos = [], { extra = {} } = {}) {
     const cuerpo = new FormData();
-    const datos = { informe: 'corto' };
-    // jsdom: un Blob de jsdom no sobrevive a la serialización de undici (llega como "undefined"), por eso
-    // la parte JSON se envía como texto; en el navegador real es un Blob `application/json`.
-    cuerpo.append('datos', JSON.stringify(datos));
+    cuerpo.append('datos', JSON.stringify({ informe, ...extra }));
+    archivos.forEach((archivo) => cuerpo.append('archivos', archivo));
+    return fetch(`${API}/solicitudes/${id}/resolver`, { method: 'PUT', body: cuerpo });
+  }
+  const foto = (nombre = 'foto.png', contenido = 'x') =>
+    new File([contenido], nombre, { type: 'image/png' });
+  const INFORME_OK = 'Se reemplazó el conector HDMI dañado.';
+  const TYPE_BACKEND = 'https://api.servicios.edu/errors/';
 
-    const respuesta = await fetch(`${API}/solicitudes/150/resolver`, {
-      method: 'PUT',
-      body: cuerpo,
-    });
+  it('[US-10 CA-11] informe de menos de 20 caracteres crudos: 400 de validación con errores.informe', async () => {
+    const respuesta = await resolver(150, 'corto', [foto()]);
     const problema = await respuesta.json();
 
     expect(respuesta.status).toBe(400);
-    expect(problema.errores).toEqual({
-      informe: expect.any(String),
-      archivos: expect.any(String),
-    });
+    expect(problema.type).toBe(`${TYPE_BACKEND}validation-error`);
+    expect(problema.errores).toEqual({ informe: expect.any(String) });
+  });
+
+  it('[US-10 CA-11] informe vacío: 400 de validación con errores.informe', async () => {
+    const respuesta = await resolver(150, '', [foto()]);
+
+    expect(respuesta.status).toBe(400);
+    expect((await respuesta.json()).errores).toEqual({ informe: expect.any(String) });
+  });
+
+  it('[US-10 CA-11] informe de 20 espacios (válido crudo, corto al recortar): 400 plano sin errores', async () => {
+    const respuesta = await resolver(150, `   ${'a'.repeat(5)}${' '.repeat(15)}`, [foto()]);
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(400);
+    expect(problema.type).toBe(`${TYPE_BACKEND}bad-request`);
+    expect(problema.errores).toBeUndefined();
+    expect(problema.detail).toBe('El informe de resolución debe contener al menos 20 caracteres.');
+  });
+
+  it('[US-10 CA-11] sin archivos: 400 plano con detail y sin mapa errores', async () => {
+    const respuesta = await resolver(150, INFORME_OK);
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(400);
+    expect(problema.type).toBe(`${TYPE_BACKEND}bad-request`);
+    expect(problema.errores).toBeUndefined();
+    expect(problema.detail).toBe('Se requiere al menos 1 evidencia para resolver la solicitud.');
+  });
+
+  it('[US-10 CA-11] más de 3 archivos: 400 plano con detail', async () => {
+    const cuatro = ['a', 'b', 'c', 'd'].map((n) => foto(`${n}.png`));
+    const respuesta = await resolver(150, INFORME_OK, cuatro);
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(400);
+    expect(problema.errores).toBeUndefined();
+    expect(problema.detail).toBe(
+      'Se permiten como máximo 3 evidencias para resolver la solicitud.',
+    );
+  });
+
+  it('[US-10 CA-11] archivo vacío: 400 plano "El archivo está vacío"', async () => {
+    // jsdom reemplaza los File por 9 bytes basura; una parte de texto vacía es lo único que llega vacía.
+    const respuesta = await resolver(150, INFORME_OK, ['']);
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(400);
+    expect(problema.errores).toBeUndefined();
+    expect(problema.detail).toBe('El archivo está vacío');
+  });
+
+  it('[US-10 CA-12] solicitud que no está EN_ATENCION: 409 con el detalle del backend', async () => {
+    const respuesta = await resolver(151, INFORME_OK, [foto()]);
+    const problema = await respuesta.json();
+
+    expect(respuesta.status).toBe(409);
+    expect(problema.type).toBe(`${TYPE_BACKEND}409`);
+    expect(problema.detail).toBe('La solicitud debe estar EN_ATENCION para ser resuelta.');
   });
 });
