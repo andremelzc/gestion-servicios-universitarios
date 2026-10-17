@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext.jsx';
+import AppShell from './AppShell.jsx';
 import ForbiddenPage from './ForbiddenPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 
@@ -14,5 +15,12 @@ export default function RoleRoute({ allowedRoles }) {
 
   if (isLoading || !isAuthenticated) return <ProtectedRoute />;
 
-  return allowedRoles.includes(usuario?.rol) ? <Outlet /> : <ForbiddenPage />;
+  if (allowedRoles.includes(usuario?.rol)) return <Outlet />;
+
+  // Con sesión pero sin rol: la 403 va dentro del AppShell para conservar cabecera y cierre de sesión.
+  return (
+    <AppShell>
+      <ForbiddenPage />
+    </AppShell>
+  );
 }
