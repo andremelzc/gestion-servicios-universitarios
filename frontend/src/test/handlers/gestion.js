@@ -136,12 +136,9 @@ export const handlersGestion = [
     if (archivos.length > 3) {
       return plano('Se permiten como máximo 3 evidencias para resolver la solicitud.');
     }
-    console.log(
-      'DBG',
-      archivos.map((a) => [a.size, a.name, typeof a]),
-    );
-    if (archivos.some((archivo) => (archivo.size ?? archivo.length) === 0))
+    if (archivos.some((archivo) => (archivo.size ?? archivo.length) === 0)) {
       return plano('El archivo está vacío');
+    }
 
     return HttpResponse.json({
       ...solicitudDetalleEjemplo,
