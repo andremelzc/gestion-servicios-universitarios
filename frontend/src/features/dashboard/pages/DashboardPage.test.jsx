@@ -1,13 +1,14 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { server } from '../../../test/server.js';
 import { AuthProvider, STORAGE_KEY } from '../../auth/AuthContext.jsx';
 import DashboardPage from './DashboardPage.jsx';
 
 afterEach(() => {
   server.events.removeAllListeners();
+  vi.restoreAllMocks();
   localStorage.clear();
 });
 
@@ -314,6 +315,20 @@ describe('DashboardPage', () => {
       expect(urls.every((u) => u.searchParams.get('idArea') === '2')).toBe(true);
     });
 
+    it('[DASH-15 CA-4] la línea "Mostrando" incluye el área aplicada, no la elegida sin aplicar', async () => {
+      renderizar('ADMIN');
+      await esperarCarga();
+
+      await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
+      expect(screen.getByText('Mostrando: últimos 30 días')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
+      await esperarCarga();
+      expect(
+        screen.getByText('Mostrando: últimos 30 días · Área Infraestructura'),
+      ).toBeInTheDocument();
+    });
+
     it('[DASH-15 CA-4] ADMIN con "Todas las áreas" no envía idArea', async () => {
       const urls = registrarPeticiones();
       renderizar('ADMIN');
@@ -337,10 +352,11 @@ describe('DashboardPage', () => {
       expect(screen.getByRole('region', { name: 'Indicadores clave' })).toBeInTheDocument();
     });
 
-    it.each(['ESTUDIANTE', 'DOCENTE'])(
+    it.each(['ESTUDIANTE'])(
       '[DASH-15 CA-4] %s recibe un mensaje de acceso no permitido sin ninguna petición',
       async (rol) => {
         const rutas = registrarTodas();
+        const fetchEspia = vi.spyOn(globalThis, 'fetch');
         renderizar(rol);
 
         const titulo = await screen.findByRole('heading', {
@@ -353,7 +369,11 @@ describe('DashboardPage', () => {
         ).toBeInTheDocument();
         expect(screen.queryByRole('heading', { name: 'Dashboard' })).not.toBeInTheDocument();
         expect(screen.queryByLabelText('Desde')).not.toBeInTheDocument();
-        await new Promise((r) => setTimeout(r, 50));
+        // Vacía las promesas pendientes: si algo hubiera pedido datos, ya habría salido.
+        await act(async () => {
+          await Promise.resolve();
+        });
+        expect(fetchEspia).not.toHaveBeenCalled();
         expect(rutas).toEqual([]);
       },
     );

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { STORAGE_KEY } from '../features/auth/AuthContext.jsx';
 import Providers from './providers.jsx';
 import { routes } from './router.jsx';
@@ -34,6 +34,9 @@ const placeholders = [
 ];
 
 describe('router', () => {
+  beforeEach(() => localStorage.clear());
+  afterEach(() => localStorage.clear());
+
   it.each(placeholders)('[BASE-04 CA-4] la ruta %s muestra su encabezado "%s"', (path, heading) => {
     renderAt(path);
 
@@ -49,7 +52,6 @@ describe('router', () => {
     renderAt('/dashboard');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument();
-    localStorage.clear();
   });
 
   it('[BASE-04 CA-4] una ruta desconocida muestra la página 404', () => {

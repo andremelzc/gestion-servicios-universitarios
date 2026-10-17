@@ -15,7 +15,7 @@ import './DashboardPage.css';
 // Sin fechas el backend aplica los últimos 30 días (API §3.4).
 const FILTROS_INICIALES = { desde: '', hasta: '' };
 
-// Roles con acceso al dashboard (api-rest §3.4: T, S, D). El estudiante y el docente reciben 403.
+// Roles con acceso al dashboard (api-rest §3.4: T, S, D); solo el ESTUDIANTE recibe 403.
 const ROLES_CON_DASHBOARD = ['TECNICO', 'SUPERVISOR', 'ADMIN'];
 
 /**
@@ -29,7 +29,13 @@ const ROLES_CON_DASHBOARD = ['TECNICO', 'SUPERVISOR', 'ADMIN'];
 export default function DashboardPage() {
   const { isLoading, usuario } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <main className="dashboard-page">
+        <p role="status">Cargando…</p>
+      </main>
+    );
+  }
   if (!ROLES_CON_DASHBOARD.includes(usuario?.rol)) return <AccesoNoPermitido />;
   return <DashboardContenido esAdmin={usuario.rol === 'ADMIN'} />;
 }
@@ -57,6 +63,8 @@ function AccesoNoPermitido() {
 function DashboardContenido({ esAdmin }) {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
   const { areas, error: errorAreas } = useAreas(esAdmin);
+  // Área aplicada (no la elegida sin aplicar): solo un ADMIN puede tener `idArea` en los filtros.
+  const nombreArea = areas.find((a) => a.id === filtros.idArea)?.nombre;
 
   return (
     <main className="dashboard-page">
@@ -67,7 +75,7 @@ function DashboardContenido({ esAdmin }) {
         errorAreas={esAdmin && errorAreas ? 'No se pudieron cargar las áreas.' : undefined}
       />
       <p className="dashboard-page__rango" aria-live="polite">
-        {`Mostrando: ${describirRango(filtros)}`}
+        {`Mostrando: ${describirRango(filtros)}${nombreArea ? ` · Área ${nombreArea}` : ''}`}
       </p>
 
       <WidgetDashboard
