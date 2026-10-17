@@ -9,13 +9,6 @@
   font-size: var(--font-size-h2, 1.5rem);
 }
 
-.bandeja-supervisor__pestanas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2, 8px);
-}
-
-.bandeja-supervisor__pestanas button,
 .bandeja-supervisor .data-table__acciones button {
   min-width: 44px;
   min-height: 44px;
@@ -27,24 +20,7 @@
   cursor: pointer;
 }
 
-/* La pestaña activa se distingue por relleno y por `aria-pressed`, no solo por color. */
-.bandeja-supervisor__pestanas button[aria-pressed='true'] {
-  background: var(--color-primary, #1d4ed8);
-  color: var(--color-surface, #ffffff);
-  font-weight: 600;
-}
-
 .bandeja-supervisor button:focus-visible {
   outline: 3px solid var(--color-focus, #2563eb);
   outline-offset: 2px;
-}
-
-.bandeja-supervisor__aviso {
-  margin: 0;
-  color: var(--color-success, #047857);
-  font-weight: 500;
-}
-
-.bandeja-supervisor__aviso:empty {
-  display: none;
 }
