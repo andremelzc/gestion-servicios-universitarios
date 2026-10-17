@@ -68,4 +68,25 @@ describe('useBandeja', () => {
     await new Promise((r) => setTimeout(r, 150));
     expect(result.current.data).toEqual([{ id: 1 }]);
   });
+
+  it('en un refetch de la misma consulta conserva los datos visibles hasta tener los nuevos', async () => {
+    let llamadas = 0;
+    server.use(
+      http.get('*/api/v1/solicitudes', async () => {
+        llamadas += 1;
+        if (llamadas > 1) await new Promise((r) => setTimeout(r, 40));
+        return HttpResponse.json(sobre([{ id: llamadas }]));
+      }),
+    );
+    const { result } = renderHook(() => useBandeja({}));
+    await waitFor(() => expect(result.current.data).toEqual([{ id: 1 }]));
+
+    act(() => result.current.refetch());
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isRefreshing).toBe(true);
+    expect(result.current.data).toEqual([{ id: 1 }]);
+
+    await waitFor(() => expect(result.current.data).toEqual([{ id: 2 }]));
+    expect(result.current.isRefreshing).toBe(false);
+  });
 });
