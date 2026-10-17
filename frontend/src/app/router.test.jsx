@@ -118,6 +118,22 @@ describe('router', () => {
     expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
   });
 
+  it('[AUTH-18] la 403 de un rol sin acceso se pinta dentro del AppShell (cabecera y sesión)', async () => {
+    iniciarSesionComo('ESTUDIANTE');
+    renderAt('/admin/usuarios');
+
+    await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /ana/i })).toBeInTheDocument();
+  });
+
+  it('[AUTH-18] sin sesión no se pinta el AppShell: redirige a /login', async () => {
+    renderAt('/admin/usuarios');
+
+    await screen.findByRole('heading', { level: 1, name: 'Iniciar sesión' });
+    expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
+  });
+
   it('[AUTH-19] con sesión, el AppShell muestra el nombre y el rol del usuario', async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: tokenVigente(), usuario: USUARIO }));
     renderAt('/perfil');

@@ -20,6 +20,11 @@ describe('rutasAcceso (AUTH-18 · UX §3)', () => {
     ['/admin/usuarios', 'ADMIN', true],
     ['/administracion', 'ESTUDIANTE', true],
     ['/bandeja', undefined, false],
+    ['/Admin/usuarios', 'ESTUDIANTE', false],
+    ['/ADMIN', 'TECNICO', false],
+    ['/Bandeja', 'ESTUDIANTE', false],
+    ['/DASHBOARD', 'ESTUDIANTE', false],
+    ['/Admin/usuarios', 'ADMIN', true],
   ])('[AUTH-18] rolPuedeAcceder(%s, %s) = %s', (ruta, rol, esperado) => {
     expect(rolPuedeAcceder(rol, ruta)).toBe(esperado);
   });

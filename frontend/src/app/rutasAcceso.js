@@ -7,9 +7,12 @@ const esRuta = (pathname, base) => pathname === base || pathname.startsWith(`${b
 
 // Las rutas con sesión pero sin restricción de rol (p. ej. /mis-solicitudes) devuelven true.
 // En las restringidas se deniega por defecto: un rol ausente o desconocido no coincide.
+// El router de React Router no distingue mayúsculas: `/Admin/usuarios` llega a la misma ruta
+// que `/admin/usuarios`, así que la comparación tampoco las distingue.
 export function rolPuedeAcceder(rol, pathname) {
-  if (esRuta(pathname, '/admin')) return ROLES_ADMIN.includes(rol);
-  if (esRuta(pathname, '/bandeja') || esRuta(pathname, '/dashboard')) {
+  const ruta = pathname.toLowerCase();
+  if (esRuta(ruta, '/admin')) return ROLES_ADMIN.includes(rol);
+  if (esRuta(ruta, '/bandeja') || esRuta(ruta, '/dashboard')) {
     return ROLES_GESTION.includes(rol);
   }
   return true;
