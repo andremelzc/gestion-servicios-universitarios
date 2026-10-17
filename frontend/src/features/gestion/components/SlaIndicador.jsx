@@ -5,7 +5,13 @@ import './SlaIndicador.css';
 const ICONOS = {
   aTiempo: <path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" strokeWidth="2" />,
   atendida: <path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" strokeWidth="2" />,
-  porVencer: <path d="M8 1 15 14H1zM7.25 6h1.5v4h-1.5zM7.25 11h1.5v1.5h-1.5z" fillRule="evenodd" />,
+  porVencer: (
+    <path
+      d="M8 1 15 14H1zM7.25 6h1.5v4h-1.5zM7.25 11h1.5v1.5h-1.5z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  ),
   vencida: <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="2" />,
   sinSla: <path d="M3 8h10" fill="none" stroke="currentColor" strokeWidth="2" />,
 };
