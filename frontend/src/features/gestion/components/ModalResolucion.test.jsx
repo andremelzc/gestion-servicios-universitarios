@@ -232,4 +232,93 @@ describe('ModalResolucion', () => {
 
     expect(campoInforme()).toHaveValue('');
   });
+
+  it('[US-10 CA-11] el contador muestra la longitud recortada, la que se valida', async () => {
+    renderModal();
+
+    await userEvent.type(campoInforme(), '  hola  ');
+
+    expect(screen.getByText('4 de 2000 caracteres (mínimo 20)')).toBeInTheDocument();
+  });
+
+  it('[US-10 CA-11] un error del servidor en el informe se descarta al editarlo', async () => {
+    renderModal({
+      error: { status: 400, errores: { informe: 'El informe es demasiado corto.' } },
+    });
+    expect(campoInforme()).toBeInvalid();
+
+    await userEvent.type(campoInforme(), 'a');
+
+    expect(campoInforme()).toBeValid();
+    expect(screen.queryByText('El informe es demasiado corto.')).not.toBeInTheDocument();
+  });
+
+  it('[US-10 CA-11] un error del servidor en archivos se descarta al cambiar los archivos', async () => {
+    renderModal({ error: { status: 400, errores: { archivos: 'Falta la evidencia.' } } });
+    expect(entradaArchivos()).toBeInvalid();
+
+    await adjuntar(archivo());
+
+    expect(entradaArchivos()).toBeValid();
+    expect(screen.queryByText('Falta la evidencia.')).not.toBeInTheDocument();
+  });
+
+  it('[US-10 CA-11] editar el informe no descarta el error de archivos y un error nuevo reaparece', async () => {
+    const props = { onClose: vi.fn(), onSubmit: vi.fn(), isOpen: true, solicitud };
+    const primero = { status: 400, errores: { informe: 'Mal.', archivos: 'Falta.' } };
+    const { rerender } = render(<ModalResolucion {...props} error={primero} />);
+
+    await userEvent.type(campoInforme(), 'a');
+    expect(entradaArchivos()).toBeInvalid();
+    expect(campoInforme()).toBeValid();
+
+    rerender(
+      <ModalResolucion {...props} error={{ status: 400, errores: { informe: 'Otra vez.' } }} />,
+    );
+    expect(campoInforme()).toBeInvalid();
+    expect(screen.getByText('Otra vez.')).toBeInTheDocument();
+  });
+
+  it('[US-10 CA-11] un archivo vacío (0 bytes) bloquea el envío con aviso en el campo', async () => {
+    const { onSubmit } = renderModal();
+    await userEvent.type(campoInforme(), INFORME);
+    await adjuntar(new File([], 'vacia.png', { type: 'image/png' }));
+
+    await marcarResuelta();
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(entradaArchivos()).toBeInvalid();
+    expect(entradaArchivos()).toHaveAccessibleDescription(
+      expect.stringContaining('No puedes adjuntar archivos vacíos. Quita los de 0 bytes.'),
+    );
+    expect(entradaArchivos()).toHaveFocus();
+  });
+
+  it('[US-10 CA-10] ignora un archivo repetido (mismo nombre, tamaño y fecha)', async () => {
+    const { onSubmit } = renderModal();
+    const foto = archivo();
+    await userEvent.type(campoInforme(), INFORME);
+
+    await adjuntar(foto);
+    await adjuntar(foto);
+    await adjuntar(archivo('otra.png'), archivo('otra.png'));
+    await marcarResuelta();
+
+    expect(onSubmit.mock.calls[0][0].archivos.map((a) => a.name)).toEqual(['foto.png', 'otra.png']);
+  });
+
+  it('[UX §8] si cambia solicitud.id con el modal abierto, el borrador se descarta', async () => {
+    const props = { isOpen: true, onClose: vi.fn(), onSubmit: vi.fn() };
+    const { rerender } = render(<ModalResolucion {...props} solicitud={solicitud} />);
+    await userEvent.type(campoInforme(), INFORME);
+    await adjuntar(archivo());
+
+    rerender(
+      <ModalResolucion {...props} solicitud={{ ...solicitud, id: 151, codigo: 'SOL-2026-0151' }} />,
+    );
+
+    expect(screen.getByRole('dialog', { name: 'Resolver SOL-2026-0151' })).toBeInTheDocument();
+    expect(campoInforme()).toHaveValue('');
+    expect(screen.queryByText('foto.png')).not.toBeInTheDocument();
+  });
 });
