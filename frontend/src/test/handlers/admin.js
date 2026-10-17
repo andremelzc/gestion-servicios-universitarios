@@ -40,7 +40,8 @@ function rechazarPrioridad(cuerpo, request, idActual) {
       errores,
     });
   }
-  if (prioridades.some((p) => p.id !== idActual && p.nivel === cuerpo.nivel.trim())) {
+  const nivel = cuerpo.nivel.trim().toUpperCase();
+  if (prioridades.some((p) => p.id !== idActual && p.nivel.toUpperCase() === nivel)) {
     return problema(
       409,
       'conflicto',

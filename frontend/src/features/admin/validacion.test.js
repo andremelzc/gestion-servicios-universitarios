@@ -8,6 +8,29 @@ describe('validarPrioridad (api-rest §3.5, US-31)', () => {
     });
   });
 
+  it('[US-31] normaliza el nivel (código de dominio) a mayúsculas', () => {
+    const { datos } = validarPrioridad({ nivel: 'urgente', ponderador: '5', slaMaxHoras: '12' });
+
+    expect(datos.nivel).toBe('URGENTE');
+  });
+
+  it('[US-31] acota urgencia y SLA al máximo de un INT (2147483647)', () => {
+    const ok = validarPrioridad({
+      nivel: 'A',
+      ponderador: '2147483647',
+      slaMaxHoras: '2147483647',
+    });
+    expect(ok.datos).toMatchObject({ ponderador: 2147483647, slaMaxHoras: 2147483647 });
+
+    const { errores } = validarPrioridad({
+      nivel: 'A',
+      ponderador: '2147483648',
+      slaMaxHoras: '99999999999',
+    });
+    expect(errores.ponderador).toBe('La urgencia no puede superar 2147483647.');
+    expect(errores.slaMaxHoras).toBe('El SLA no puede superar 2147483647 horas.');
+  });
+
   it('[US-31] exige nivel, ponderador y SLA', () => {
     const { errores } = validarPrioridad({ nivel: ' ', ponderador: '', slaMaxHoras: '' });
 

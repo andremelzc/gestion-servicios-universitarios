@@ -69,6 +69,16 @@ describe('MSW · handlers de administración, prioridades (API §3.5)', () => {
     expect((await respuesta.json()).type).toMatch(/\/conflicto$/);
   });
 
+  it('[US-31] el nivel repetido se detecta sin distinguir mayúsculas', async () => {
+    const respuesta = await enviar('POST', '/prioridades', {
+      nivel: 'alta',
+      ponderador: 5,
+      slaMaxHoras: 2,
+    });
+
+    expect(respuesta.status).toBe(409);
+  });
+
   it('[US-31 CA-6] PUT cambia el SLA; DELETE da 204 y reactivar vuelve a activar', async () => {
     const cambio = await enviar('PUT', '/prioridades/3', {
       nivel: 'ALTA',
