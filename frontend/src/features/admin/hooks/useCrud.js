@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiClient } from '../../../services/apiClient.js';
+import { interpretarError } from '../../../services/errores.js';
 
 // Hook genérico del CRUD de administración (arquitectura §4.2, ADM-12). Lista paginada
 // (api-rest §2.3: sobre `{content, page, size, totalElements, totalPages}`, página base 0),
@@ -18,6 +19,13 @@ import { apiClient } from '../../../services/apiClient.js';
 //   normaliza a una única página.
 // - `filtros`: parámetros propios de la pantalla (p. ej. `{ idArea }`); se omiten los vacíos. Un
 //   cambio de su contenido vuelve a la página 0; cambiar `ruta` reinicia todo.
+//
+// Mutaciones (`crear`, `actualizar`, `desactivar`, `reactivar`): devuelven `{ok: true, data}` o
+// `{ok: false, error}` (nunca lanzan) y, si salen bien, refrescan el listado sin esqueleto
+// (`isRefreshing`). `isSaving` es verdadero mientras quede alguna en curso (contador, no booleano).
+// `errorMutacion` (`{general, campos}` de `interpretarError`) lo fija el último fallo; cada intento
+// nuevo lo limpia al empezar, y un éxito (propio o concurrente) nunca borra un fallo ya mostrado.
+// `limpiarErrorMutacion()` lo descarta (p. ej. al cerrar el modal). La baja es lógica (RN-14).
 //
 // Diseño: el listado es un derivado de la URL de la consulta. El estado solo se escribe desde
 // manejadores de eventos, durante el render (reinicios por cambio de `ruta`/`filtros`, patrón
@@ -79,7 +87,11 @@ export default function useCrud(ruta, opciones = {}) {
   const [busquedaEnVivo, setBusquedaEnVivo] = useState('');
   const [resultado, setResultado] = useState(SIN_RESULTADO);
 
+  const [pendientes, setPendientes] = useState(0);
+  const [errorMutacion, setErrorMutacion] = useState(null);
+
   const temporizador = useRef(null);
+  const montado = useRef(false);
 
   // Contenido de los filtros, para comparar por valor y no por identidad del objeto.
   const filtrosClave = JSON.stringify(
@@ -96,6 +108,7 @@ export default function useCrud(ruta, opciones = {}) {
     setConsulta((actual) => ({ ...CONSULTA_INICIAL, version: actual.version }));
     setBusquedaEnVivo('');
     setResultado(SIN_RESULTADO);
+    setErrorMutacion(null);
   } else if (origen.filtrosClave !== filtrosClave) {
     setOrigen({ ruta, filtrosClave });
     setConsulta((actual) => ({ ...actual, page: 0 }));
@@ -134,6 +147,13 @@ export default function useCrud(ruta, opciones = {}) {
     return () => controlador.abort();
   }, [url, clave]);
 
+  useEffect(() => {
+    montado.current = true;
+    return () => {
+      montado.current = false;
+    };
+  }, []);
+
   // Al desmontar o cambiar de `ruta` no debe quedar un debounce pendiente.
   useEffect(() => () => clearTimeout(temporizador.current), [ruta]);
 
@@ -164,6 +184,39 @@ export default function useCrud(ruta, opciones = {}) {
     [],
   );
 
+  const mutar = useCallback(
+    async (peticion) => {
+      setPendientes((n) => n + 1);
+      setErrorMutacion(null);
+      try {
+        const data = await peticion();
+        if (montado.current) refetch();
+        return { ok: true, data };
+      } catch (error) {
+        if (montado.current) setErrorMutacion(interpretarError(error));
+        return { ok: false, error };
+      } finally {
+        if (montado.current) setPendientes((n) => n - 1);
+      }
+    },
+    [refetch],
+  );
+
+  const crear = useCallback((cuerpo) => mutar(() => apiClient.post(ruta, cuerpo)), [mutar, ruta]);
+  const actualizar = useCallback(
+    (id, cuerpo) => mutar(() => apiClient.put(`${ruta}/${id}`, cuerpo)),
+    [mutar, ruta],
+  );
+  const desactivar = useCallback(
+    (id) => mutar(() => apiClient.del(`${ruta}/${id}`)),
+    [mutar, ruta],
+  );
+  const reactivar = useCallback(
+    (id) => mutar(() => apiClient.put(`${ruta}/${id}/reactivar`)),
+    [mutar, ruta],
+  );
+  const limpiarErrorMutacion = useCallback(() => setErrorMutacion(null), []);
+
   const otraConsulta = resultado.url !== url;
   const reintento = resultado.error !== null && resultado.clave !== clave;
   const isLoading = otraConsulta || reintento;
@@ -182,5 +235,12 @@ export default function useCrud(ruta, opciones = {}) {
     error: isLoading ? null : resultado.error,
     onRetry: refetch,
     refetch,
+    crear,
+    actualizar,
+    desactivar,
+    reactivar,
+    isSaving: pendientes > 0,
+    errorMutacion,
+    limpiarErrorMutacion,
   };
 }
