@@ -164,6 +164,93 @@ describe('BandejaTecnicoPage', () => {
       await waitFor(() => expect(consultas.length).toBeGreaterThan(1));
       expect(await screen.findByText('No tienes solicitudes por iniciar.')).toBeInTheDocument();
     });
+
+    it('limpia el aviso y la alerta anteriores al empezar otra acción', async () => {
+      const filas = [asignada, { ...asignada, id: 152, codigo: 'SOL-2026-0152' }];
+      const { estado } = bandejaConEstado(filas);
+      iniciarEn(estado);
+      render(<BandejaTecnicoPage />);
+      await userEvent.click(await botonIniciar());
+      await waitFor(() =>
+        expect(regionAviso()).toHaveTextContent('SOL-2026-0150 está en atención'),
+      );
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Iniciar atención SOL-2026-0152' }),
+      );
+
+      await waitFor(() =>
+        expect(regionAviso()).toHaveTextContent('SOL-2026-0152 está en atención'),
+      );
+      expect(regionAviso()).not.toHaveTextContent('SOL-2026-0150');
+    });
+  });
+
+  describe('resolución', () => {
+    async function abrirResolver(estado) {
+      render(<BandejaTecnicoPage />);
+      await screen.findByText('SOL-2026-0150');
+      await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Resolver SOL-2026-0151' }));
+      expect(estado.get(151)).toBe('EN_ATENCION');
+      return screen.findByRole('dialog');
+    }
+
+    async function completar(dialogo) {
+      await userEvent.type(
+        within(dialogo).getByLabelText('Informe técnico *'),
+        'Se reemplazó el cable de video y se probó.',
+      );
+      await userEvent.upload(
+        within(dialogo).getByLabelText(/Evidencia de la solución/),
+        new File(['x'], 'foto.png', { type: 'image/png' }),
+      );
+    }
+
+    it('envía el informe y las evidencias, cierra el modal, quita la fila y anuncia', async () => {
+      const { estado } = bandejaConEstado();
+      let formulario;
+      server.use(
+        http.put('*/api/v1/solicitudes/151/resolver', async ({ request }) => {
+          formulario = await request.formData();
+          estado.set(151, 'RESUELTA');
+          return HttpResponse.json({ id: 151 });
+        }),
+      );
+      const dialogo = await abrirResolver(estado);
+      await completar(dialogo);
+
+      await userEvent.click(within(dialogo).getByRole('button', { name: 'Marcar resuelta' }));
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      // jsdom entrega los Blob y File a MSW sin contenido ni nombre: solo se verifican las partes.
+      expect(formulario.has('datos')).toBe(true);
+      expect(formulario.getAll('archivos')).toHaveLength(1);
+      expect(await screen.findByText('No tienes solicitudes en curso.')).toBeInTheDocument();
+      expect(screen.queryByText('SOL-2026-0151')).not.toBeInTheDocument();
+      expect(regionAviso()).toHaveTextContent('SOL-2026-0151 marcada como resuelta.');
+      await waitFor(() =>
+        expect(screen.getByRole('heading', { level: 1, name: 'Mis asignadas' })).toHaveFocus(),
+      );
+    });
+
+    it('mantiene el modal abierto con el error del servidor y no toca la lista', async () => {
+      const { estado } = bandejaConEstado();
+      server.use(
+        http.put('*/api/v1/solicitudes/151/resolver', () =>
+          problema(409, 'transicion-invalida', 'Conflicto', 'Ya fue resuelta.', '/x'),
+        ),
+      );
+      const dialogo = await abrirResolver(estado);
+      await completar(dialogo);
+
+      await userEvent.click(within(dialogo).getByRole('button', { name: 'Marcar resuelta' }));
+
+      expect(await within(dialogo).findByRole('alert')).toHaveTextContent(
+        'Esta solicitud ya cambió de estado',
+      );
+      expect(regionAviso()).toBeEmptyDOMElement();
+    });
   });
 
   it('muestra el vacío y el error de la consulta', async () => {
@@ -174,5 +261,27 @@ describe('BandejaTecnicoPage', () => {
     server.use(http.get('*/api/v1/solicitudes', () => problema(403, 'prohibido', 'No', 'x', '/x')));
     await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('No tienes permiso');
+  });
+
+  it('pagina mostrando las filas de cada página y retrocede si la actual queda vacía', async () => {
+    const fila = (n) => ({ ...asignada, id: 300 + n, codigo: `SOL-2026-03${n}0` });
+    const consultas = [];
+    server.use(
+      http.get('*/api/v1/solicitudes', ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        consultas.push(params);
+        return params.get('page') === '1'
+          ? HttpResponse.json(paginaDe([], { page: 1, totalPages: 1, totalElements: 20 }))
+          : HttpResponse.json(paginaDe([fila(0)], { page: 0, totalPages: 2, totalElements: 21 }));
+      }),
+    );
+    render(<BandejaTecnicoPage />);
+    await screen.findByText('SOL-2026-0300');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
+
+    await waitFor(() => expect(consultas.some((c) => c.get('page') === '1')).toBe(true));
+    expect(await screen.findByText('SOL-2026-0300')).toBeInTheDocument();
+    expect(consultas[consultas.length - 1].has('page')).toBe(false);
   });
 });

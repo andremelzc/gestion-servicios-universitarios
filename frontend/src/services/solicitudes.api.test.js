@@ -1,12 +1,15 @@
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { server } from '../test/server.js';
+import { apiClient } from './apiClient.js';
 import {
   asignar,
   construirConsulta,
   evaluar,
+  iniciarAtencion,
   listarBandeja,
   listarPrioridades,
+  resolver,
 } from './solicitudes.api.js';
 
 describe('construirConsulta', () => {
@@ -92,5 +95,43 @@ describe('catálogos y acciones', () => {
       ['evaluar', { idPrioridad: 3 }],
       ['asignar', { idTecnico: 14, nota: 'Urgente' }],
     ]);
+  });
+});
+
+describe('acciones del técnico', () => {
+  it('inicia la atención con PUT sin cuerpo', async () => {
+    let metodo;
+    server.use(
+      http.put('*/api/v1/solicitudes/:id/iniciar-atencion', ({ request }) => {
+        metodo = request.method;
+        return HttpResponse.json({ id: 150 });
+      }),
+    );
+    await iniciarAtencion(150);
+    expect(metodo).toBe('PUT');
+  });
+
+  it('resuelve en multipart: parte `datos` (Blob JSON) y una parte `archivos` por archivo', async () => {
+    // Un Blob de jsdom llega a MSW como "undefined" (límite de la serialización de undici), así
+    // que el cuerpo se inspecciona antes de salir, en el `FormData` que recibe `apiClient`.
+    const put = vi.spyOn(apiClient, 'put').mockResolvedValue({ id: 150 });
+    const archivos = [
+      new File(['a'], 'uno.png', { type: 'image/png' }),
+      new File(['b'], 'dos.png', { type: 'image/png' }),
+    ];
+    await resolver(150, { informe: 'Se reemplazó el cable de video.', archivos });
+
+    const [ruta, cuerpo] = put.mock.calls[0];
+    expect(ruta).toBe('/solicitudes/150/resolver');
+    const datos = cuerpo.get('datos');
+    expect(datos.type).toBe('application/json');
+    const texto = await new Promise((resolve) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(lector.result);
+      lector.readAsText(datos);
+    });
+    expect(JSON.parse(texto)).toEqual({ informe: 'Se reemplazó el cable de video.' });
+    expect(cuerpo.getAll('archivos')).toEqual(archivos);
+    put.mockRestore();
   });
 });

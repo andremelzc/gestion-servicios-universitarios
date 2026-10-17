@@ -63,3 +63,15 @@ export async function listarPrioridades(opciones) {
 export const evaluar = (id, cuerpo) => apiClient.put(`/solicitudes/${id}/evaluar`, cuerpo);
 export const asignar = (id, cuerpo) => apiClient.put(`/solicitudes/${id}/asignar`, cuerpo);
 export const iniciarAtencion = (id) => apiClient.put(`/solicitudes/${id}/iniciar-atencion`);
+
+/**
+ * `PUT …/resolver` es multipart (api-rest §3.2): parte `datos` = Blob JSON `{informe}` y una
+ * parte `archivos` por evidencia. `apiClient` deja pasar el `FormData` sin forzar `Content-Type`
+ * (el navegador agrega el boundary).
+ */
+export function resolver(id, { informe, archivos }) {
+  const cuerpo = new FormData();
+  cuerpo.append('datos', new Blob([JSON.stringify({ informe })], { type: 'application/json' }));
+  archivos.forEach((archivo) => cuerpo.append('archivos', archivo));
+  return apiClient.put(`/solicitudes/${id}/resolver`, cuerpo);
+}
