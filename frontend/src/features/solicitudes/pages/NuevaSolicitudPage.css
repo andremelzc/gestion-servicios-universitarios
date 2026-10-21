@@ -1,0 +1,178 @@
+/* Estilos de NuevaSolicitudPage (tokens de UX §2 vía tokens.css, con respaldo).
+   Escritorio en 2 columnas: datos | descripción y evidencias (W-03). */
+.nueva-solicitud {
+  --ns-text: var(--color-text, #111827);
+  --ns-muted: var(--color-text-muted, #4b5563);
+  --ns-border: var(--color-border, #d1d5db);
+  --ns-primary: var(--color-primary, #1d4ed8);
+  --ns-primary-hover: var(--color-primary-hover, #1e40af);
+  --ns-focus: var(--color-focus, #2563eb);
+  --ns-danger: var(--color-danger, #b91c1c);
+  --ns-radius: var(--radius, 8px);
+  color: var(--ns-text);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.nueva-solicitud__titulo {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.nueva-solicitud__alerta {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--ns-danger);
+  border-radius: var(--ns-radius);
+  color: var(--ns-danger);
+}
+
+.nueva-solicitud__alerta-texto {
+  margin: 0 0 8px;
+}
+
+.nueva-solicitud__reintentar {
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 1px solid currentcolor;
+  border-radius: var(--ns-radius);
+  background: none;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nueva-solicitud__reintentar:focus-visible {
+  outline: 3px solid var(--ns-focus);
+  outline-offset: 1px;
+}
+
+.nueva-solicitud__form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.nueva-solicitud__columna {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nueva-solicitud__fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nueva-solicitud__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nueva-solicitud__campo label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.nueva-solicitud__campo input,
+.nueva-solicitud__campo select,
+.nueva-solicitud__campo textarea {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--ns-border);
+  border-radius: var(--ns-radius);
+  color: inherit;
+  font: inherit;
+}
+
+.nueva-solicitud__campo textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.nueva-solicitud__campo input:focus-visible,
+.nueva-solicitud__campo select:focus-visible,
+.nueva-solicitud__campo textarea:focus-visible {
+  outline: 3px solid var(--ns-focus);
+  outline-offset: 1px;
+}
+
+.nueva-solicitud__campo input[aria-invalid='true'],
+.nueva-solicitud__campo select[aria-invalid='true'],
+.nueva-solicitud__campo textarea[aria-invalid='true'] {
+  border-color: var(--ns-danger);
+}
+
+.nueva-solicitud__contador {
+  margin: 0;
+  color: var(--ns-muted);
+  font-size: 0.8125rem;
+  text-align: right;
+}
+
+.nueva-solicitud__error {
+  margin: 0;
+  color: var(--ns-danger);
+  font-size: 0.875rem;
+}
+
+.nueva-solicitud__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.nueva-solicitud__cancelar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--ns-border);
+  border-radius: var(--ns-radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.nueva-solicitud__cancelar:focus-visible {
+  outline: 3px solid var(--ns-focus);
+  outline-offset: 2px;
+}
+
+.nueva-solicitud__enviar {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--ns-radius);
+  background: var(--ns-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nueva-solicitud__enviar:hover:not(:disabled) {
+  background: var(--ns-primary-hover);
+}
+
+.nueva-solicitud__enviar:focus-visible {
+  outline: 3px solid var(--ns-focus);
+  outline-offset: 2px;
+}
+
+.nueva-solicitud__enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 720px) {
+  .nueva-solicitud__form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nueva-solicitud__acciones {
+    grid-column: 1 / -1;
+  }
+}

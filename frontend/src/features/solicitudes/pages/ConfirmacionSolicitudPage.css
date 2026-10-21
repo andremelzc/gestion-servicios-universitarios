@@ -1,0 +1,88 @@
+/* Estilos de ConfirmacionSolicitudPage (tokens de UX §2 vía tokens.css, con respaldo).
+   W-03: "✔ Registrada: SOL-…" con las dos acciones debajo. */
+.confirmacion {
+  --cf-text: var(--color-text, #111827);
+  --cf-muted: var(--color-text-muted, #4b5563);
+  --cf-border: var(--color-border, #d1d5db);
+  --cf-primary: var(--color-primary, #1d4ed8);
+  --cf-primary-hover: var(--color-primary-hover, #1e40af);
+  --cf-focus: var(--color-focus, #2563eb);
+  --cf-success: var(--color-success, #047857);
+  --cf-radius: var(--radius, 8px);
+  color: var(--cf-text);
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.confirmacion__titulo {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.confirmacion__panel {
+  padding: 20px 16px;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+}
+
+/* El estado no depende solo del color: hay icono ✔ (oculto a lectores) y texto. */
+.confirmacion__estado {
+  margin: 0 0 8px;
+  color: var(--cf-success);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.confirmacion__aviso {
+  margin: 0;
+  color: var(--cf-muted);
+}
+
+.confirmacion__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.confirmacion__accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--cf-radius);
+  background: var(--cf-primary);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.confirmacion__accion:hover {
+  background: var(--cf-primary-hover);
+}
+
+.confirmacion__accion:focus-visible {
+  outline: 3px solid var(--cf-focus);
+  outline-offset: 2px;
+}
+
+.confirmacion__accion--secundaria {
+  border: 1px solid var(--cf-border);
+  background: none;
+  color: inherit;
+}
+
+.confirmacion__accion--secundaria:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+@media (min-width: 480px) {
+  .confirmacion__acciones {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

@@ -9,6 +9,7 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"rol", "area"})
     Optional<Usuario> findByCorreo(String correo);
     
     Optional<Usuario> findByCodigoInstitucional(String codigoInstitucional);
