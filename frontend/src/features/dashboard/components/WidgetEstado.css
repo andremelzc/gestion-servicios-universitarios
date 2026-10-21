@@ -1,0 +1,71 @@
+.widget-estado {
+  min-width: 0;
+  min-height: 360px;
+  padding: var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 1px 2px rgb(17 24 39 / 8%);
+  color: var(--color-text, #111827);
+}
+
+.widget-estado--compacto {
+  min-height: 160px;
+}
+
+.widget-estado__titulo {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: 1.25rem;
+}
+
+.widget-estado__esqueleto {
+  height: 96px;
+  border-radius: var(--radius, 8px);
+  background: linear-gradient(
+    90deg,
+    var(--color-border, #d1d5db) 25%,
+    var(--color-surface, #ffffff) 50%,
+    var(--color-border, #d1d5db) 75%
+  );
+  background-size: 200% 100%;
+  animation: widget-estado-brillo 1.4s ease-in-out infinite;
+}
+
+@keyframes widget-estado-brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .widget-estado__esqueleto {
+    animation: none;
+  }
+}
+
+.widget-estado__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+}
+
+.widget-estado__mensaje {
+  margin: 0;
+  color: var(--color-danger, #b91c1c);
+}
+
+.widget-estado__boton {
+  min-height: var(--touch-target, 44px);
+  padding: 0 var(--space-4, 16px);
+  background: transparent;
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.widget-estado__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}

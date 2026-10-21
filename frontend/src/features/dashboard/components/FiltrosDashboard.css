@@ -1,0 +1,72 @@
+/* Mobile-first: campos apilados; en sm (≥ 640px) en una fila. */
+.filtros-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+
+.filtros-dashboard__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+  font-size: 0.875rem;
+}
+
+.filtros-dashboard__campo input,
+.filtros-dashboard__campo select {
+  min-height: var(--touch-target, 44px);
+  padding: 0 var(--space-3, 12px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  color: var(--color-text, #111827);
+  font: inherit;
+}
+
+.filtros-dashboard__campo input[aria-invalid='true'] {
+  border-color: var(--color-danger, #b91c1c);
+}
+
+.filtros-dashboard__campo input:focus-visible,
+.filtros-dashboard__campo select:focus-visible,
+.filtros-dashboard__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.filtros-dashboard__boton {
+  min-height: var(--touch-target, 44px);
+  padding: 0 var(--space-5, 24px);
+  background: var(--color-primary, #1d4ed8);
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.filtros-dashboard__boton:hover {
+  background: var(--color-primary-hover, #1e40af);
+}
+
+.filtros-dashboard__pista,
+.filtros-dashboard__error {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.filtros-dashboard__pista {
+  color: var(--color-text-muted, #4b5563);
+}
+
+.filtros-dashboard__error {
+  color: var(--color-danger, #b91c1c);
+}
+
+@media (min-width: 640px) {
+  .filtros-dashboard {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+}
