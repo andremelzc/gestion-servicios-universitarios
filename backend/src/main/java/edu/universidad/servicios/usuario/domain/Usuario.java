@@ -33,7 +33,7 @@ public class Usuario {
     @Column(length = 20)
     private String telefono;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
