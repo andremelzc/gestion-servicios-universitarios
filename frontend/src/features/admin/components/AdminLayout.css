@@ -1,0 +1,72 @@
+/* Móvil primero: el menú es una fila con desplazamiento horizontal sobre el contenido. */
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.admin-layout__menu {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.admin-layout__lista {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  list-style: none;
+}
+
+.admin-layout__enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-layout__enlace:hover {
+  background: var(--color-bg);
+}
+
+/* El color no es el único indicador: la sección activa también va en negrita. */
+.admin-layout__enlace[aria-current='page'] {
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-weight: 700;
+}
+
+.admin-layout__enlace:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.admin-layout__contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Escritorio: menú lateral fijo a la izquierda. */
+@media (min-width: 768px) {
+  .admin-layout {
+    flex-direction: row;
+  }
+
+  .admin-layout__menu {
+    flex: 0 0 220px;
+    border-right: 1px solid var(--color-border);
+    border-bottom: 0;
+    overflow-x: visible;
+  }
+
+  .admin-layout__lista {
+    flex-direction: column;
+    padding: var(--space-4) var(--space-3);
+  }
+}

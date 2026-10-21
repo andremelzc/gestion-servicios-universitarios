@@ -1,0 +1,25 @@
+.sla-indicador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  color: var(--color-text, #111827);
+  font-weight: 500;
+}
+
+/* El texto conserva el color de lectura (contraste AA); el color solo refuerza el icono. */
+.sla-indicador[data-sla='vencida'] svg {
+  color: var(--color-danger, #b91c1c);
+}
+
+.sla-indicador[data-sla='porVencer'] svg {
+  color: var(--color-warning, #b45309);
+}
+
+.sla-indicador[data-sla='aTiempo'] svg,
+.sla-indicador[data-sla='atendida'] svg {
+  color: var(--color-success, #047857);
+}
+
+.sla-indicador[data-sla='sinSla'] svg {
+  color: var(--color-text-muted, #4b5563);
+}

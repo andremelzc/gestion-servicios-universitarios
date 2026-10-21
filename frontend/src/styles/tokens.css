@@ -1,0 +1,57 @@
+/* Tokens del sistema de diseño (UX-04 · UX §2.1–§2.2 y biblioteca Figma de UX-01/R4-08).
+   Debe importarse antes que base.css y antes de cualquier CSS de componentes: los
+   `var(--token, respaldo)` de los componentes se resuelven aquí (el respaldo queda como
+   red de seguridad). Modo oscuro fuera del alcance mínimo (§2.1): añadir un bloque
+   `@media (prefers-color-scheme: dark)` con las sobrescrituras cuando se decida. */
+:root {
+  /* Color · base (§2.1, 11 estilos; contraste AA verificado sobre blanco). */
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-text: #111827;
+  --color-text-muted: #4b5563;
+  --color-surface: #ffffff;
+  --color-bg: #f3f4f6;
+  --color-border: #d1d5db;
+  --color-success: #047857;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+  --color-focus: #2563eb;
+
+  /* Color · estados de solicitud (§2.1; catálogo editable por el administrador).
+     La insignia usa fondo tintado al 12 % con texto normal y punto/icono del estado:
+     el color nunca es el único indicador. */
+  --color-estado-registrada: #6b7280;
+  --color-estado-evaluacion: #d97706;
+  --color-estado-asignada: #2563eb;
+  --color-estado-atencion: #7c3aed;
+  --color-estado-resuelta: #059669;
+  --color-estado-cerrada: #047857;
+
+  /* Color · capas y controles deshabilitados (referenciados por Modal y ModalAsignación). */
+  --color-overlay: rgb(17 24 39 / 0.6);
+  --color-disabled-bg: #e5e7eb;
+  --color-disabled-text: #4b5563;
+
+  /* Tipografía (§2.2). La familia Inter se usa cuando está disponible; el respaldo del
+     sistema cubre el resto (cargar la webfont queda como decisión aparte). */
+  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-small: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-h3: 1.25rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h1: 2rem;
+  --line-height-base: 1.5;
+
+  /* Espaciado (escala de 4 px, §2.2), radios, tamaños y sombras (suaves, §2.2). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius: 8px;
+  --touch-target: 44px;
+  --shadow-card: 0 1px 2px rgb(17 24 39 / 0.06), 0 1px 3px rgb(17 24 39 / 0.1);
+  --shadow-modal: 0 10px 30px rgb(0 0 0 / 0.25);
+}
