@@ -1,0 +1,14 @@
+.region-aviso {
+  margin: 0;
+  color: var(--color-success, #047857);
+  font-weight: 500;
+}
+
+/* Sin mensaje, fuera de la vista pero presente para los lectores de pantalla. */
+.region-aviso:empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
