@@ -38,7 +38,7 @@
 /* El color no es el único indicador: la sección activa también va en negrita. */
 .admin-layout__enlace[aria-current='page'] {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-surface);
   font-weight: 700;
 }
 

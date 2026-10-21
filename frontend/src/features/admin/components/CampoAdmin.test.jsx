@@ -25,6 +25,26 @@ describe('CampoAdmin', () => {
     expect(control).toHaveAccessibleDescription('Ingresa el nivel.');
   });
 
+  it('con ayudaEnVivo la región de estado existe aunque no haya ayuda y no describe al control vacía', () => {
+    const { rerender } = render(
+      <CampoAdmin id="x" etiqueta="Color" ayudaEnVivo>
+        <input />
+      </CampoAdmin>,
+    );
+    const region = screen.getByRole('status');
+    expect(region).toBeEmptyDOMElement();
+    expect(screen.getByLabelText('Color')).not.toHaveAttribute('aria-describedby');
+
+    rerender(
+      <CampoAdmin id="x" etiqueta="Color" ayuda="Poco contraste" ayudaEnVivo>
+        <input />
+      </CampoAdmin>,
+    );
+
+    expect(screen.getByRole('status')).toBe(region);
+    expect(screen.getByLabelText('Color')).toHaveAccessibleDescription('Poco contraste');
+  });
+
   it('la ayuda también describe el control, junto al error', () => {
     render(
       <CampoAdmin id="x" etiqueta="SLA" ayuda="Horas" error="Inválido">
