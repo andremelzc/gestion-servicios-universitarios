@@ -219,8 +219,8 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 | 7 | **Historias de usuario** | [SRS §6.2](../01-definicion/especificaciones-tecnicas.md#62-historias-de-usuario-y-su-división) (10 HU divididas en 29 US + 12 historias técnicas) | ✅ |
 | 8 | **Criterios de aceptación** | `specs/*/01-spec.md` (escenarios BDD en Gherkin) — [índice](../../specs/README.md) | ✅ |
 | 9 | **Arquitectura preliminar** | [Arquitectura técnica](../02-diseno/arquitectura-tecnica.md) · [Modelo de datos](../02-diseno/modelo-datos.md) · [ADRs](../02-diseno/decisiones-arquitectura.md) | ✅ |
-| 10 | **Wireframes / mockups** | Wireframes: [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad). Mockups de alta fidelidad: Figma (TASK-003, 09/10) | ⚠️ wireframes ✅ · mockups ⏳ |
-| 11 | **Prototipo** | Prototipo clicable en Figma (TASK-003) y maqueta HTML/CSS/JS ([UX §6](../01-definicion/ux-ui-prototipo.md#6-prototipo-y-desarrollo-de-la-fase-i), TASK-033) | ⏳ |
+| 10 | **Wireframes / mockups** | Wireframes: [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad) + [Figma 04-Wireframes](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177). Mockups de alta fidelidad: [Figma 05-Mockups](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-2) (TASK-003, 09/10) | ✅ |
+| 11 | **Prototipo** | Prototipo clicable en Figma: [prototipo](https://www.figma.com/proto/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-28893&p=f&t=koVwxnafwYMrZhOJ-1&scaling=min-zoom&content-scaling=fixed&page-id=83%3A2&starting-point-node-id=83%3A28893&show-proto-sidebar=1) (TASK-003, CA-7 probado por una persona ajena). Maqueta HTML/CSS/JS: [UX §6](../01-definicion/ux-ui-prototipo.md#6-prototipo-y-desarrollo-de-la-fase-i) (TASK-033) | ⚠️ prototipo ✅ · maqueta ⏳ |
 | 12 | **Evidencia del primer desarrollo** | Repositorio con la maqueta funcionando, esquema `V1`/`V2`, y el primer tramo del backend/CI (TASK-001, 002, 004, 033) | ⏳ |
 
 > **Honestidad del estado:** los puntos 10–12 dependen de artefactos que **se producen del 5 al 11 de octubre** (Figma y maqueta). Hasta entonces el informe no debe presentarlos como completos. Al terminar, se reemplazan los ⏳ por enlaces y capturas.
@@ -247,9 +247,9 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 - [x] **Specs** (spec → plan → tareas por módulo) → [`specs/`](../../specs/README.md)
 
 #### 7.2.3 UI/UX
-- [x] Wireframes → UX §5
-- [ ] Mockups → Figma (TASK-003)
-- [ ] Prototipo → Figma + maqueta (TASK-003, 033)
+- [x] Wireframes → [UX §5](../01-definicion/ux-ui-prototipo.md#5-wireframes-de-baja-fidelidad) + [Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=69-5177)
+- [x] Mockups → [Figma](https://www.figma.com/design/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-2) (TASK-003)
+- [ ] Prototipo → Figma ✅ ([enlace](https://www.figma.com/proto/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-28893&p=f&t=koVwxnafwYMrZhOJ-1&scaling=min-zoom&content-scaling=fixed&page-id=83%3A2&starting-point-node-id=83%3A28893&show-proto-sidebar=1)); maqueta pendiente (TASK-003, 033)
 - [ ] HTML DOM y CSS → maqueta (TASK-033)
 - [x] Diseño responsive → UX §2.3 y §8 (especificación); verificación en la maqueta
 - [x] Usabilidad y UX → UX §7 (plan de evaluación)

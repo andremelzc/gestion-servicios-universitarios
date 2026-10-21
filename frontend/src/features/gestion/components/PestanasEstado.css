@@ -1,0 +1,41 @@
+.pestanas-estado {
+  display: grid;
+  gap: var(--space-4, 16px);
+}
+
+.pestanas-estado__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.pestanas-estado__lista button {
+  flex: 1 1 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4, 16px);
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+/* La pestaña activa se distingue por relleno, peso y `aria-selected`, no solo por color. */
+.pestanas-estado__lista button[aria-selected='true'] {
+  background: var(--color-primary, #1d4ed8);
+  color: var(--color-surface, #ffffff);
+  font-weight: 600;
+}
+
+.pestanas-estado__lista button:focus-visible,
+.pestanas-estado [role='tabpanel']:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .pestanas-estado__lista button {
+    flex: 0 0 auto;
+  }
+}

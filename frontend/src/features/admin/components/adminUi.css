@@ -1,0 +1,139 @@
+/* Piezas comunes de las pantallas de administración: campos de formulario, botones y avisos. */
+.admin-campo {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.admin-campo label {
+  font-weight: 600;
+}
+
+.admin-campo input,
+.admin-campo select,
+.admin-campo textarea {
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.admin-campo [aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.admin-campo :focus-visible,
+.admin-boton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.admin-error,
+.admin-ayuda {
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.admin-error {
+  color: var(--color-danger);
+}
+
+/* El color no es el único indicador del error: lleva el prefijo ⚠. */
+.admin-error::before {
+  content: '⚠ ';
+}
+
+.admin-ayuda {
+  color: var(--color-text-muted);
+}
+
+.admin-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.admin-boton {
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.admin-boton--primario {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.admin-boton--peligro {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.admin-boton:disabled {
+  border-color: var(--color-border);
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.admin-formulario {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Contenedor de página: encabezado con la acción principal y aviso de éxito (`role="status"`). */
+.admin-pagina {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.admin-pagina__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.admin-pagina__cabecera h1 {
+  margin: 0;
+  font-size: var(--font-size-h2);
+}
+
+.admin-exito {
+  margin: 0;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.admin-exito:empty {
+  display: none;
+}
+
+.admin-exito::before {
+  content: '✓ ';
+}
+
+/* Muestra de color: círculo y texto (el color nunca es el único indicador). */
+.admin-muestra,
+.admin-vista-previa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-vista-previa {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}

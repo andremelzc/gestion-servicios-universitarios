@@ -1,0 +1,139 @@
+/* Estilos de FileUploader (usar tokens.css cuando llegue con UX-04).
+   Respaldo: valores de UX §2.1, mismo patrón que DataTable.css. */
+.file-uploader {
+  --fu-text: var(--color-text, #111827);
+  --fu-muted: var(--color-text-muted, #4b5563);
+  --fu-border: var(--color-border, #d1d5db);
+  --fu-primary: var(--color-primary, #1d4ed8);
+  --fu-focus: var(--color-focus, #2563eb);
+  --fu-danger: var(--color-danger, #b91c1c);
+  --fu-radius: var(--radius, 8px);
+  color: var(--fu-text);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-uploader__etiqueta {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.file-uploader__zona {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 20px 12px;
+  border: 2px dashed var(--fu-border);
+  border-radius: var(--fu-radius);
+  text-align: center;
+  cursor: pointer;
+}
+
+.file-uploader__zona[data-arrastrando='true'] {
+  border-color: var(--fu-primary);
+  /* Tinte del color primario (#1D4ED8 al 6 %) sin depender de color-mix. */
+  background: rgb(29 78 216 / 6%);
+}
+
+.file-uploader__zona:focus-within {
+  outline: 3px solid var(--fu-focus);
+  outline-offset: 2px;
+}
+
+.file-uploader__instruccion {
+  font-size: 0.875rem;
+}
+
+.file-uploader__ayuda {
+  font-size: 0.8125rem;
+  color: var(--fu-muted);
+}
+
+.file-uploader__aviso {
+  margin: 0;
+  color: var(--fu-danger);
+  font-size: 0.875rem;
+}
+
+.file-uploader__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-uploader__archivo {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--fu-border);
+  border-radius: var(--fu-radius);
+}
+
+.file-uploader__archivo[data-error='true'] {
+  border-color: var(--fu-danger);
+}
+
+.file-uploader__miniatura {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.file-uploader__tipo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: var(--fu-border);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.file-uploader__nombre {
+  overflow-wrap: anywhere;
+}
+
+.file-uploader__tamano {
+  color: var(--fu-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.file-uploader__quitar {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--fu-radius);
+  background: transparent;
+  color: var(--fu-danger);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.file-uploader__quitar:hover {
+  background: rgb(185 28 28 / 8%);
+}
+
+.file-uploader__quitar:focus-visible {
+  outline: 3px solid var(--fu-focus);
+  outline-offset: 1px;
+}
+
+.file-uploader__error {
+  grid-column: 2 / -1;
+  margin: 0;
+  color: var(--fu-danger);
+  font-size: 0.875rem;
+}
