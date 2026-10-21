@@ -1,0 +1,34 @@
+.acceso-denegado {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.acceso-denegado__titulo {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-h2);
+}
+
+.acceso-denegado__titulo:focus {
+  outline: none;
+}
+
+.acceso-denegado__enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+.acceso-denegado__enlace:hover {
+  background: var(--color-primary-hover);
+}
+
+.acceso-denegado__enlace:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

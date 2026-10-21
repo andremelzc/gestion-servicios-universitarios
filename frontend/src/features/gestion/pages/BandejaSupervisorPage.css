@@ -1,0 +1,26 @@
+.bandeja-supervisor {
+  display: grid;
+  gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px);
+}
+
+.bandeja-supervisor h1 {
+  margin: 0;
+  font-size: var(--font-size-h2, 1.5rem);
+}
+
+.bandeja-supervisor .data-table__acciones button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4, 16px);
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.bandeja-supervisor button:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}

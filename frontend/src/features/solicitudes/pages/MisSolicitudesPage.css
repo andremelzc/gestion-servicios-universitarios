@@ -1,0 +1,51 @@
+/* Estilos de MisSolicitudesPage (REG-18 · W-04; tokens de UX §2 vía tokens.css, con respaldo).
+   El listado (tabla/tarjetas, filtros, paginación y vacío) lo pinta `DataTable`; aquí solo la
+   cabecera de la pantalla: título + la acción "Nueva solicitud" (también la del estado vacío). */
+.mis-solicitudes {
+  --ms-text: var(--color-text, #111827);
+  --ms-primary: var(--color-primary, #1d4ed8);
+  --ms-primary-hover: var(--color-primary-hover, #1e40af);
+  --ms-focus: var(--color-focus, #2563eb);
+  --ms-radius: var(--radius, 8px);
+  color: var(--ms-text);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.mis-solicitudes__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mis-solicitudes__titulo {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Acción principal: [+ Nueva] de la cabecera y "Crear una" del estado vacío (W-04). */
+.mis-solicitudes__nueva {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--ms-radius);
+  background: var(--ms-primary);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mis-solicitudes__nueva:hover {
+  background: var(--ms-primary-hover);
+}
+
+.mis-solicitudes__nueva:focus-visible {
+  outline: 3px solid var(--ms-focus);
+  outline-offset: 2px;
+}

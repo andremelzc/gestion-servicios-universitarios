@@ -35,7 +35,7 @@ jobs:
 
       - name: Publicar Reporte de Cobertura JaCoCo
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage-report
           path: backend/target/site/jacoco/
@@ -69,7 +69,7 @@ jobs:
 
       - name: Publicar Reporte de Cobertura Vitest
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage-report
           path: frontend/coverage/
@@ -85,7 +85,7 @@ jobs:
     needs: [backend-build-test, frontend-build-lint]
     steps:
       - name: Checkout del repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validar build Docker Backend
         if: hashFiles('backend/Dockerfile') != ''
