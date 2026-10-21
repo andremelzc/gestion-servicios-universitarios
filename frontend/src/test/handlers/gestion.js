@@ -70,7 +70,8 @@ export const resumenEjemplo = {
   tecnicoNombreCompleto: null,
   fechaRegistro: '2026-10-03T15:04:05',
   fechaLimiteSla: '2026-10-04T15:04:05',
-  vencida: false,
+  // El API calcula `vencida` con su reloj; el ejemplo tiene el límite en el pasado.
+  vencida: true,
 };
 
 /** Sobre `Page<T>` de api-rest §2.3. */
