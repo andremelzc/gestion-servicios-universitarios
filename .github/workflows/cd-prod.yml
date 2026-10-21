@@ -1,9 +1,14 @@
 name: Pipeline CD - Despliegue a Producción
 
 on:
+  # Despliegue automático a Producción al integrar cambios en main
   push:
+    branches:
+      - main
     tags:
-      - 'v*' # Se ejecuta automáticamente cuando creas un tag de versión, ej: v1.0.0
+      - 'v*' # También se ejecuta al crear un tag de versión, ej: v1.0.0
+  # Permite lanzar el despliegue manualmente desde la pestaña Actions
+  workflow_dispatch:
 
 jobs:
   ci:
