@@ -51,7 +51,6 @@ const placeholders = [
   ['/solicitudes/nueva', 'Nueva solicitud'],
   ['/solicitudes/42', 'Detalle de solicitud'],
   ['/perfil', 'Perfil'],
-  ['/bandeja', 'Bandeja de solicitudes'],
   ['/dashboard', 'Dashboard'],
   ['/admin/usuarios', 'Administración de usuarios'],
   ['/admin/areas', 'Administración de áreas'],
@@ -108,6 +107,21 @@ describe('router', () => {
 
     await screen.findByRole('heading', { level: 1, name: 'Bandeja de solicitudes' });
     expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+  });
+
+  // `/bandeja` elige la vista según el rol de la sesión, así que no es un marcador fijo.
+  it.each([
+    ['SUPERVISOR', 'Bandeja de solicitudes'],
+    ['TECNICO', 'Mis asignadas'],
+    ['ESTUDIANTE', 'Acceso no permitido'],
+  ])('[US-08/US-09] la ruta /bandeja con rol %s muestra "%s"', async (rol, heading) => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ token: tokenVigente(), usuario: { ...USUARIO, rol } }),
+    );
+    renderAt('/bandeja');
+
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
   });
 
   it('[BASE-04 CA-4] una ruta desconocida muestra la página 404', () => {

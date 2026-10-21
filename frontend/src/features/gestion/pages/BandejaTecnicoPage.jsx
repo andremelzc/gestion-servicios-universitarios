@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
 import { interpretarError } from '../../../services/errores.js';
-import { iniciarAtencion } from '../../../services/solicitudes.api.js';
+import { iniciarAtencion, resolver } from '../../../services/solicitudes.api.js';
+import ModalResolucion from '../components/ModalResolucion.jsx';
 import PestanasEstado from '../components/PestanasEstado.jsx';
 import RegionAviso from '../components/RegionAviso.jsx';
 import SlaIndicador from '../components/SlaIndicador.jsx';
@@ -29,14 +30,17 @@ const PESTANAS = [
 
 /**
  * Bandeja del técnico (US-09 · UX W-07, móvil primero): "Por iniciar" y "En curso" como
- * tarjetas, con la acción Iniciar atención (Resolver se suma en el siguiente cambio). Contenedor:
- * llama al API; tras cada acción refresca la lista y lo anuncia en una región `aria-live`.
+ * tarjetas, con las acciones Iniciar atención y Resolver (`ModalResolucion`). Contenedor: llama al
+ * API; tras cada acción refresca la lista y lo anuncia en una región `aria-live`.
  */
 export default function BandejaTecnicoPage() {
   const [pestanaId, setPestanaId] = useState(PESTANAS[0].id);
   const [pagina, setPagina] = useState(0);
   const [iniciando, setIniciando] = useState(() => new Set());
   const [alerta, setAlerta] = useState('');
+  const [resolviendo, setResolviendo] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+  const [errorResolucion, setErrorResolucion] = useState(null);
   const aviso = useAviso();
   // Ids con la petición en vuelo: una referencia, para ignorar un segundo clic antes del re-render.
   const enVuelo = useRef(new Set());
@@ -84,6 +88,23 @@ export default function BandejaTecnicoPage() {
     } finally {
       enVuelo.current.delete(solicitud.id);
       setIniciando(new Set(enVuelo.current));
+    }
+  }
+
+  async function enviarResolucion(datos) {
+    setEnviando(true);
+    setErrorResolucion(null);
+    aviso.limpiar();
+    try {
+      await resolver(resolviendo.id, datos);
+      aviso.anunciar(`${resolviendo.codigo} marcada como resuelta.`);
+      pendienteFoco.current = true;
+      setResolviendo(null);
+      bandeja.refetch();
+    } catch (falla) {
+      setErrorResolucion(falla);
+    } finally {
+      setEnviando(false);
     }
   }
 
@@ -140,7 +161,7 @@ export default function BandejaTecnicoPage() {
           page={bandeja.page}
           onPageChange={setPagina}
           renderActions={(s) =>
-            pestana.estado === 'ASIGNADA' && (
+            pestana.estado === 'ASIGNADA' ? (
               <button
                 type="button"
                 aria-label={`Iniciar atención ${s.codigo}`}
@@ -149,10 +170,31 @@ export default function BandejaTecnicoPage() {
               >
                 {iniciando.has(s.id) ? 'Iniciando…' : 'Iniciar atención'}
               </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={`Resolver ${s.codigo}`}
+                onClick={() => {
+                  aviso.limpiar();
+                  setErrorResolucion(null);
+                  setResolviendo(s);
+                }}
+              >
+                Resolver
+              </button>
             )
           }
         />
       </PestanasEstado>
+
+      <ModalResolucion
+        isOpen={resolviendo !== null}
+        solicitud={resolviendo}
+        onClose={() => setResolviendo(null)}
+        onSubmit={enviarResolucion}
+        isSubmitting={enviando}
+        error={errorResolucion}
+      />
     </main>
   );
 }
