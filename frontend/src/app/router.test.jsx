@@ -24,8 +24,8 @@ const USUARIO = {
 
 // Igual que App.jsx: las páginas pueden usar useAuth() (p. ej. /login, AUTH-16),
 // que exige el AuthProvider de Providers.
-const renderAt = (path) => {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+const renderAt = (entrada) => {
+  const router = createMemoryRouter(routes, { initialEntries: [entrada] });
   render(
     <Providers>
       <RouterProvider router={router} />
@@ -34,7 +34,16 @@ const renderAt = (path) => {
   return router;
 };
 
-// Mapa de rutas: docs/01-definicion/ux-ui-prototipo.md §3
+// Siembra una sesión persistida (token sin `exp`: se considera vigente) con el rol indicado.
+const iniciarSesionComo = (rol) =>
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ token: 'jwt-de-prueba', usuario: { id: 1, nombre: 'Ana', rol } }),
+  );
+
+beforeEach(() => localStorage.clear());
+
+// Mapa de rutas: docs/01-definicion/ux-ui-prototipo.md §3 (con sesión de ADMIN, que accede a todo)
 const placeholders = [
   ['/login', 'Iniciar sesión'],
   ['/registro', 'Crear cuenta'],
@@ -55,10 +64,49 @@ beforeEach(() => {
 });
 
 describe('router', () => {
-  it.each(placeholders)('[BASE-04 CA-4] la ruta %s muestra su encabezado "%s"', (path, heading) => {
-    renderAt(path);
+  it.each(placeholders)(
+    '[BASE-04 CA-4] la ruta %s muestra su encabezado "%s"',
+    async (path, heading) => {
+      iniciarSesionComo('ADMIN');
+      renderAt(path);
 
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    },
+  );
+
+  it('[ADM-13 CA-13] el ADMIN ve el menú de administración en las rutas /admin/*', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
+    expect(screen.getByRole('navigation', { name: 'Administración' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Áreas' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('[ADM-13 / AUTH-19] el menú de administración se pinta dentro del AppShell, sin duplicar <main>', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getAllByRole('navigation')).toHaveLength(1);
+  });
+
+  it('[ADM-13 CA-13] un rol sin acceso recibe 403 y no ve el menú de administración', async () => {
+    iniciarSesionComo('SUPERVISOR');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
+    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+  });
+
+  it('[ADM-13] fuera de /admin no aparece el menú de administración', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/bandeja');
+
+    await screen.findByRole('heading', { level: 1, name: 'Bandeja de solicitudes' });
+    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
   });
 
   // `/bandeja` elige la vista según el rol de la sesión, así que no es un marcador fijo.
@@ -90,15 +138,26 @@ describe('router', () => {
     expect(router.state.location.pathname).toBe('/login');
   });
 
-  it('[BASE-04 CA-4] "/admin" redirige a /admin/usuarios', () => {
+  it('[BASE-04 CA-4] "/admin" redirige a /admin/usuarios (ADMIN)', async () => {
+    iniciarSesionComo('ADMIN');
     const router = renderAt('/admin');
 
+    await screen.findByRole('heading', { level: 1, name: 'Administración de usuarios' });
     expect(router.state.location.pathname).toBe('/admin/usuarios');
   });
 
-  it('[AUTH-19] las rutas del área autenticada se envuelven en el AppShell', () => {
+  it('[AUTH-19] las rutas del área autenticada se envuelven en el AppShell', async () => {
+    iniciarSesionComo('ESTUDIANTE');
     renderAt('/perfil');
 
+    expect(await screen.findByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+  });
+
+  it('[AUTH-19] las rutas /admin/* con rol ADMIN también van dentro del AppShell', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/admin/usuarios');
+
+    await screen.findByRole('heading', { level: 1, name: 'Administración de usuarios' });
     expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
   });
 
@@ -108,11 +167,110 @@ describe('router', () => {
     expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
   });
 
+  it('[AUTH-18] la 403 de un rol sin acceso se pinta dentro del AppShell (cabecera y sesión)', async () => {
+    iniciarSesionComo('ESTUDIANTE');
+    renderAt('/admin/usuarios');
+
+    await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /ana/i })).toBeInTheDocument();
+  });
+
+  it('[AUTH-18] sin sesión no se pinta el AppShell: redirige a /login', async () => {
+    renderAt('/admin/usuarios');
+
+    await screen.findByRole('heading', { level: 1, name: 'Iniciar sesión' });
+    expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
+  });
+
   it('[AUTH-19] con sesión, el AppShell muestra el nombre y el rol del usuario', async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: tokenVigente(), usuario: USUARIO }));
     renderAt('/perfil');
 
     const boton = await screen.findByRole('button', { name: /juan pérez/i });
     expect(boton).toHaveTextContent('Estudiante');
+  });
+
+  it('[REG-17] la confirmación se muestra dentro del AppShell con el código', async () => {
+    iniciarSesionComo('ESTUDIANTE');
+    const router = renderAt({
+      pathname: '/solicitudes/confirmacion',
+      state: { id: 150, codigo: 'SOL-2026-0150' },
+    });
+
+    expect(await screen.findByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/solicitudes/confirmacion');
+    expect(screen.getByRole('status')).toHaveTextContent('Registrada: SOL-2026-0150');
+  });
+
+  // Matriz de UX §3 por rol: [ruta, rol, encabezado esperado]. Si el rol no puede entrar,
+  // el encabezado es el de la página 403; si puede, el de la pantalla de esa ruta.
+  const NO = 'Acceso no permitido';
+  const protegidas = [
+    ['/mis-solicitudes', 'ESTUDIANTE', 'Mis solicitudes'],
+    ['/solicitudes/nueva', 'ESTUDIANTE', 'Nueva solicitud'],
+    ['/solicitudes/42', 'ESTUDIANTE', 'Detalle de solicitud'],
+    ['/perfil', 'ESTUDIANTE', 'Perfil'],
+    ['/bandeja', 'ESTUDIANTE', NO],
+    ['/dashboard', 'ESTUDIANTE', NO],
+    ['/admin/usuarios', 'ESTUDIANTE', NO],
+    ['/bandeja', 'TECNICO', 'Bandeja de solicitudes'],
+    ['/dashboard', 'TECNICO', 'Dashboard'],
+    ['/admin/areas', 'TECNICO', NO],
+    ['/bandeja', 'SUPERVISOR', 'Bandeja de solicitudes'],
+    ['/dashboard', 'SUPERVISOR', 'Dashboard'],
+    ['/admin/categorias', 'SUPERVISOR', NO],
+    ['/admin/usuarios', 'ADMIN', 'Administración de usuarios'],
+    ['/admin/areas', 'ADMIN', 'Administración de áreas'],
+    ['/admin/categorias', 'ADMIN', 'Administración de categorías'],
+    ['/admin/prioridades', 'ADMIN', 'Administración de prioridades'],
+    ['/admin/estados', 'ADMIN', 'Administración de estados'],
+  ];
+
+  it.each(protegidas)(
+    '[AUTH-18 CA-10] la ruta %s con rol %s muestra "%s"',
+    async (path, rol, encabezado) => {
+      iniciarSesionComo(rol);
+      renderAt(path);
+
+      expect(
+        await screen.findByRole('heading', { level: 1, name: encabezado }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    '/mis-solicitudes',
+    '/solicitudes/nueva',
+    '/solicitudes/42',
+    '/perfil',
+    '/bandeja',
+    '/dashboard',
+    '/admin',
+    '/admin/usuarios',
+  ])('[AUTH-18 CA-9] sin sesión, %s redirige a /login y guarda el origen', async (path) => {
+    const router = renderAt(path);
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Iniciar sesión' }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/login');
+    expect(router.state.location.state.from.pathname).toBe(path);
+  });
+
+  it('[AUTH-18] /login y /registro siguen siendo públicos', async () => {
+    renderAt('/registro');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Crear cuenta' }),
+    ).toBeInTheDocument();
+  });
+
+  it('[AUTH-18] una ruta desconocida muestra 404 también sin sesión', () => {
+    renderAt('/no-existe');
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Página no encontrada' }),
+    ).toBeInTheDocument();
   });
 });

@@ -1,4 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { Blob as NodeBlob, File as NodeFile } from 'node:buffer';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+
+// jsdom ↔ undici: en Node ≥ 22 el parser multipart de undici exige un File real y
+// rechaza el de jsdom (`request.formData()` lanza y MSW responde 500). Se usan las
+// clases de Node solo en este archivo: en `test/setup.js` chocarían con
+// `URL.createObjectURL` de jsdom, que usan FileUploader y ModalResolucion.
+beforeAll(async () => {
+  const FormDataUndici = (
+    await new Response('--b--\r\n', {
+      headers: { 'Content-Type': 'multipart/form-data; boundary=b' },
+    }).formData()
+  ).constructor;
+  vi.stubGlobal('Blob', NodeBlob);
+  vi.stubGlobal('File', NodeFile);
+  vi.stubGlobal('FormData', FormDataUndici);
+});
 
 const API = 'http://localhost/api/v1';
 const BASE_TYPE = 'https://servicios.universidad.edu/problemas/';
