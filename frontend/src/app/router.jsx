@@ -13,6 +13,7 @@ import AreasPage from '../features/admin/pages/AreasPage.jsx';
 import CategoriasPage from '../features/admin/pages/CategoriasPage.jsx';
 import PrioridadesPage from '../features/admin/pages/PrioridadesPage.jsx';
 import EstadosPage from '../features/admin/pages/EstadosPage.jsx';
+import AdminLayout from '../features/admin/components/AdminLayout.jsx';
 import ProtectedRoute from '../components/layout/ProtectedRoute.jsx';
 import RoleRoute from '../components/layout/RoleRoute.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
@@ -48,11 +49,18 @@ export const routes = [
         element: <RoleRoute allowedRoles={ROLES_ADMIN} />,
         children: [
           { path: '/admin', element: <Navigate to="/admin/usuarios" replace /> },
-          { path: '/admin/usuarios', element: conShell(<UsuariosPage />) },
-          { path: '/admin/areas', element: conShell(<AreasPage />) },
-          { path: '/admin/categorias', element: conShell(<CategoriasPage />) },
-          { path: '/admin/prioridades', element: conShell(<PrioridadesPage />) },
-          { path: '/admin/estados', element: conShell(<EstadosPage />) },
+          {
+            // ADM-13: las pantallas de administración comparten el menú lateral (AdminLayout),
+            // dentro del AppShell: el shell aporta cabecera y sesión; el layout, la navegación de /admin.
+            element: conShell(<AdminLayout />),
+            children: [
+              { path: '/admin/usuarios', element: <UsuariosPage /> },
+              { path: '/admin/areas', element: <AreasPage /> },
+              { path: '/admin/categorias', element: <CategoriasPage /> },
+              { path: '/admin/prioridades', element: <PrioridadesPage /> },
+              { path: '/admin/estados', element: <EstadosPage /> },
+            ],
+          },
         ],
       },
     ],

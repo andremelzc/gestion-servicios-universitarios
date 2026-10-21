@@ -75,6 +75,41 @@ describe('router', () => {
     },
   );
 
+  it('[ADM-13 CA-13] el ADMIN ve el menú de administración en las rutas /admin/*', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
+    expect(screen.getByRole('navigation', { name: 'Administración' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Áreas' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('[ADM-13 / AUTH-19] el menú de administración se pinta dentro del AppShell, sin duplicar <main>', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
+    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getAllByRole('navigation')).toHaveLength(1);
+  });
+
+  it('[ADM-13 CA-13] un rol sin acceso recibe 403 y no ve el menú de administración', async () => {
+    iniciarSesionComo('SUPERVISOR');
+    renderAt('/admin/areas');
+
+    await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
+    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+  });
+
+  it('[ADM-13] fuera de /admin no aparece el menú de administración', async () => {
+    iniciarSesionComo('ADMIN');
+    renderAt('/bandeja');
+
+    await screen.findByRole('heading', { level: 1, name: 'Bandeja de solicitudes' });
+    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+  });
+
   it('[BASE-04 CA-4] una ruta desconocida muestra la página 404', () => {
     renderAt('/ruta-que-no-existe');
 
