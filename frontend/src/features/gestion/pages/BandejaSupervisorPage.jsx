@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import EstadoBadge from '../../../components/ui/EstadoBadge.jsx';
 import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
+import PestanasEstado from '../components/PestanasEstado.jsx';
 import SlaIndicador from '../components/SlaIndicador.jsx';
+import useAhora from '../hooks/useAhora.js';
 import useBandeja from '../hooks/useBandeja.js';
 import useCatalogosBandeja from '../hooks/useCatalogosBandeja.js';
 import './BandejaSupervisorPage.css';
@@ -56,10 +58,20 @@ export default function BandejaSupervisorPage() {
   const catalogos = useCatalogosBandeja();
 
   const pestana = PESTANAS.find((p) => p.id === filtros.pestana);
-  const { data, page, isLoading, error, refetch, consultadoEn } = useBandeja({
+  const { data, page, isLoading, error, refetch } = useBandeja({
     ...filtros,
     estados: pestana.estados,
   });
+  const ahora = useAhora();
+
+  // Si la página actual quedó vacía (p. ej. se asignó su última fila), se retrocede a la anterior
+  // en vez de mostrar "sin resultados" con solicitudes en las páginas previas.
+  if (!isLoading && !error && data.length === 0 && filtros.page > 0) {
+    setFiltros((f) => ({
+      ...f,
+      page: Math.min(f.page - 1, Math.max((page?.totalPages ?? 1) - 1, 0)),
+    }));
+  }
 
   // La búsqueda se aplica al dejar de escribir, para no consultar en cada tecla.
   useEffect(() => {
@@ -101,7 +113,7 @@ export default function BandejaSupervisorPage() {
           fechaLimiteSla={s.fechaLimiteSla}
           vencida={s.vencida}
           estadoCodigo={s.estadoCodigo}
-          ahora={consultadoEn ?? 0}
+          ahora={ahora}
           mostrarPrefijo={false}
         />
       ),
@@ -148,37 +160,32 @@ export default function BandejaSupervisorPage() {
   );
 
   return (
-    <section className="bandeja-supervisor" aria-labelledby="bandeja-supervisor-titulo">
+    // AppShell no aporta `<main>`: cada página declara su landmark principal.
+    <main className="bandeja-supervisor" aria-labelledby="bandeja-supervisor-titulo">
       <h1 id="bandeja-supervisor-titulo">Bandeja de solicitudes</h1>
 
-      <div role="group" aria-label="Estado" className="bandeja-supervisor__pestanas">
-        {PESTANAS.map(({ id, nombre }) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={filtros.pestana === id}
-            onClick={() => cambiar({ pestana: id })}
-          >
-            {nombre}
-          </button>
-        ))}
-      </div>
-
-      <DataTable
-        caption="Solicitudes"
-        columns={columnas}
-        data={data}
-        isLoading={isLoading}
-        error={error}
-        onRetry={refetch}
-        emptyMessage="No hay solicitudes en esta vista."
-        search={busqueda}
-        onSearchChange={setBusqueda}
-        appliedSearch={filtros.q}
-        filters={filtrosExtra}
-        page={page}
-        onPageChange={(n) => setFiltros((f) => ({ ...f, page: n }))}
-      />
-    </section>
+      <PestanasEstado
+        pestanas={PESTANAS}
+        activa={filtros.pestana}
+        onChange={(id) => cambiar({ pestana: id })}
+        etiqueta="Estado"
+      >
+        <DataTable
+          caption="Solicitudes"
+          columns={columnas}
+          data={data}
+          isLoading={isLoading}
+          error={error}
+          onRetry={refetch}
+          emptyMessage="No hay solicitudes en esta vista."
+          search={busqueda}
+          onSearchChange={setBusqueda}
+          appliedSearch={filtros.q}
+          filters={filtrosExtra}
+          page={page}
+          onPageChange={(n) => setFiltros((f) => ({ ...f, page: n }))}
+        />
+      </PestanasEstado>
+    </main>
   );
 }
