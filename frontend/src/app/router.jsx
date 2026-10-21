@@ -4,6 +4,7 @@ import RegistroPage from '../features/auth/pages/RegistroPage.jsx';
 import PerfilPage from '../features/auth/pages/PerfilPage.jsx';
 import MisSolicitudesPage from '../features/solicitudes/pages/MisSolicitudesPage.jsx';
 import NuevaSolicitudPage from '../features/solicitudes/pages/NuevaSolicitudPage.jsx';
+import ConfirmacionSolicitudPage from '../features/solicitudes/pages/ConfirmacionSolicitudPage.jsx';
 import DetalleSolicitudPage from '../features/solicitudes/pages/DetalleSolicitudPage.jsx';
 import BandejaPage from '../features/gestion/pages/BandejaPage.jsx';
 import DashboardPage from '../features/dashboard/pages/DashboardPage.jsx';
@@ -34,6 +35,7 @@ export const routes = [
     children: [
       { path: '/mis-solicitudes', element: conShell(<MisSolicitudesPage />) },
       { path: '/solicitudes/nueva', element: conShell(<NuevaSolicitudPage />) },
+      { path: '/solicitudes/confirmacion', element: conShell(<ConfirmacionSolicitudPage />) },
       { path: '/solicitudes/:id', element: conShell(<DetalleSolicitudPage />) },
       { path: '/perfil', element: conShell(<PerfilPage />) },
       {

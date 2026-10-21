@@ -1,0 +1,32 @@
+/* Etiqueta de prioridad (UX §8): texto oscuro + icono de color (≥ 3:1 sobre blanco). */
+.prioridad-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  color: var(--color-text, #111827);
+  font-size: var(--font-size-small, 0.875rem);
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.prioridad-tag__icono {
+  flex: none;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.prioridad-tag[data-nivel='baja'] .prioridad-tag__icono {
+  color: var(--color-success, #047857);
+}
+
+.prioridad-tag[data-nivel='media'] .prioridad-tag__icono {
+  color: var(--color-primary, #1d4ed8);
+}
+
+.prioridad-tag[data-nivel='alta'] .prioridad-tag__icono {
+  color: var(--color-warning, #b45309);
+}
+
+.prioridad-tag[data-nivel='critica'] .prioridad-tag__icono {
+  color: var(--color-danger, #b91c1c);
+}

@@ -24,8 +24,8 @@ const USUARIO = {
 
 // Igual que App.jsx: las páginas pueden usar useAuth() (p. ej. /login, AUTH-16),
 // que exige el AuthProvider de Providers.
-const renderAt = (path) => {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+const renderAt = (entrada) => {
+  const router = createMemoryRouter(routes, { initialEntries: [entrada] });
   render(
     <Providers>
       <RouterProvider router={router} />
@@ -175,6 +175,18 @@ describe('router', () => {
 
     const boton = await screen.findByRole('button', { name: /juan pérez/i });
     expect(boton).toHaveTextContent('Estudiante');
+  });
+
+  it('[REG-17] la confirmación se muestra dentro del AppShell con el código', async () => {
+    iniciarSesionComo('ESTUDIANTE');
+    const router = renderAt({
+      pathname: '/solicitudes/confirmacion',
+      state: { id: 150, codigo: 'SOL-2026-0150' },
+    });
+
+    expect(await screen.findByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/solicitudes/confirmacion');
+    expect(screen.getByRole('status')).toHaveTextContent('Registrada: SOL-2026-0150');
   });
 
   // Matriz de UX §3 por rol: [ruta, rol, encabezado esperado]. Si el rol no puede entrar,
