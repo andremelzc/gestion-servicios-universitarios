@@ -12,7 +12,8 @@
   font-size: 0.875rem;
 }
 
-.filtros-dashboard__campo input {
+.filtros-dashboard__campo input,
+.filtros-dashboard__campo select {
   min-height: var(--touch-target, 44px);
   padding: 0 var(--space-3, 12px);
   background: var(--color-surface, #ffffff);
@@ -27,6 +28,7 @@
 }
 
 .filtros-dashboard__campo input:focus-visible,
+.filtros-dashboard__campo select:focus-visible,
 .filtros-dashboard__boton:focus-visible {
   outline: 3px solid var(--color-focus, #2563eb);
   outline-offset: 2px;
