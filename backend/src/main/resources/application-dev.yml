@@ -11,6 +11,12 @@ spring:
         user: ${FLYWAY_USER:${DB_USER:app_servicios}}
         password: ${FLYWAY_PASSWORD:${DB_PASSWORD:dev_app_password}}
 
+springdoc:
+    api-docs:
+        enabled: ${SWAGGER_ENABLED:true}
+    swagger-ui:
+        enabled: ${SWAGGER_ENABLED:true}
+
 server:
     error:
         include-message: always

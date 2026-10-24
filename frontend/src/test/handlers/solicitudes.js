@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { problema } from './gestion.js';
 
-// Catálogos y alta de solicitudes (docs/02-diseno/api-rest.md §3.2 y §3.5), con las formas
-// reales de CategoriaResponse/PrioridadResponse/SolicitudCreadaResponse del backend.
+// Catálogos de categorías, alta y listado de solicitudes propias (docs/02-diseno/api-rest.md
+// §3.2 y §3.5), con las formas reales de CategoriaResponse/SolicitudCreadaResponse del backend.
 export const categoriasEjemplo = [
   {
     id: 2,
@@ -22,12 +22,6 @@ export const categoriasEjemplo = [
     tiempoSlaHoras: 48,
     activo: true,
   },
-];
-
-export const prioridadesEjemplo = [
-  { id: 1, nivel: 'BAJA', ponderador: 1, slaMaxHoras: 72, activo: true },
-  { id: 2, nivel: 'MEDIA', ponderador: 2, slaMaxHoras: 48, activo: true },
-  { id: 3, nivel: 'ALTA', ponderador: 3, slaMaxHoras: 8, activo: true },
 ];
 
 export const solicitudCreadaEjemplo = {
@@ -102,8 +96,6 @@ export function responderMisSolicitudes(request) {
 
 export const handlersSolicitudes = [
   http.get('*/api/v1/categorias', () => HttpResponse.json(categoriasEjemplo)),
-
-  http.get('*/api/v1/prioridades', () => HttpResponse.json(prioridadesEjemplo)),
 
   http.get('*/api/v1/solicitudes/mis-solicitudes', ({ request }) =>
     responderMisSolicitudes(request),
