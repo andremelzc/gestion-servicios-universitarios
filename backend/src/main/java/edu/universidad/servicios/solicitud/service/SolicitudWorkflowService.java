@@ -2,7 +2,9 @@ package edu.universidad.servicios.solicitud.service;
 
 import edu.universidad.servicios.solicitud.domain.*;
 import edu.universidad.servicios.solicitud.dto.SolicitudAsignarRequest;
+import edu.universidad.servicios.solicitud.dto.SolicitudCerrarRequest;
 import edu.universidad.servicios.solicitud.dto.SolicitudDetalleResponse;
+import edu.universidad.servicios.solicitud.dto.SolicitudEvaluarRequest;
 import edu.universidad.servicios.solicitud.dto.SolicitudResolverRequest;
 import edu.universidad.servicios.solicitud.repository.*;
 import edu.universidad.servicios.usuario.domain.Usuario;
@@ -315,12 +317,18 @@ public class SolicitudWorkflowService {
                 throw new IllegalArgumentException("Datos inválidos para resolución");
             }
             case EVALUAR -> {
+                if (datos instanceof SolicitudEvaluarRequest req) {
+                    yield evaluar(id, req.idPrioridad(), req.nota(), actor);
+                }
                 if (datos instanceof Integer idPrio) {
                     yield evaluar(id, idPrio, null, actor);
                 }
                 yield evaluar(id, null, null, actor);
             }
             case CERRAR -> {
+                if (datos instanceof SolicitudCerrarRequest req) {
+                    yield cerrar(id, req.nota(), actor);
+                }
                 String nota = (datos instanceof String s) ? s : null;
                 yield cerrar(id, nota, actor);
             }

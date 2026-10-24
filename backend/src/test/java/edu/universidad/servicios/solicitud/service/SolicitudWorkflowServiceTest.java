@@ -93,6 +93,7 @@ class SolicitudWorkflowServiceTest {
     private EstadoSolicitud estadoAsignada;
     private EstadoSolicitud estadoEnAtencion;
     private EstadoSolicitud estadoResuelta;
+    private EstadoSolicitud estadoCerrada;
 
     private Solicitud solicitud;
 
@@ -181,6 +182,10 @@ class SolicitudWorkflowServiceTest {
         estadoResuelta = new EstadoSolicitud();
         estadoResuelta.setCodigo("RESUELTA");
         estadoResuelta.setNombreVisible("Resuelta");
+
+        estadoCerrada = new EstadoSolicitud();
+        estadoCerrada.setCodigo("CERRADA");
+        estadoCerrada.setNombreVisible("Cerrada");
 
         solicitud = new Solicitud();
         solicitud.setId(100L);
@@ -388,5 +393,140 @@ class SolicitudWorkflowServiceTest {
         );
 
         assertThat(ex.getMessage()).contains("al menos 1 evidencia");
+    }
+
+    @Test
+    @DisplayName("[GES-11 / CA-6] Evaluar solicitud en REGISTRADA actualiza a EN_EVALUACION con cambio de prioridad y recálculo de SLA")
+    void evaluarExitosaConCambioPrioridad() {
+        solicitud.setEstado(estadoRegistrada);
+
+        Prioridad prioridadAlta = new Prioridad();
+        prioridadAlta.setId(3);
+        prioridadAlta.setNivel("ALTA");
+        prioridadAlta.setActivo(true);
+
+        LocalDateTime nuevaFechaSla = solicitud.getFechaRegistro().plusHours(24);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(supervisorTI, solicitud)).thenReturn(true);
+        when(accessPolicy.puedeEjecutar(eq(supervisorTI), eq(solicitud), eq(Transicion.EVALUAR))).thenReturn(true);
+        when(prioridadRepository.findByIdAndActivoTrue(3)).thenReturn(Optional.of(prioridadAlta));
+        when(slaCalculator.calcularFechaLimite(eq(solicitud.getFechaRegistro()), eq(prioridadAlta), eq(solicitud.getCategoria())))
+                .thenReturn(nuevaFechaSla);
+        when(estadoRepository.findById("EN_EVALUACION")).thenReturn(Optional.of(estadoEnEvaluacion));
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitudDetalleResponse detalle = workflowService.evaluar(100L, 3, "Prioridad ajustada por urgencia", supervisorTI);
+
+        assertThat(detalle.estadoCodigo()).isEqualTo("EN_EVALUACION");
+        assertThat(solicitud.getPrioridad()).isEqualTo(prioridadAlta);
+        assertThat(solicitud.getFechaLimiteSla()).isEqualTo(nuevaFechaSla);
+        verify(historialService).registrar(eq(solicitud), eq(supervisorTI), eq(estadoRegistrada), eq(estadoEnEvaluacion),
+                eq("Prioridad ajustada por urgencia"));
+    }
+
+    @Test
+    @DisplayName("[GES-11] Evaluar solicitud sin cambio de prioridad mantiene la prioridad actual")
+    void evaluarExitosaSinCambioPrioridad() {
+        solicitud.setEstado(estadoRegistrada);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(supervisorTI, solicitud)).thenReturn(true);
+        when(accessPolicy.puedeEjecutar(eq(supervisorTI), eq(solicitud), eq(Transicion.EVALUAR))).thenReturn(true);
+        when(estadoRepository.findById("EN_EVALUACION")).thenReturn(Optional.of(estadoEnEvaluacion));
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitudDetalleResponse detalle = workflowService.evaluar(100L, null, "Sin cambios de prioridad", supervisorTI);
+
+        assertThat(detalle.estadoCodigo()).isEqualTo("EN_EVALUACION");
+        verify(prioridadRepository, never()).findByIdAndActivoTrue(any());
+        verify(slaCalculator, never()).calcularFechaLimite(any(), any(), any());
+        verify(historialService).registrar(eq(solicitud), eq(supervisorTI), eq(estadoRegistrada), eq(estadoEnEvaluacion),
+                eq("Sin cambios de prioridad"));
+    }
+
+    @Test
+    @DisplayName("[GES-11] Evaluar solicitud desde estado distinto a REGISTRADA lanza ResponseStatusException CONFLICT (409)")
+    void evaluarDesdeEstadoInvalidoLanzaConflict() {
+        solicitud.setEstado(estadoEnAtencion);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(supervisorTI, solicitud)).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                workflowService.evaluar(100L, null, null, supervisorTI)
+        );
+
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(ex.getReason()).contains("REGISTRADA");
+    }
+
+    @Test
+    @DisplayName("[GES-11] Evaluar solicitud sin permisos de supervisor/admin lanza FORBIDDEN (403)")
+    void evaluarSinPermisosLanzaForbidden() {
+        solicitud.setEstado(estadoRegistrada);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(estudiante, solicitud)).thenReturn(true);
+        when(accessPolicy.puedeEjecutar(eq(estudiante), eq(solicitud), eq(Transicion.EVALUAR))).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                workflowService.evaluar(100L, null, null, estudiante)
+        );
+
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(ex.getReason()).contains("No tiene permisos");
+    }
+
+    @Test
+    @DisplayName("[GES-13 / CA-14] Cerrar solicitud en RESUELTA actualiza a CERRADA y registra fecha de cierre")
+    void cerrarExitosa() {
+        solicitud.setEstado(estadoResuelta);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(estudiante, solicitud)).thenReturn(true);
+        when(accessPolicy.puedeEjecutar(eq(estudiante), eq(solicitud), eq(Transicion.CERRAR))).thenReturn(true);
+        when(estadoRepository.findById("CERRADA")).thenReturn(Optional.of(estadoCerrada));
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SolicitudDetalleResponse detalle = workflowService.cerrar(100L, "Conforme con el servicio", estudiante);
+
+        assertThat(detalle.estadoCodigo()).isEqualTo("CERRADA");
+        assertThat(solicitud.getFechaCierre()).isNotNull();
+        verify(historialService).registrar(eq(solicitud), eq(estudiante), eq(estadoResuelta), eq(estadoCerrada),
+                eq("Conforme con el servicio"));
+    }
+
+    @Test
+    @DisplayName("[GES-13] Cerrar solicitud desde estado no RESUELTA lanza ResponseStatusException CONFLICT (409)")
+    void cerrarDesdeEstadoNoResueltaLanzaConflict() {
+        solicitud.setEstado(estadoEnEvaluacion);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(estudiante, solicitud)).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                workflowService.cerrar(100L, null, estudiante)
+        );
+
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(ex.getReason()).contains("RESUELTA");
+    }
+
+    @Test
+    @DisplayName("[GES-13] Cerrar solicitud sin autorización lanza FORBIDDEN (403)")
+    void cerrarSinPermisosLanzaForbidden() {
+        solicitud.setEstado(estadoResuelta);
+
+        when(solicitudRepository.findByIdConDetalles(100L)).thenReturn(Optional.of(solicitud));
+        when(accessPolicy.puedeVer(tecnicoTI, solicitud)).thenReturn(true);
+        when(accessPolicy.puedeEjecutar(eq(tecnicoTI), eq(solicitud), eq(Transicion.CERRAR))).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                workflowService.cerrar(100L, null, tecnicoTI)
+        );
+
+        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(ex.getReason()).contains("No tiene permisos");
     }
 }
