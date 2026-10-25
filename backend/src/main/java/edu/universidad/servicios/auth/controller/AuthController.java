@@ -9,6 +9,13 @@ import edu.universidad.servicios.auth.dto.RegistroRequest;
 import edu.universidad.servicios.auth.exception.PasswordActualIncorrectaException;
 import edu.universidad.servicios.auth.security.UsuarioDetails;
 import edu.universidad.servicios.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,11 +35,22 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(name = "Autenticación", description = "Endpoints para inicio de sesión, registro y gestión de credenciales")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Iniciar sesión",
+            description = "Autentica al usuario con correo y contraseña, retornando token JWT y perfil básico."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Autenticación exitosa",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Credenciales con formato incorrecto"),
+            @ApiResponse(responseCode = "401", description = "Correo o contraseña incorrectos")
+    })
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
@@ -46,6 +64,16 @@ public class AuthController {
      * gracias al {@link ExceptionHandler} local de {@link HttpMessageNotReadableException}.</p>
      */
     @PostMapping("/registro")
+    @Operation(
+            summary = "Registro público de estudiante",
+            description = "Permite registrar un nuevo estudiante en el sistema con asignación forzada de ROLE_ESTUDIANTE y login automático."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente con auto-login",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos de registro inválidos o campo no permitido"),
+            @ApiResponse(responseCode = "409", description = "El correo o código institucional ya está registrado")
+    })
     public ResponseEntity<AuthResponse> registro(@Valid @RequestBody RegistroRequest request) {
         AuthResponse response = authService.registrar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -53,12 +81,6 @@ public class AuthController {
 
     /**
      * Intercepta campos desconocidos como {@code "rol"} en el JSON de registro (CA-6).
-     * Jackson por defecto ignora propiedades desconocidas; esta excepción se lanza
-     * cuando configuramos {@code FAIL_ON_UNKNOWN_PROPERTIES} en el {@code ObjectMapper}
-     * o cuando un campo no se puede mapear.
-     *
-     * <p>Este manejador local captura específicamente el caso de campos inesperados
-     * y devuelve un 400 descriptivo.</p>
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> handleUnreadableMessage(HttpMessageNotReadableException ex) {
@@ -84,12 +106,18 @@ public class AuthController {
 
     /**
      * Cambio de contraseña para el usuario autenticado (US-18, CA-14, AUTH-12).
-     *
-     * <p>Devuelve {@code 204 No Content} en caso de éxito.</p>
-     * <p>Si la contraseña actual no coincide, lanza {@link PasswordActualIncorrectaException}
-     * que se mapea a {@code 400 Bad Request} con el detalle del error en {@code errores.passwordActual}.</p>
      */
     @PutMapping("/cambiar-password")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Cambiar contraseña",
+            description = "Permite al usuario autenticado actualizar su contraseña actual por una nueva que cumpla las políticas de seguridad."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Contraseña cambiada exitosamente"),
+            @ApiResponse(responseCode = "400", description = "La contraseña actual es incorrecta o la nueva contraseña no cumple los requisitos"),
+            @ApiResponse(responseCode = "401", description = "No autenticado o token vencido")
+    })
     public ResponseEntity<Void> cambiarPassword(
             @Valid @RequestBody CambiarPasswordRequest request,
             @AuthenticationPrincipal UsuarioDetails usuarioDetails,
