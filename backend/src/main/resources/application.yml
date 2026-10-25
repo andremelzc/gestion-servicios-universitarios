@@ -27,6 +27,12 @@ app:
     security:
         allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:universidad.edu}
 
+springdoc:
+    api-docs:
+        enabled: ${SWAGGER_ENABLED:false}
+    swagger-ui:
+        enabled: ${SWAGGER_ENABLED:false}
+
 server:
     port: ${PORT:8080}
 

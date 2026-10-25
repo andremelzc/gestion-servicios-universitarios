@@ -214,7 +214,7 @@ describe('router', () => {
     ['/bandeja', 'ESTUDIANTE', NO],
     ['/dashboard', 'ESTUDIANTE', NO],
     ['/admin/usuarios', 'ESTUDIANTE', NO],
-    ['/bandeja', 'TECNICO', 'Bandeja de solicitudes'],
+    ['/bandeja', 'TECNICO', 'Mis asignadas'],
     ['/dashboard', 'TECNICO', 'Dashboard'],
     ['/admin/areas', 'TECNICO', NO],
     ['/bandeja', 'SUPERVISOR', 'Bandeja de solicitudes'],

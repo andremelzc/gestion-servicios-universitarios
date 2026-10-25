@@ -1,5 +1,5 @@
 # Etapa 1: Compilacion del Frontend
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 
 # Aprovechar cache de capas para dependencias

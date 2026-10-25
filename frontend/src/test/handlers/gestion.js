@@ -48,15 +48,6 @@ export function problema(status, slug, title, detail, instance, extra = {}) {
   );
 }
 
-// Catálogos (`GET /prioridades` entrega `nivel`; `GET /categorias`, api-rest §3.5).
-export const prioridadesEjemplo = [
-  { id: 2, nivel: 'MEDIA', ponderador: 2, slaMaxHoras: 48, activo: true },
-  { id: 3, nivel: 'ALTA', ponderador: 3, slaMaxHoras: 24, activo: true },
-];
-export const categoriasEjemplo = [
-  { id: 2, nombre: 'Equipos de Cómputo', idArea: 1, area: 'Tecnologías de la Información' },
-];
-
 // `SolicitudResumenResponse` real del backend: plano (estadoCodigo, prioridadNivel…).
 export const resumenEjemplo = {
   id: 150,
@@ -86,8 +77,6 @@ export const paginaDe = (content, extra = {}) => ({
 
 export const handlersGestion = [
   http.get('*/api/v1/solicitudes', () => HttpResponse.json(paginaDe([resumenEjemplo]))),
-  http.get('*/api/v1/prioridades', () => HttpResponse.json(prioridadesEjemplo)),
-  http.get('*/api/v1/categorias', () => HttpResponse.json(categoriasEjemplo)),
   http.put('*/api/v1/solicitudes/:id/evaluar', ({ params }) =>
     HttpResponse.json({ ...solicitudDetalleEjemplo, id: Number(params.id) }),
   ),

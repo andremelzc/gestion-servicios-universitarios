@@ -76,8 +76,10 @@ describe('listarBandeja', () => {
 describe('catálogos y acciones', () => {
   it('adapta las prioridades (`nivel`) al formato {id, nombre} del modal', async () => {
     expect(await listarPrioridades()).toEqual([
+      { id: 1, nombre: 'Baja' },
       { id: 2, nombre: 'Media' },
       { id: 3, nombre: 'Alta' },
+      { id: 4, nombre: 'Crítica' },
     ]);
   });
 

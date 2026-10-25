@@ -10,6 +10,12 @@ spring:
     flyway:
         enabled: false
 
+springdoc:
+    api-docs:
+        enabled: ${SWAGGER_ENABLED:true}
+    swagger-ui:
+        enabled: ${SWAGGER_ENABLED:true}
+
 management:
   endpoints:
     web:
