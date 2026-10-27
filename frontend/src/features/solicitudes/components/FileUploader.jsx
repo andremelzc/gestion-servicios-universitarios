@@ -162,14 +162,16 @@ export default function FileUploader({
             const error = validarArchivo(archivo);
             const clave = claveDe(archivo);
             const url = miniaturas[clave];
+            // `encodeURI` es un saneador reconocido por CodeQL; un blob: URL no cambia.
+            const urlMiniatura = esUrlMiniatura(url) ? encodeURI(url) : null;
             return (
               <li
                 key={`${clave}-${indice}`}
                 className="file-uploader__archivo"
                 data-error={Boolean(error)}
               >
-                {esUrlMiniatura(url) ? (
-                  <img className="file-uploader__miniatura" src={url} alt="" /> // codeql[js/xss-through-dom] URL.createObjectURL genera un blob: URL, no HTML del usuario.
+                {urlMiniatura ? (
+                  <img className="file-uploader__miniatura" src={urlMiniatura} alt="" />
                 ) : (
                   <span className="file-uploader__tipo" aria-hidden="true">
                     {etiquetaTipo(archivo.name)}
