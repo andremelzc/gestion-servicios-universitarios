@@ -21,6 +21,9 @@ const ACEPTADOS = '.jpg,.jpeg,.png,.pdf';
 // Identidad de la miniatura: mismo nombre, tamaño y fecha => mismo contenido esperado.
 const claveDe = (archivo) => `${archivo.name}-${archivo.size}-${archivo.lastModified}`;
 
+// Solo se renderizan object URLs creados por el navegador para las miniaturas.
+const esUrlMiniatura = (url) => typeof url === 'string' && url.startsWith('blob:');
+
 function etiquetaTipo(nombre) {
   const punto = nombre.lastIndexOf('.');
   return punto === -1 ? 'ARCHIVO' : nombre.slice(punto + 1).toUpperCase();
@@ -165,7 +168,8 @@ export default function FileUploader({
                 className="file-uploader__archivo"
                 data-error={Boolean(error)}
               >
-                {url ? (
+                {esUrlMiniatura(url) ? (
+                  // codeql[js/xss-through-dom] URL.createObjectURL genera un blob: URL, no HTML del usuario.
                   <img className="file-uploader__miniatura" src={url} alt="" />
                 ) : (
                   <span className="file-uploader__tipo" aria-hidden="true">
