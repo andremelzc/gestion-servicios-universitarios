@@ -18,7 +18,7 @@ export default [
       globals: { ...globals.browser },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '19.3' } },
     rules: {
       'react/prop-types': 'off',
     },

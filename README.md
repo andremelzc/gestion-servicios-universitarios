@@ -27,7 +27,7 @@ Las solicitudes se pierden en correos y llamadas, nadie sabe quién es responsab
 
 | Capa | Tecnología |
 |:---|:---|
-| Frontend | React 18 + Vite · React Router · Recharts · Vitest + Testing Library |
+| Frontend | React 19 + Vite · React Router · Recharts · Vitest + Testing Library |
 | Backend | Spring Boot 3 · Java 17 · Spring Security 6 (JWT *stateless*) · Spring Data JPA · springdoc-openapi · Flyway |
 | Base de datos | MySQL 8.0 (InnoDB) con constraints, triggers de inmutabilidad y migraciones versionadas |
 | Gateway | Nginx (TLS, cabeceras de seguridad, *rate limiting*, proxy `/api`) |
