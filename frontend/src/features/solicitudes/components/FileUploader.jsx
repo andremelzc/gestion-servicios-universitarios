@@ -169,8 +169,7 @@ export default function FileUploader({
                 data-error={Boolean(error)}
               >
                 {esUrlMiniatura(url) ? (
-                  // codeql[js/xss-through-dom] URL.createObjectURL genera un blob: URL, no HTML del usuario.
-                  <img className="file-uploader__miniatura" src={url} alt="" />
+                  <img className="file-uploader__miniatura" src={url} alt="" /> // codeql[js/xss-through-dom] URL.createObjectURL genera un blob: URL, no HTML del usuario.
                 ) : (
                   <span className="file-uploader__tipo" aria-hidden="true">
                     {etiquetaTipo(archivo.name)}
