@@ -44,7 +44,10 @@ describe('EstadosPage (US-32)', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Estado «En revisión» actualizado. Se mostrará así en todas las pantallas.',
     );
-    const fila = await screen.findByRole('row', { name: /EN_EVALUACION/ });
+    // El listado se refresca después de la mutación: esperar al nuevo texto antes de
+    // localizar la fila (React 19 puede resolver el `findByRole` con la fila anterior).
+    expect(await screen.findByText('En revisión')).toBeVisible();
+    const fila = screen.getByRole('row', { name: /EN_EVALUACION/ });
     expect(within(fila).getByText('En revisión')).toBeVisible();
     expect(within(fila).getByText('#B45309')).toBeVisible();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

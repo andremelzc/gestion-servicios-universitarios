@@ -21,7 +21,7 @@
 
 | Capa | Tecnología | Versión objetivo |
 |:---|:---|:---|
-| Frontend | React + Vite, React Router, Recharts, Vitest + Testing Library | React 18, Node 20 |
+| Frontend | React + Vite, React Router, Recharts, Vitest + Testing Library | React 19, Node 22.22.2 |
 | Backend | Spring Boot, Spring Security, Spring Data JPA, Bean Validation, springdoc-openapi, Flyway, Micrometer | Spring Boot 3, Java 17 |
 | Base de datos | MySQL (InnoDB) | 8.0 |
 | Proxy / gateway | Nginx (TLS, cabeceras, *rate limiting*, estáticos, proxy a `/api`) | estable |
@@ -90,7 +90,7 @@ Cualquier combinación no listada responde **HTTP 409 Conflict** (RN-06). Un rol
 ```mermaid
 graph TD
     subgraph Cliente["Capa de presentación: SPA React"]
-        UI["React 18 + Vite"]
+        UI["React 19 + Vite"]
         Router["React Router (rutas protegidas por rol)"]
         State["Context API: AuthContext, estado de UI"]
         Http["fetch con interceptores propios (JWT, 401)"]
