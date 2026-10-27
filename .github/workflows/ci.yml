@@ -35,7 +35,7 @@ jobs:
 
       - name: Publicar Reporte de Cobertura JaCoCo
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage-report
           path: backend/target/site/jacoco/
@@ -48,10 +48,10 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v7
 
-      - name: Configurar Node.js 20
+      - name: Configurar Node.js 22
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: Publicar Reporte de Cobertura Vitest
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage-report
           path: frontend/coverage/

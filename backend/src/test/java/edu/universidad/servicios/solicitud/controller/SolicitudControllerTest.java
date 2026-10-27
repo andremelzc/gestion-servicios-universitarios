@@ -444,6 +444,74 @@ class SolicitudControllerTest {
         verify(solicitudWorkflowService).resolver(eq(150L), any(SolicitudResolverRequest.class), any(), eq(usuario));
     }
 
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/evaluar procesa solicitud y delega al workflow service (GES-11)")
+    void debeEvaluarCorrectamente() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "EN_EVALUACION", "En evaluación", "#D97706", null, null);
+
+        when(solicitudWorkflowService.evaluar(eq(150L), eq(4), eq("Evaluación técnica conforme"), eq(usuario)))
+                .thenReturn(detalle);
+
+        SolicitudEvaluarRequest req = new SolicitudEvaluarRequest(4, "Evaluación técnica conforme");
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/evaluar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("EN_EVALUACION")));
+
+        verify(solicitudWorkflowService).evaluar(eq(150L), eq(4), eq("Evaluación técnica conforme"), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/evaluar permite petición sin cuerpo (valores nulos opcionales)")
+    void debeEvaluarSinCuerpo() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "EN_EVALUACION", "En evaluación", "#D97706", null, null);
+
+        when(solicitudWorkflowService.evaluar(eq(150L), isNull(), isNull(), eq(usuario)))
+                .thenReturn(detalle);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/evaluar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("EN_EVALUACION")));
+
+        verify(solicitudWorkflowService).evaluar(eq(150L), isNull(), isNull(), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/cerrar procesa cierre formal y delega al workflow service (GES-13)")
+    void debeCerrarCorrectamente() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "CERRADA", "Cerrada", "#047857", 20L, "Solución OK");
+
+        when(solicitudWorkflowService.cerrar(eq(150L), eq("Conforme con la solución"), eq(usuario)))
+                .thenReturn(detalle);
+
+        SolicitudCerrarRequest req = new SolicitudCerrarRequest("Conforme con la solución");
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/cerrar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("CERRADA")));
+
+        verify(solicitudWorkflowService).cerrar(eq(150L), eq("Conforme con la solución"), eq(usuario));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/cerrar permite petición sin cuerpo opcional")
+    void debeCerrarSinCuerpo() throws Exception {
+        SolicitudDetalleResponse detalle = crearDetalleMock(150L, "CERRADA", "Cerrada", "#047857", 20L, "Solución OK");
+
+        when(solicitudWorkflowService.cerrar(eq(150L), isNull(), eq(usuario)))
+                .thenReturn(detalle);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/cerrar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoCodigo", is("CERRADA")));
+
+        verify(solicitudWorkflowService).cerrar(eq(150L), isNull(), eq(usuario));
+    }
+
     private SolicitudDetalleResponse crearDetalleMock(Long id, String estadoCodigo, String estadoNombre, String colorHex, Long tecnicoId, String informe) {
         return new SolicitudDetalleResponse(
                 id, "SOL-2026-0150", "Titulo", "Descripcion", "Campus Central", "Aula 101",

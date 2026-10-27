@@ -2,7 +2,16 @@
 // Los colores salen de los tokens de UX §2.1 (estado, éxito, advertencia, peligro),
 // nunca de la paleta por defecto de la librería.
 
-export const COLOR_NEUTRO = '#4B5563';
+import {
+  COLOR_NEUTRO,
+  colorEstado,
+  etiquetaEstado,
+  etiquetaPrioridad,
+  normalizar,
+} from '../../components/ui/catalogos.js';
+
+// Etiquetas y color de estado viven en `components/ui/catalogos.js` (los comparten EstadoBadge y PrioridadTag).
+export { COLOR_NEUTRO, colorEstado, etiquetaEstado, etiquetaPrioridad };
 export const COLOR_PRIMARIO = '#1D4ED8';
 
 // Paleta categórica (series sin color semántico); cicla si hay más categorías.
@@ -25,17 +34,6 @@ const COLORES_PRIORIDAD = {
   CRITICA: '#B91C1C',
 };
 
-// Nombres visibles de UX §2.1 para los 6 estados fijos (ADR-009).
-const ETIQUETAS_ESTADO = {
-  REGISTRADA: 'Registrada',
-  EN_EVALUACION: 'En evaluación',
-  ASIGNADA: 'Asignada',
-  EN_ATENCION: 'En atención',
-  RESUELTA: 'Resuelta',
-  CERRADA: 'Cerrada',
-};
-
-const HEX_COLOR = /^#[0-9A-F]{6}$/i;
 const formateadorValor = new Intl.NumberFormat('es-PE');
 const formateadorPorcentaje = new Intl.NumberFormat('es-PE', {
   maximumFractionDigits: 1,
@@ -75,42 +73,8 @@ export function coloresCategorias(cantidad) {
   return colores;
 }
 
-function normalizar(nombre) {
-  return String(nombre ?? '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toUpperCase();
-}
-
 export function colorPrioridad(nombre) {
   return COLORES_PRIORIDAD[normalizar(nombre)] ?? COLOR_NEUTRO;
-}
-
-/** Usa el `colorHex` del catálogo; solo acepta `#RRGGBB` (se escribe en un atributo SVG). */
-export function colorEstado(colorHex) {
-  return typeof colorHex === 'string' && HEX_COLOR.test(colorHex) ? colorHex : COLOR_NEUTRO;
-}
-
-export function etiquetaEstado(codigo) {
-  if (ETIQUETAS_ESTADO[codigo]) return ETIQUETAS_ESTADO[codigo];
-  const texto = String(codigo ?? '')
-    .replaceAll('_', ' ')
-    .toLowerCase();
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-}
-
-const ETIQUETAS_PRIORIDAD = {
-  BAJA: 'Baja',
-  MEDIA: 'Media',
-  ALTA: 'Alta',
-  CRITICA: 'Crítica',
-};
-
-export function etiquetaPrioridad(nombre) {
-  const clave = normalizar(nombre);
-  if (ETIQUETAS_PRIORIDAD[clave]) return ETIQUETAS_PRIORIDAD[clave];
-  const texto = String(nombre ?? '').toLowerCase();
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 export function ordenarPorValorDesc(datos) {

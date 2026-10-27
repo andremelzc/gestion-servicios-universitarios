@@ -48,7 +48,38 @@ export function problema(status, slug, title, detail, instance, extra = {}) {
   );
 }
 
+// `SolicitudResumenResponse` real del backend: plano (estadoCodigo, prioridadNivel…).
+export const resumenEjemplo = {
+  id: 150,
+  codigo: 'SOL-2026-0150',
+  titulo: 'Proyector sin imagen',
+  categoriaNombre: 'Equipos de Cómputo',
+  prioridadNivel: 'ALTA',
+  estadoCodigo: 'EN_EVALUACION',
+  estadoNombre: 'En evaluación',
+  estadoColorHex: '#D97706',
+  tecnicoNombreCompleto: null,
+  fechaRegistro: '2026-10-03T15:04:05',
+  fechaLimiteSla: '2026-10-04T15:04:05',
+  // El API calcula `vencida` con su reloj; el ejemplo tiene el límite en el pasado.
+  vencida: true,
+};
+
+/** Sobre `Page<T>` de api-rest §2.3. */
+export const paginaDe = (content, extra = {}) => ({
+  content,
+  page: 0,
+  size: 20,
+  totalElements: content.length,
+  totalPages: content.length ? 1 : 0,
+  ...extra,
+});
+
 export const handlersGestion = [
+  http.get('*/api/v1/solicitudes', () => HttpResponse.json(paginaDe([resumenEjemplo]))),
+  http.put('*/api/v1/solicitudes/:id/evaluar', ({ params }) =>
+    HttpResponse.json({ ...solicitudDetalleEjemplo, id: Number(params.id) }),
+  ),
   http.get('*/api/v1/usuarios/tecnicos', () => HttpResponse.json(tecnicosEjemplo)),
 
   http.put('*/api/v1/solicitudes/:id/asignar', async ({ params, request }) => {
@@ -81,6 +112,71 @@ export const handlersGestion = [
       id: Number(params.id),
       estado: { codigo: 'ASIGNADA', nombreVisible: 'Asignada', colorHex: '#2563EB' },
       tecnico: { id: tecnico.id, nombre: tecnico.nombre, apellido: tecnico.apellido },
+    });
+  }),
+
+  // `multipart/form-data` (api-rest §3.2): parte `datos` (JSON `{informe}`) y parte `archivos` (1–3).
+  // Espejo SIMPLIFICADO del backend (SolicitudController/SolicitudWorkflowService/GlobalExceptionHandler),
+  // con su mismo orden: validación del DTO (400 con `errores`), estado (409), y luego las reglas que el
+  // servicio lanza como IllegalArgumentException (400 plano con `detail` y sin mapa `errores`). Los `type`
+  // son los del backend (`https://api.servicios.edu/errors/...`), no los de `problema()` por defecto.
+  // Por convención de la prueba, la solicitud 151 está REGISTRADA y cualquier otra, EN_ATENCION.
+  // No simula 403/404/413/415 ni la firma real del contenido.
+  http.put('*/api/v1/solicitudes/:id/resolver', async ({ params, request }) => {
+    const instance = new URL(request.url).pathname;
+    const type = (slug) => ({ type: `https://api.servicios.edu/errors/${slug}` });
+    const formulario = await request.formData();
+    const datos = formulario.get('datos');
+    const texto = typeof datos === 'string' ? datos : await datos?.text();
+    const { informe = '' } = texto ? JSON.parse(texto) : {};
+    const archivos = formulario.getAll('archivos');
+
+    // @NotBlank + @Size(20, 2000) sobre el informe crudo (MethodArgumentNotValidException).
+    if (informe.trim() === '' || informe.length < 20 || informe.length > 2000) {
+      return problema(
+        400,
+        'validation-error',
+        'Error de validación',
+        'Existen errores de validación en la solicitud.',
+        instance,
+        {
+          ...type('validation-error'),
+          errores: { informe: 'El informe de resolución debe contener al menos 20 caracteres.' },
+        },
+      );
+    }
+    if (Number(params.id) === 151) {
+      return problema(
+        409,
+        '409',
+        'Conflict',
+        'La solicitud debe estar EN_ATENCION para ser resuelta.',
+        instance,
+        type('409'),
+      );
+    }
+    // IllegalArgumentException: 400 plano, sin `errores`.
+    const plano = (detail) =>
+      problema(400, 'bad-request', 'Petición inválida', detail, instance, type('bad-request'));
+    if (informe.trim().length < 20) {
+      return plano('El informe de resolución debe contener al menos 20 caracteres.');
+    }
+    if (archivos.length < 1) {
+      return plano('Se requiere al menos 1 evidencia para resolver la solicitud.');
+    }
+    if (archivos.length > 3) {
+      return plano('Se permiten como máximo 3 evidencias para resolver la solicitud.');
+    }
+    if (archivos.some((archivo) => (archivo.size ?? archivo.length) === 0)) {
+      return plano('El archivo está vacío');
+    }
+
+    return HttpResponse.json({
+      ...solicitudDetalleEjemplo,
+      id: Number(params.id),
+      estado: { codigo: 'RESUELTA', nombreVisible: 'Resuelta', colorHex: '#16A34A' },
+      informeResolucion: informe.trim(),
+      fechaResolucion: '2026-10-04T10:00:00Z',
     });
   }),
 ];

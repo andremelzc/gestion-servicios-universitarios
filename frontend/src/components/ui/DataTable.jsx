@@ -7,16 +7,17 @@ import useMediaQuery from './useMediaQuery.js';
  * por debajo (mobile-first). Es solo de presentación: no consulta la API; los datos y los
  * callbacks llegan por props (los aporta `useCrud` o la pantalla).
  *
- * Los nombres de las props coinciden con lo que devuelve `useCrud`, para pasarlos tal cual:
+ * Los nombres de las props coinciden con lo que devuelve `useCrud` (features/admin/hooks), que
+ * lleva el estado de página, búsqueda (con *debounce*) e inactivas; se pasan tal cual:
  *
- *   const crud = useCrud('/categorias', { includeInactive, search, page });
+ *   const crud = useCrud('/categorias', { filtros: { idArea } });
  *   <DataTable
- *     caption="Categorías"
- *     columns={columnas}
- *     data={crud.data}
- *     isLoading={crud.isLoading}
- *     error={crud.error}
- *     onRetry={crud.refetch}
+ *     caption="Categorías" columns={columnas} data={crud.data}
+ *     isLoading={crud.isLoading} error={crud.error} onRetry={crud.onRetry}
+ *     search={crud.search} onSearchChange={crud.onSearchChange} appliedSearch={crud.appliedSearch}
+ *     includeInactive={crud.includeInactive}
+ *     onIncludeInactiveChange={crud.onIncludeInactiveChange}
+ *     page={crud.page} onPageChange={crud.onPageChange}
  *   />
  *
  * Props
@@ -51,15 +52,6 @@ import useMediaQuery from './useMediaQuery.js';
  *   muestra. Durante la carga la navegación sigue montada (botones deshabilitados) para no
  *   perder el foco; el texto "Página X de Y" está en una única región `aria-live`.
  * Los controles de la barra se pintan solo si llega su callback.
- *
- * Ejemplo completo:
- *   <DataTable
- *     caption="Categorías" columns={columnas} data={crud.data}
- *     isLoading={crud.isLoading} error={crud.error} onRetry={crud.refetch}
- *     search={search} onSearchChange={setSearch}
- *     includeInactive={includeInactive} onIncludeInactiveChange={setIncludeInactive}
- *     page={crud.page} onPageChange={setPage}
- *   />
  *
  * Fuera de alcance (#99): el ordenamiento por columnas. El issue y CA-14 no lo piden.
  *

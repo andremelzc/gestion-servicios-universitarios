@@ -3,6 +3,7 @@ updates:
   # Actualizaciones de dependencias Java (Spring Boot)
   - package-ecosystem: "maven"
     directory: "/backend"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -10,6 +11,7 @@ updates:
   # Actualizaciones de dependencias Node.js (Vite/React)
   - package-ecosystem: "npm"
     directory: "/frontend"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -17,6 +19,7 @@ updates:
   # Actualizaciones de las GitHub Actions (CI/CD)
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
