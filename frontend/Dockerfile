@@ -2,8 +2,8 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Aprovechar cache de capas para dependencias
-COPY package*.json ./
+# Aprovechar cache de capas para dependencias (incluye .npmrc para engine-strict/peer rules)
+COPY package*.json .npmrc ./
 RUN npm ci
 
 COPY . .

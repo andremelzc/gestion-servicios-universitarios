@@ -1,11 +1,14 @@
 # Frontend — Gestión de Servicios Universitarios
 
-SPA con React 18 + JavaScript (JSX), Vite y React Router. Estructura por _features_ según
+SPA con React 19 + JavaScript (JSX), Vite y React Router. Estructura por _features_ según
 [Arquitectura técnica §4.2](../docs/02-diseno/arquitectura-tecnica.md#42-frontend-por-features).
 
 ## Requisitos
 
-Node >= 20.19 y < 23 (el proyecto usa `engine-strict`) y npm.
+Node >= 22.22.2 y < 23 (lo exige jsdom 30; el proyecto usa `engine-strict`) y npm.
+
+`npm ci` aplica `legacy-peer-deps` (ver `.npmrc`): `eslint-plugin-react` 7.37.5 aún declara
+como peer máximo ESLint 9.7, aunque funciona con ESLint 10.
 
 ## Scripts
 

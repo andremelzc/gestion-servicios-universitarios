@@ -148,7 +148,7 @@ graph LR
 
 | Workflow | Disparador | Jobs | Criterio de éxito |
 |:---|:---|:---|:---|
-| **`ci.yml`** | `pull_request` y `push` a `develop`/`main` | `backend` (JDK 17, `mvn -B verify`, JaCoCo con umbral **≥ 70 %**, publica reporte) · `frontend` (Node 20, `npm ci`, `lint`, `vitest run --coverage`, `build`) · `docker-build` (construye sin publicar) | Todos verdes |
+| **`ci.yml`** | `pull_request` y `push` a `develop`/`main` | `backend` (JDK 17, `mvn -B verify`, JaCoCo con umbral **≥ 70 %**, publica reporte) · `frontend` (Node 22.22.2, `npm ci`, `lint`, `vitest run --coverage`, `build`) · `docker-build` (construye sin publicar) | Todos verdes |
 | **`security.yml`** | PR, `push` y programado (semanal) | `codeql` (java, javascript) · `gitleaks` (Dependabot cubre las dependencias) | 0 hallazgos altos/críticos sin justificar |
 | **`cd-staging.yml`** | `push` a `develop` (tras CI verde) | Construye y publica imágenes en **GHCR** con *tag* `sha-<commit>`; se conecta al servidor *staging*; `docker compose pull && up -d`; *smoke test* `GET /actuator/health` y login de prueba; **ZAP baseline** | Smoke OK; 0 alertas ZAP altas |
 | **`cd-prod.yml`** | `push` de *tag* `v*` | Despliega las imágenes del *tag* `vX.Y.Z` con las variables del *Environment* `production`; *smoke test* | Smoke OK |
