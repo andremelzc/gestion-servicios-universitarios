@@ -364,30 +364,216 @@ Detalle en [Estrategia de pruebas §6](../03-calidad-y-operacion/estrategia-prue
 
 ## 8. Panorama de estilos de API y API Gateway
 
-El enunciado pide conocer alternativas a REST. Esta es la decisión razonada para el proyecto:
-
-| Estilo | Qué es | ¿Cuándo conviene? | ¿Se usa aquí? |
-|:---|:---|:---|:---|
-| **REST** | Recursos + verbos HTTP + JSON | CRUD y flujos orientados a recursos, caché HTTP, herramientas maduras | **Sí — estilo principal.** El dominio son recursos con ciclo de vida (solicitudes, catálogos). |
-| **GraphQL** | Un endpoint; el cliente elige los campos | Clientes muy variados que necesitan componer datos de muchos recursos; evitar *over/under-fetching* | **No.** Hay un solo cliente (nuestra SPA) y pocas vistas; complicaría autorización por campo y caché. *Alternativa:* `GET /solicitudes/{id}` ya devuelve el detalle agregado. |
-| **gRPC** | RPC binario sobre HTTP/2 (Protobuf) | Comunicación servicio-a-servicio de baja latencia, *streaming* | **No.** No hay microservicios internos; los navegadores no hablan gRPC nativo (requiere gRPC-Web). |
-| **Webhooks** | El servidor llama a una URL del cliente cuando ocurre un evento | Integrar sistemas externos sin *polling* | **No implementado.** *Evolución propuesta:* notificar un evento `solicitud.resuelta` a un sistema externo (ej. mesa de ayuda institucional) firmando el payload con HMAC. |
-| **WebSocket / SSE** | Canal persistente servidor→cliente | Notificaciones en tiempo real | **No en el alcance.** *Evolución:* SSE para avisos en tiempo real. |
-
-### 8.1 API Gateway
-
-El **API Gateway** del proyecto es **Nginx** actuando como proxy inverso ([ADR-006](decisiones-arquitectura.md#adr-006--nginx-como-api-gateway-ligero)), no Spring Cloud Gateway (innecesario sin microservicios):
-
-| Función de gateway | Cómo se cubre |
-|:---|:---|
-| Punto de entrada único | Nginx expone 443; `/` sirve la SPA y `/api/` hace proxy al backend. El backend no se publica. |
-| Terminación TLS | Certificado en Nginx; HSTS. |
-| Cabeceras de seguridad | CSP, `X-Content-Type-Options`, etc. añadidas en Nginx. |
-| *Rate limiting* | `limit_req_zone` por IP en `/api/v1/auth/*`. |
-| Balanceo | `upstream` con varias réplicas del backend (RNF-03). |
-| Aislamiento | `/actuator/prometheus` y Swagger no se enrutan al exterior. |
+El enunciado y las competencias del curso exigen conocer el panorama actual de comunicación entre sistemas distribuidos y evaluar alternativas a REST. A continuación se presenta el análisis arquitectónico formal, la justificación de diseño de GISU, el modelado defensivo de Webhooks y la evidencia de operación del API Gateway perimetral.
 
 ---
+
+### 8.1 Comparativa técnica de estilos arquitectónicos
+
+| Criterio | REST (Representational State Transfer) | GraphQL | gRPC (Google Remote Procedure Call) | Webhooks (Event-Driven HTTP Push) | SSE / WebSockets |
+|:---|:---|:---|:---|:---|:---|
+| **Protocolo de transporte** | HTTP/1.1 y HTTP/2 | HTTP/1.1 y HTTP/2 | Exclusivo HTTP/2 (streaming bidireccional) | HTTP/1.1 o HTTP/2 (TLS obligatorio en producción) | HTTP/1.1 (SSE) / TCP con handshake HTTP (WS) |
+| **Serialización / Payload** | JSON (o XML, multipart/form-data) | JSON estructurado según AST de consulta | Protobuf binario (Buffer Protocol con tipado fuerte) | JSON estructurado (event payloads) | Texto plano, JSON o binario |
+| **Modelo de comunicación** | Solicitud-Respuesta síncrona orientada a recursos (`URI`) | Solicitud-Respuesta síncrona a endpoint único (`/graphql`) | RPC síncrono/asíncrono orientado a métodos y procedimientos | Asíncrono push del servidor al cliente (Callback) | Servidor→Cliente continuo (SSE) o Full-Duplex (WS) |
+| **Mecanismo de Caché** | Nativo HTTP (`Cache-Control`, `ETag`, `Last-Modified`) en gateway/CDN/browser | Difícil a nivel HTTP (todas son `POST`); requiere caché a nivel de campo (Apollo/Relay) | Inexistente a nivel HTTP estándar; requiere caching en memoria o proxies dedicados | No aplica (el emisor genera eventos irrepetibles e inmutables) | No aplica (canales efímeros en tiempo real) |
+| **Autorización y Seguridad** | Granular por endpoint y método HTTP (`@PreAuthorize`, Spring Security, RBAC) | Compleja; requiere inspección de grafos, directivas y autorización campo a campo | Interceptors a nivel de método RPC y metadata JWT | Firma HMAC con clave secreta compartida y protección SSRF | Handshake inicial autenticado con JWT |
+| **Sobrecarga de red** | Potencial *over-fetching* o *under-fetching* si el contrato no está optimizado | Elimina *over-fetching*; el cliente solicita exactamente los campos que necesita | Extremadamente baja; serialización binaria compacta y de altísima velocidad | Mínima; el servidor notifica solo cuando ocurre un hecho significativo | Mínimo encabezado tras el handshake |
+| **Compatibilidad con navegadores** | Universal (nativa en cualquier cliente HTTP / Fetch API) | Universal (requiere cliente GraphQL liviano o fetch estándar) | Limitada (requiere `gRPC-Web` y proxy Envoy intermediario) | Consumidores de tipo servidor (URLs públicas con backend receptor) | Universal (EventSource para SSE; WebSocket API nativa) |
+| **¿Se usa en GISU?** | **Sí — Estilo principal.** | **No.** Justificado por simplicidad y modelo monolito modular. | **No.** Justificado por consumo exclusivo desde cliente web SPA. | **No en MVP (Diseño de evolución documentado en §8.2).** | **No en Fase 2 (Evolución recomendada para Fase 3).** |
+
+#### ¿Por qué el proyecto GISU utiliza REST como estilo principal?
+1. **Dominio centrado en entidades y transiciones:** GISU modela recursos persistentes con identificadores unívocos (`/solicitudes/{id}`, `/usuarios`, `/catalogos`) cuyo ciclo de vida está gobernado por una máquina de estados finitos (`REGISTRADA` → `EN_EVALUACION` → `ASIGNADA` → `EN_ATENCION` → `RESUELTA` → `CERRADA`). Los verbos HTTP (`GET`, `POST`, `PUT`) reflejan de forma natural las transiciones y lecturas del dominio.
+2. **Cliente homogéneo y vistas predecibles:** La plataforma cuenta con un cliente principal (la SPA en React 18). No existe la necesidad de que múltiples clientes heterogéneos (móviles, IoT, terceros) seleccionen campos dinámicos arbitrarios. El endpoint `GET /solicitudes/{id}` ya consolida el detalle del solicitante, evidencias, fechas límite de SLA y acciones permitidas según el rol en un único contrato cohesivo.
+3. **Caché y observabilidad estándar:** Los endpoints de catálogos (`/api/v1/categorias`, `/api/v1/prioridades`) y dashboard aprovechan directamente las cabeceras HTTP y el proxy inverso Nginx. Asimismo, la trazabilidad distribuida (W3C `traceparent` / `X-Trace-Id`) se inyecta de manera transparente en cada petición REST.
+4. **Menor complejidad operativa y cognitiva:** Evita los riesgos de seguridad propios de GraphQL (consultas anidadas cíclicas, denegación de servicio por consultas costosas, *N+1 query problems* en resolvers) y la necesidad de tooling especializado como Envoy en gRPC.
+
+---
+
+### 8.2 Diseño arquitectónico de Webhooks (Integración Externa y Evolución)
+
+En una futura integración con la mesa de ayuda central de la universidad o un sistema externo de notificaciones (Slack, correo masivo, ERP), el backend GISU no debería someterse a *polling* continuo. El mecanismo óptimo es un **Webhook asíncrono basado en eventos**.
+
+A continuación se documenta el diseño formal de la integración para el evento `solicitud.resuelta`:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor T as Técnico Operativo
+    participant B as Backend GISU
+    participant DB as MySQL 8.0
+    participant WH as Webhook Dispatcher
+    participant EXT as Sistema Externo (Mesa de Ayuda)
+
+    T->>B: PUT /api/v1/solicitudes/4/resolver (Multipart + Informe)
+    B->>DB: Actualizar estado = RESUELTA, registrar Historial
+    B->>WH: Emitir evento SolicitudResueltaEvent (Asíncrono)
+    B-->>T: 200 OK (SolicitudResueltaResponse)
+    
+    rect rgb(240, 248, 255)
+    Note over WH,EXT: Transmisión segura con HMAC-SHA256 y control SSRF
+    WH->>WH: Validar URL destino contra Lista Blanca (Anti-SSRF)
+    WH->>WH: Generar Firma HMAC-SHA256(Payload, WebhookSecret)
+    WH->>EXT: POST https://externo.universidad.edu/webhooks/gisu<br/>Headers: X-Gisu-Signature, X-Gisu-Timestamp, X-Gisu-Event
+    EXT-->>WH: 200 OK / 202 Accepted
+    end
+```
+
+#### 8.2.1 Estructura del Evento (Payload JSON)
+```json
+{
+  "idEvento": "evt_9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "tipo": "solicitud.resuelta",
+  "timestamp": "2026-10-31T11:20:00Z",
+  "apiVersion": "1.0",
+  "entidad": {
+    "id": 4,
+    "codigo": "SOL-2026-0004",
+    "estadoAnterior": "EN_ATENCION",
+    "estadoNuevo": "RESUELTA",
+    "fechaResolucion": "2026-10-31T11:20:00Z",
+    "informe": "Se procedió con el reemplazo del cable HDMI y ajuste de resolución en el proyector.",
+    "idArea": 1,
+    "resueltoPor": {
+      "id": 3,
+      "nombre": "Jorge Técnico TI",
+      "correo": "tecnico.ti.demo@universidad.edu"
+    },
+    "sla": {
+      "cumplido": true,
+      "fechaLimite": "2026-10-31T18:00:00Z"
+    }
+  }
+}
+```
+
+#### 8.2.2 Medidas de Seguridad del Webhook
+1. **Firma criptográfica HMAC-SHA256 (`X-Gisu-Signature`):**
+   - El emisor calcula `HMAC-SHA256(secret_compartido, payload_json)`.
+   - Se envía la cabecera `X-Gisu-Signature: sha256=d5b94f...`. El receptor recalcula la firma con su clave secreta y valida en tiempo constante (`MessageDigest.isEqual`) para prevenir ataques de temporización (*timing attacks*).
+2. **Prevención de ataques de repetición (Replay Attacks):**
+   - Se incluye la cabecera `X-Gisu-Timestamp: 1793445600`.
+   - El receptor valida que `|tiempo_actual - timestamp| <= 300` segundos (tolerancia máxima de 5 minutos).
+3. **Protección contra SSRF (Server-Side Request Forgery - OWASP A10):**
+   - **Lista blanca estricta (Allowlist):** Solo se permite el registro de URLs de webhook bajo dominios institucionales autorizados (ej. `*.universidad.edu.pe`).
+   - **Bloqueo de rangos privados (RFC 1918 / Loopback / Cloud Metadata):** Se rechaza cualquier URL que resuelva a:
+     - `127.0.0.0/8` o `::1` (localhost)
+     - `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` (redes privadas internas)
+     - `169.254.169.254` (metadatos de AWS/GCP/Azure)
+   - **DNS Re-resolution & Pinning:** La IP resuelta se comprueba inmediatamente antes de iniciar el socket TCP para prevenir ataques de DNS Rebinding.
+4. **Política de reintentos y tolerancia a fallos:**
+   - Si el endpoint receptor responde un código distinto de `2xx` o sufre un *timeout* (5 s), se aplica una política de **retroceso exponencial** con jitter:
+     - Reintento 1: a los 30 segundos.
+     - Reintento 2: a los 5 minutos.
+     - Reintento 3: a los 30 minutos.
+   - Tras agotar los reintentos, el evento se envía a una tabla de contingencia / Dead Letter Queue y el endpoint se marca como inactivo preventivamente.
+
+---
+
+### 8.3 Demostración del API Gateway Real (Nginx)
+
+De acuerdo con la decisión de arquitectura [ADR-006](decisiones-arquitectura.md#adr-006--nginx-como-api-gateway-ligero) y la tarea `OPS-05`, el rol de **API Gateway** en GISU no lo asume un framework pesado como Spring Cloud Gateway (el cual agregaría ~300 MB de consumo de JVM y latencia innecesaria en una arquitectura monolítica modular), sino **Nginx**, configurado como proxy inverso de alto rendimiento en [`frontend/nginx/default.conf`](../../frontend/nginx/default.conf).
+
+A continuación se detalla la correspondencia entre los requisitos de gateway y la configuración real implementada:
+
+```nginx
+# ==============================================================================
+# CONFIGURACIÓN REAL DEL API GATEWAY (frontend/nginx/default.conf)
+# ==============================================================================
+
+# 1. Rate Limiting Zone: Mitigación de fuerza bruta en autenticación (OPS-05 / CA-9)
+# Limita a un máximo de 10 peticiones por minuto por IP origen en /auth/login
+limit_req_zone $binary_remote_addr zone=login_limit:10m rate=10r/m;
+limit_req_status 429;
+
+server {
+    listen 80;
+    server_name localhost;
+
+    # 2. Hardening perimetral: Ocultar banner de versión del servidor web
+    server_tokens off;
+
+    # 3. Control de carga: Límite alineado con subida de evidencias (RN-15: máx 15MB)
+    client_max_body_size 15M;
+
+    # 4. Inyección de Cabeceras de Seguridad HTTP (OWASP A05)
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:8080 http://backend:8080; frame-ancestors 'none';" always;
+
+    # 5. Despacho de la Single Page Application (React)
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 6. Proxy específico para Login con aplicación estricta de Rate Limiting
+    location = /api/v1/auth/login {
+        limit_req zone=login_limit nodelay;
+        proxy_pass http://backend:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 7. Proxy reverso centralizado hacia la API REST del backend
+    location /api/ {
+        proxy_pass http://backend:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 8. Exposición controlada de Healthcheck para orquestadores (Docker / K8s)
+    location = /actuator/health {
+        proxy_pass http://backend:8080/actuator/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 9. Aislamiento perimetral estricto: Bloqueo de endpoints de Actuator al exterior (CA-10)
+    # Impide fugas de información sobre variables de entorno, métricas internas o beans
+    location /actuator {
+        return 404;
+    }
+}
+```
+
+---
+
+### 8.4 Guía de sustentación (Preguntas y Respuestas Clave)
+
+A fin de defender con solvencia las decisiones técnicas ante el docente o evaluador, se sintetizan las respuestas estándar del equipo:
+
+#### P1: "¿Por qué optaron por una arquitectura REST en lugar de migrar a GraphQL o gRPC?"
+> **Respuesta:**
+> "Optamos por **REST** porque el dominio de GISU es transaccional y está centrado en recursos con un ciclo de vida bien modelado en una máquina de estados finitos (`Solicitud`), consumido por un cliente web SPA predecible. 
+> 
+> **No elegimos GraphQL** porque al tener un único cliente web, no sufrimos el problema de clientes heterogéneos; además, GraphQL introduce riesgos de seguridad significativos (denegación de servicio por consultas anidadas complejas, ataques N+1) y dificulta el aprovechamiento de la caché HTTP en CDN/Gateway y la auditoría granular por roles que hoy resolvemos limpiamente con `@PreAuthorize`.
+> 
+> **Tampoco elegimos gRPC** porque gRPC está diseñado para comunicación inter-servicios de baja latencia mediante HTTP/2 y Protobuf binario. Los navegadores web no soportan gRPC nativo sin proxies intermediarios pesados como Envoy (`gRPC-Web`), lo cual añadiría complejidad operativa innecesaria para una arquitectura monolítica modular."
+
+#### P2: "¿Dónde está el API Gateway y qué funciones críticas desempeña?"
+> **Respuesta:**
+> "El API Gateway es **Nginx** operando como proxy inverso perimetral ([ADR-006](decisiones-arquitectura.md#adr-006--nginx-como-api-gateway-ligero)). En lugar de sobrecargar la infraestructura con Spring Cloud Gateway, Nginx asume con mínima latencia y bajo consumo de memoria las funciones esenciales de un gateway:
+> 1. **Punto de entrada único:** Unifica el acceso a la SPA (`/`) y al backend (`/api/`) bajo el mismo origen, resolviendo CORS por diseño.
+> 2. **Rate Limiting:** Protege el endpoint crítico `/api/v1/auth/login` contra ataques de fuerza bruta limitando a 10 req/min por IP con retorno HTTP 429 (`login_limit`).
+> 3. **Aislamiento de seguridad perimetral:** Expone únicamente el healthcheck `/actuator/health` y bloquea cualquier intento de consultar `/actuator` (entorno, métricas, beans) respondiendo HTTP 404.
+> 4. **Hardening de cabeceras:** Inyecta cabeceras defensivas como CSP, `X-Frame-Options: DENY`, `nosniff` y oculta la versión del servidor con `server_tokens off`."
+
+#### P3: "¿Cómo implementarían la comunicación asíncrona hacia terceros de forma segura?"
+> **Respuesta:**
+> "La diseñaríamos mediante **Webhooks asíncronos** emitidos por eventos del dominio (por ejemplo `solicitud.resuelta`). Para garantizar la seguridad en redes públicas, implementamos tres controles indispensables:
+> 1. **Firma criptográfica HMAC-SHA256 (`X-Gisu-Signature`)** con verificación en tiempo constante para que el receptor garantice autenticidad e integridad.
+> 2. **Prevención de ataques de repetición (`X-Gisu-Timestamp`)** con ventana de tolerancia de 300 segundos.
+> 3. **Mitigación estricta de SSRF (OWASP A10)** mediante una lista blanca de dominios y el bloqueo activo a nivel de socket de rangos privados (RFC 1918), bucle local (`127.0.0.1`) y endpoints de metadatos de nube (`169.254.169.254`)."
+
 
 ## 9. Evolución y compatibilidad
 
