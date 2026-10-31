@@ -1,0 +1,24 @@
+info:
+  name: Evaluar Solicitud
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/solicitudes/7/evaluar"
+  body:
+    type: json
+    data: |-
+      {
+        "idPrioridad": 4,
+        "nota": "Al revisar el caso; se eleva a prioridad CRÍTICA por impacto institucional."
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

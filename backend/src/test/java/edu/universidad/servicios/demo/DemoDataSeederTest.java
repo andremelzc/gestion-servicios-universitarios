@@ -133,6 +133,23 @@ class DemoDataSeederTest {
                 .hasMessageContaining("No existe el área");
     }
 
+    @Test
+    void sincronizaSecuenciaAlTerminarCreacionDeSolicitudes() {
+        prepararCatalogos();
+        prepararUsuariosExistentes();
+        when(solicitudes.existsByCodigo(any(String.class))).thenReturn(false);
+        org.springframework.jdbc.core.JdbcTemplate jdbcMock = mock(org.springframework.jdbc.core.JdbcTemplate.class);
+
+        DemoDataSeeder seederConJdbc = new DemoDataSeeder(
+            usuarios, roles, areas, categorias, prioridades, estados,
+            solicitudes, encoder, jdbcMock, "clave-demo", 6
+        );
+
+        seederConJdbc.run();
+
+        verify(jdbcMock).update(org.mockito.ArgumentMatchers.contains("INSERT INTO secuencias_solicitud"), any(Integer.class), org.mockito.ArgumentMatchers.eq(6), org.mockito.ArgumentMatchers.eq(6));
+    }
+
     private DemoDataSeeder crearSeeder(String password, int cantidad) {
         return new DemoDataSeeder(usuarios, roles, areas, categorias, prioridades, estados,
                 solicitudes, encoder, password, cantidad);
