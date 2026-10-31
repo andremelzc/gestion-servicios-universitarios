@@ -1,5 +1,6 @@
 package edu.universidad.servicios.solicitud.service;
 
+import edu.universidad.servicios.common.validation.PaginacionValidator;
 import edu.universidad.servicios.solicitud.domain.EvidenciaArchivo;
 import edu.universidad.servicios.solicitud.domain.Solicitud;
 import edu.universidad.servicios.solicitud.dto.HistorialItemResponse;
@@ -21,23 +22,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Servicio de consultas para mis-solicitudes, detalle, historial y descarga de evidencias (REG-11 / REG-12).
+ * Servicio de consultas para mis-solicitudes, detalle, historial y descarga de evidencias (REG-11 / REG-12 / OPS-11).
  */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SolicitudConsultaService {
 
-    private static final Set<String> SORT_WHITELIST = Set.of(
+    public static final Set<String> SORT_WHITELIST = Set.of(
             "fechaRegistro",
             "codigo",
             "titulo",
-            "fechaLimiteSla"
+            "fechaLimiteSla",
+            "id",
+            "prioridad",
+            "prioridad.peso",
+            "prioridad.id",
+            "estado",
+            "estado.orden",
+            "estado.codigo",
+            "fechaResolucion",
+            "fechaCierre"
     );
 
     private final SolicitudRepository solicitudRepository;
@@ -48,7 +57,7 @@ public class SolicitudConsultaService {
     private final java.time.Clock clock;
 
     /**
-     * Lista las solicitudes de la bandeja general según el alcance del rol y filtros (GES-09 / RF-12 / CA-16).
+     * Lista las solicitudes de la bandeja general según el alcance del rol y filtros (GES-09 / RF-12 / CA-16 / OPS-11).
      * Técnico: solicitudes asignadas a él.
      * Supervisor: solicitudes de categorías pertenecientes a su área.
      * Administrador: todas las solicitudes o según filtro.
@@ -109,7 +118,7 @@ public class SolicitudConsultaService {
     }
 
     /**
-     * Lista las solicitudes registradas exclusivamente por el usuario autenticado (REG-11 / US-21 / CA-11).
+     * Lista las solicitudes registradas exclusivamente por el usuario autenticado (REG-11 / US-21 / CA-11 / OPS-11).
      *
      * @param usuario  Usuario solicitante autenticado.
      * @param estado   Filtro opcional por código de estado (ej: "REGISTRADA", "CERRADA").
@@ -209,21 +218,13 @@ public class SolicitudConsultaService {
         if (pageable == null) {
             return PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "fechaRegistro"));
         }
-        int page = Math.max(pageable.getPageNumber(), 0);
-        int size = Math.min(Math.max(pageable.getPageSize(), 1), 100);
+        PaginacionValidator.validar(pageable, SORT_WHITELIST);
 
-        List<Sort.Order> orders = new ArrayList<>();
-        for (Sort.Order order : pageable.getSort()) {
-            if (SORT_WHITELIST.contains(order.getProperty())) {
-                orders.add(order);
-            }
-        }
+        Sort sort = (pageable.getSort() != null && pageable.getSort().isSorted())
+                ? pageable.getSort()
+                : Sort.by(Sort.Direction.DESC, "fechaRegistro");
 
-        Sort sort = orders.isEmpty()
-                ? Sort.by(Sort.Direction.DESC, "fechaRegistro")
-                : Sort.by(orders);
-
-        return PageRequest.of(page, size, sort);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 
     private String normalizarRol(Usuario usuario) {

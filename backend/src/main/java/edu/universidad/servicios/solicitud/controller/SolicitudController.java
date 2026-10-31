@@ -1,6 +1,7 @@
 package edu.universidad.servicios.solicitud.controller;
 
 import edu.universidad.servicios.auth.security.UsuarioDetails;
+import edu.universidad.servicios.common.validation.PaginacionValidator;
 import edu.universidad.servicios.solicitud.dto.*;
 import edu.universidad.servicios.solicitud.service.SolicitudConsultaService;
 import edu.universidad.servicios.solicitud.service.SolicitudService;
@@ -105,6 +106,7 @@ public class SolicitudController {
             Authentication authentication
     ) {
         Usuario solicitante = resolverUsuario(usuarioDetails, authentication);
+        PaginacionValidator.validar(pageable, SolicitudConsultaService.SORT_WHITELIST);
         Page<SolicitudResumenResponse> response = solicitudConsultaService.listarMisSolicitudes(solicitante, estado, q, pageable);
         return ResponseEntity.ok(response);
     }
@@ -236,6 +238,7 @@ public class SolicitudController {
             Authentication authentication
     ) {
         Usuario usuario = resolverUsuario(usuarioDetails, authentication);
+        PaginacionValidator.validar(pageable, SolicitudConsultaService.SORT_WHITELIST);
         Page<SolicitudResumenResponse> response = solicitudConsultaService.listarBandeja(
                 usuario, estados, idPrioridad, idCategoria, idTecnico, q, desde, hasta, vencidas, pageable);
         return ResponseEntity.ok(response);

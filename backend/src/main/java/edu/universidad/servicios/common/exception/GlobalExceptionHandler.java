@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
 		ex.getBindingResult()
 			.getAllErrors()
 			.forEach(error -> {
-				String fieldName = ((FieldError) error).getField();
+				String fieldName = error instanceof FieldError fe ? fe.getField() : error.getObjectName();
 				String errorMessage = error.getDefaultMessage();
 				errors.put(fieldName, errorMessage);
 			});
@@ -132,7 +132,6 @@ public class GlobalExceptionHandler {
 		addCommonProperties(pd);
 		return pd;
 	}
-
 
 	@ExceptionHandler(ResponseStatusException.class)
 	public ProblemDetail handleResponseStatusException(

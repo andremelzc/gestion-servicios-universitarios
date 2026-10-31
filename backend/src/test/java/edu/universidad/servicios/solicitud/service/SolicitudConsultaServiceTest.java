@@ -243,4 +243,22 @@ class SolicitudConsultaServiceTest {
         );
         assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
+
+    @Test
+    @DisplayName("listarMisSolicitudes con campo de orden fuera de lista blanca lanza IllegalArgumentException (CA-6 / OPS-11)")
+    void listarMisSolicitudesConSortInvalidoLanzaExcepcion() {
+        Pageable pageableInvalido = PageRequest.of(0, 20, Sort.by("passwordHash"));
+        assertThrows(IllegalArgumentException.class, () ->
+                service.listarMisSolicitudes(estudiante, null, null, pageableInvalido)
+        );
+    }
+
+    @Test
+    @DisplayName("listarMisSolicitudes con tamaño mayor a 100 lanza IllegalArgumentException (OPS-11)")
+    void listarMisSolicitudesConTamanoExcedidoLanzaExcepcion() {
+        Pageable pageableInvalido = PageRequest.of(0, 101);
+        assertThrows(IllegalArgumentException.class, () ->
+                service.listarMisSolicitudes(estudiante, null, null, pageableInvalido)
+        );
+    }
 }
