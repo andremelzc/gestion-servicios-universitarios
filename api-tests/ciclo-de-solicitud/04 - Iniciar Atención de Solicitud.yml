@@ -1,0 +1,17 @@
+info:
+  name: Iniciar Atención de Solicitud
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/solicitudes/3/iniciar-atencion"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

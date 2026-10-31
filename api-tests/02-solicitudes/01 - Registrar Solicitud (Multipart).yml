@@ -1,0 +1,36 @@
+info:
+  name: Registrar Solicitud (Multipart)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/solicitudes"
+  body:
+    type: multipart-form
+    data:
+      - name: solicitud
+        type: text
+        contentType: application/json
+        value: |
+          {
+            "titulo": "Falla en proyector de aula magna",
+            "descripcion": "El proyector no enciende al conectar la toma de corriente principal.",
+            "ubicacionCampus": "Campus Central",
+            "ubicacionAmbiente": "Pabellón A - Laboratorio 201",
+            "idCategoria": 1,
+            "idPrioridad": 2
+          }
+      - name: archivos
+        type: file
+        value:
+          - ./ejemplo.pdf
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

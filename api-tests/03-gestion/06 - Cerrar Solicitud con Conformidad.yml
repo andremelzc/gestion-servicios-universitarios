@@ -1,0 +1,23 @@
+info:
+  name: Cerrar Solicitud con Conformidad
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/solicitudes/11/cerrar"
+  body:
+    type: json
+    data: |-
+      {
+        "nota": "Conforme con la solución técnica brindada en el laboratorio."
+      }
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

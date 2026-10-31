@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "GISU API Tests",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
