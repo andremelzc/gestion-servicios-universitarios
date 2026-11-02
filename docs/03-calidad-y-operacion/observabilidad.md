@@ -127,7 +127,7 @@ Reglas mínimas (Prometheus `alert-rules.yml` o Grafana Alerting). Severidad: **
 |:---|:---|:---:|:---:|:---|
 | **InstanciaCaida** | `up{job="backend"} == 0` | 1 min | SEV1 | Revisar `docker ps`, logs, reiniciar; escalar al Rol 6 |
 | **ErrorRate5xxAlto** | `sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05` | 5 min | SEV1 | Buscar `traceId` de errores en logs; revisar último despliegue; *rollback* si coincide |
-| **BDInaccesible** | `/actuator/health` con `db != UP` | 1 min | SEV1 | Revisar contenedor `db`, disco, credenciales |
+| **BDInaccesible** | `health_db_up{job="backend"} == 0` (gauge del indicador `db` de `/actuator/health`) | 1 min | SEV1 | Revisar contenedor `db`, disco, credenciales |
 
 **Requisito de evidencia:** **3** alertas activas (`InstanciaCaida`, `ErrorRate5xxAlto` y `BDInaccesible`) y **un simulacro documentado** (p. ej. detener el backend y mostrar `InstanciaCaida` disparada y su resolución).
 

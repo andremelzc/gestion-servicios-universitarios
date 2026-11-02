@@ -50,6 +50,8 @@ class ActuatorEndpointIntegrationTest {
         HttpResponse<String> res = get(managementPort, "/actuator/prometheus");
         assertThat(res.statusCode()).isEqualTo(200);
         assertThat(res.body()).contains("jvm_memory_used_bytes");
+        // OBS-10: gauge de la alerta BDInaccesible (H2 arriba => 1)
+        assertThat(res.body()).containsPattern("(?m)^health_db_up(\\{.*\\})? 1\\.0$");
     }
 
     @Test
