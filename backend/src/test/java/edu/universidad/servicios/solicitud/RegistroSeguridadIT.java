@@ -136,12 +136,21 @@ class RegistroSeguridadIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.errores.descripcion").exists());
     }
 
+    private static final byte[] EXE = {'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00};
+
     @Test
-    @DisplayName("[TC-009] Ejecutable renombrado a .jpg → 415 sin fila ni archivo")
+    @DisplayName("[TC-009] Ejecutable renombrado a .jpg → 400 (firma ≠ extensión) sin fila ni archivo")
     void exeRenombradoSeRechaza() throws Exception {
-        byte[] exe = {'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00};
         altaRechazada("El proyector no enciende desde la mañana",
-                new MockMultipartFile("archivos", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, exe))
+                new MockMultipartFile("archivos", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, EXE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("[TC-009] Ejecutable con extensión .exe → 415 sin fila ni archivo")
+    void exeConExtensionRealSeRechaza() throws Exception {
+        altaRechazada("El proyector no enciende desde la mañana",
+                new MockMultipartFile("archivos", "setup.exe", "application/octet-stream", EXE))
                 .andExpect(status().isUnsupportedMediaType());
     }
 
