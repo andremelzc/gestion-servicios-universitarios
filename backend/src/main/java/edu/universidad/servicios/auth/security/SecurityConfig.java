@@ -43,10 +43,12 @@ public class SecurityConfig {
                         "/api/v1/auth/login",
                         "/api/v1/auth/registro",
                         "/api/v1/auth/recuperar-password",
-                        "/api/v1/auth/restablecer-password",
-                        "/actuator",
-                        "/actuator/**"
+                        "/api/v1/auth/restablecer-password"
                 ).permitAll()
+                // OBS-07: Actuator vive en el puerto de gestión (MANAGEMENT_PORT, red interna).
+                // Solo health es público; prometheus se permite porque ese puerto no se publica.
+                // El resto de /actuator exige autenticación.
+                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/prometheus").permitAll()
                 // Swagger (se debería limitar en prod)
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Reglas RBAC
