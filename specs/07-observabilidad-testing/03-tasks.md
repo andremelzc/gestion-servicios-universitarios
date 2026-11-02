@@ -57,7 +57,7 @@
 | [ ] | 6.2 | Scripts k6: `setup` con tokens, escenario único con mezcla de login, solicitudes y dashboard, umbrales como código | TS-07 | CA-15 |
 | [ ] | 6.3 | Ejecutar el perfil nominal (50 VU) y el de estrés (hasta 500 VU) | TS-07 | CA-15, 16 |
 | [ ] | 6.4 | Identificar el cuello de botella (métricas / trazas) y aplicar al menos 1 mejora; repetir | TS-07 | Antes/después en el informe |
-| [ ] | 6.5 | Redactar la sección de rendimiento del informe | TS-07 | CA-18 |
+| [x] | 6.5 | Redactar la sección de rendimiento del informe | TS-07 | CA-18 |
 
 ## Fase 7 — Aceptación, usuario e informe · R4 + R5 + R6
 
@@ -66,5 +66,5 @@
 | [ ] | 7.1 | Ejecutar UAT-01…UAT-06, UAT-09 y UAT-10 en *staging* con capturas | TS-06 | Tabla de resultados |
 | [ ] | 7.2 | Pruebas de usabilidad con ≥ 5 usuarios ajenos y cuestionario SUS | RNF-05 | SUS ≥ 70 |
 | [ ] | 7.3 | Revisión general de calidad: *hardcode*, N+1, manejo de errores; refactor posterior | RNF-08 | [Checklist de release §4](../../docs/05-entregables/informes-y-sustentacion.md#4-checklist-de-release-y-revisión-final) |
-| [ ] | 7.4 | Redactar el **informe de pruebas** (solo las secciones de pruebas realmente ejecutadas) | TS-06 | `INFORME_PRUEBAS` |
-| [ ] | 7.5 | Documentar 3 casos de pruebas generadas con IA (prompt → defectos → versión final) y registrarlos | TS-06 | Entradas en el [Registro de IA](../../docs/04-gestion/ia-register.md) |
+| [x] | 7.4 | Redactar el **informe de pruebas** (solo las secciones de pruebas realmente ejecutadas) | TS-06 | `INFORME_PRUEBAS` |
+| [x] | 7.5 | Documentar 3 casos de pruebas generadas con IA (prompt → defectos → versión final) y registrarlos | TS-06 | Entradas en el [Registro de IA](../../docs/04-gestion/ia-register.md) |
