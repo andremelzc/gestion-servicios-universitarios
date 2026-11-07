@@ -75,3 +75,10 @@ export function resolver(id, { informe, archivos }) {
   archivos.forEach((archivo) => cuerpo.append('archivos', archivo));
   return apiClient.put(`/solicitudes/${id}/resolver`, cuerpo);
 }
+
+/**
+ * Historial inmutable de la solicitud (api-rest §3.2, `GET /solicitudes/{id}/historial`): arreglo de
+ * `{fecha, usuario, estadoAnterior, estadoNuevo, nota}`, ya ordenado cronológicamente por el API.
+ */
+export const obtenerHistorial = (id, opciones) =>
+  apiClient.get(`/solicitudes/${id}/historial`, opciones);
