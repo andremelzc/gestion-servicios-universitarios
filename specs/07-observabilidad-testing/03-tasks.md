@@ -17,10 +17,10 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 2.1 | `docker-compose.monitoring.yml` con Prometheus, Grafana y Jaeger (perfil `monitoring`) | TS-05 | CA-7 |
-| [ ] | 2.2 | `prometheus.yml` y `alert-rules.yml` (3 alertas: instancia caída, error 5xx y BD inaccesible; ver [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas)) | TS-05 | Reglas cargadas |
-| [ ] | 2.3 | Dashboard provisionado de Salud del servicio | TS-05 | CA-7 |
-| [ ] | 2.4 | **Simulacro de incidente** (detener backend / BD) y *post-mortem* en `docs/incidentes/` | TS-05 | CA-5, CA-6 |
+| [x] | 2.1 | `docker-compose.monitoring.yml` con Prometheus, Grafana y Jaeger (perfil `monitoring`) | TS-05 | CA-7 |
+| [x] | 2.2 | `prometheus.yml` y `alert-rules.yml` (3 alertas: instancia caída, error 5xx y BD inaccesible; ver [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas)) | TS-05 | Reglas cargadas |
+| [x] | 2.3 | Dashboard provisionado de Salud del servicio | TS-05 | CA-7 |
+| [x] | 2.4 | **Simulacro de incidente** (detener backend / BD) y *post-mortem* en `docs/incidentes/` | TS-05 | CA-5, CA-6 |
 
 ## Fase 3 — Pruebas unitarias e integración (BE) · R6 con R2/R3
 
