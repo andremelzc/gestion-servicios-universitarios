@@ -53,10 +53,10 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 6.1 | Sembrar ~2 000 solicitudes (`DemoDataSeeder` modo `carga`) | TS-07 | Conteo en BD |
-| [ ] | 6.2 | Scripts k6: `setup` con tokens, escenario único con mezcla de login, solicitudes y dashboard, umbrales como código | TS-07 | CA-15 |
-| [ ] | 6.3 | Ejecutar el perfil nominal (50 VU) y el de estrés (hasta 500 VU) | TS-07 | CA-15, 16 |
-| [ ] | 6.4 | Identificar el cuello de botella (métricas / trazas) y aplicar al menos 1 mejora; repetir | TS-07 | Antes/después en el informe |
+| [x] | 6.1 | Sembrar ~2 000 solicitudes (`DemoDataSeeder` modo `carga`) | TS-07 | Conteo en BD |
+| [x] | 6.2 | Scripts k6: `setup` con tokens, escenario único con mezcla de login, solicitudes y dashboard, umbrales como código | TS-07 | CA-15 |
+| [x] | 6.3 | Ejecutar el perfil nominal (50 VU) y el de estrés (hasta 500 VU) | TS-07 | CA-15, 16 |
+| [x] | 6.4 | Identificar el cuello de botella (métricas / trazas) y aplicar al menos 1 mejora; repetir | TS-07 | Antes/después en el informe |
 | [x] | 6.5 | Redactar la sección de rendimiento del informe | TS-07 | CA-18 |
 
 ## Fase 7 — Aceptación, usuario e informe · R4 + R5 + R6
