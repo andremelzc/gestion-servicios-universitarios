@@ -16,7 +16,9 @@ import edu.universidad.servicios.usuario.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -111,9 +113,11 @@ public class DemoDataSeeder implements CommandLineRunner {
 	private final EstadoSolicitudRepository estadoRepository;
 	private final SolicitudRepository solicitudRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JdbcTemplate jdbcTemplate;
 	private final String password;
 	private final int cantidadSolicitudes;
 
+	@Autowired
 	public DemoDataSeeder(
 		UsuarioRepository usuarioRepository,
 		RolRepository rolRepository,
@@ -123,6 +127,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 		EstadoSolicitudRepository estadoRepository,
 		SolicitudRepository solicitudRepository,
 		PasswordEncoder passwordEncoder,
+		@Autowired(required = false) JdbcTemplate jdbcTemplate,
 		@Value("${app.demo.user-password}") String password,
 		@Value("${app.demo.solicitudes.cantidad:200}") int cantidadSolicitudes
 	) {
@@ -134,8 +139,36 @@ public class DemoDataSeeder implements CommandLineRunner {
 		this.estadoRepository = estadoRepository;
 		this.solicitudRepository = solicitudRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.jdbcTemplate = jdbcTemplate;
 		this.password = password;
 		this.cantidadSolicitudes = cantidadSolicitudes;
+	}
+
+	public DemoDataSeeder(
+		UsuarioRepository usuarioRepository,
+		RolRepository rolRepository,
+		AreaRepository areaRepository,
+		CategoriaRepository categoriaRepository,
+		PrioridadRepository prioridadRepository,
+		EstadoSolicitudRepository estadoRepository,
+		SolicitudRepository solicitudRepository,
+		PasswordEncoder passwordEncoder,
+		String password,
+		int cantidadSolicitudes
+	) {
+		this(
+			usuarioRepository,
+			rolRepository,
+			areaRepository,
+			categoriaRepository,
+			prioridadRepository,
+			estadoRepository,
+			solicitudRepository,
+			passwordEncoder,
+			null,
+			password,
+			cantidadSolicitudes
+		);
 	}
 
 	@Override
@@ -303,6 +336,22 @@ public class DemoDataSeeder implements CommandLineRunner {
 				registro.plusHours(prioridad.getSlaMaxHoras())
 			);
 			solicitudRepository.save(solicitud);
+		}
+		sincronizarSecuencia(anio);
+	}
+
+	private void sincronizarSecuencia(int anio) {
+		if (jdbcTemplate != null) {
+			jdbcTemplate.update(
+				"""
+				INSERT INTO secuencias_solicitud (anio, ultimo_numero)
+				VALUES (?, ?)
+				ON DUPLICATE KEY UPDATE ultimo_numero = GREATEST(ultimo_numero, ?)
+				""",
+				anio,
+				cantidadSolicitudes,
+				cantidadSolicitudes
+			);
 		}
 	}
 

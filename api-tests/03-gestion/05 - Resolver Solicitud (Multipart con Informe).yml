@@ -1,0 +1,31 @@
+info:
+  name: Resolver Solicitud (Multipart con Informe)
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/solicitudes/4/resolver"
+  body:
+    type: multipart-form
+    data:
+      - name: datos
+        type: text
+        contentType: application/json
+        value: |
+          {
+            "informe": "Se procedió con el reemplazo del cable HDMI y ajuste de resolución en el proyector."
+          }
+      - name: archivos
+        type: file
+        value:
+          - ./ejemplo.pdf
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,8 @@
+name: staging
+variables:
+  - name: baseUrl
+    value: "https://staging.servicios.universidad.edu"
+    enabled: true
+  - name: token
+    value: ""
+    enabled: true
