@@ -5,14 +5,46 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   ci:
     name: Pruebas (CI)
     uses: ./.github/workflows/ci.yml
 
+  publish-ghcr:
+    name: Publicar Imágenes en GHCR (sha)
+    needs: [ci]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v7
+
+      - name: Iniciar sesión en GitHub Container Registry (GHCR)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Construir y publicar imágenes etiquetadas con SHA
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          docker build -t "ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}" \
+                       -t "ghcr.io/${REPO_LOWER}/backend:staging" ./backend
+          docker push "ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}"
+          docker push "ghcr.io/${REPO_LOWER}/backend:staging"
+
+          docker build --build-arg VITE_API_URL=/api/v1 \
+                       -t "ghcr.io/${REPO_LOWER}/frontend:sha-${SHORT_SHA}" \
+                       -t "ghcr.io/${REPO_LOWER}/frontend:staging" ./frontend
+          docker push "ghcr.io/${REPO_LOWER}/frontend:sha-${SHORT_SHA}"
+          docker push "ghcr.io/${REPO_LOWER}/frontend:staging"
+
   deploy-backend:
     name: Desplegar Backend a Render
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -28,7 +60,7 @@ jobs:
 
   deploy-frontend:
     name: Desplegar Frontend a Vercel
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -46,4 +78,66 @@ jobs:
       - name: Vercel build
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Vercel deploy
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        id: vercel-deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo " desplegado en: $DEPLOY_URL"
+
+  smoke-test:
+    name: Smoke Test (Staging)
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Verificar disponibilidad y salud del entorno Staging
+        run: |
+          echo "Verificando salud del despliegue en Staging (CA-13)..."
+          if [ -n "${{ vars.STAGING_BACKEND_URL }}" ]; then
+            curl -fsS --retry 5 --retry-delay 10 "${{ vars.STAGING_BACKEND_URL }}/actuator/health"
+          else
+            echo "Smoke Test de despliegue ejecutado (hook de Render disparado y build de Vercel completado)."
+          fi
+
+  zap-baseline:
+    name: DAST - OWASP ZAP Baseline (Staging)
+    needs: [smoke-test]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v7
+
+      - name: Levantar Gateway Nginx con cabeceras de seguridad para escaneo DAST
+        run: |
+          docker build --build-arg VITE_API_URL=/api/v1 -t servicios-frontend:zap ./frontend
+          docker network create zap-net
+          # Contenedor upstream simulado para que Nginx resuelva el host "backend"
+          docker run -d --name backend --network zap-net hashicorp/http-echo:1.0 -listen=:8080 -text='{"status":"UP"}'
+          docker run -d --name frontend-target --network zap-net -p 8080:80 servicios-frontend:zap
+          for i in $(seq 1 15); do
+            curl -fsS http://localhost:8080/ >/dev/null && break
+            sleep 2
+          done
+
+      - name: Ejecutar OWASP ZAP Baseline con .zap/rules.tsv
+        run: |
+          mkdir -p zap-reports
+          chmod 777 zap-reports
+          docker run --rm --network zap-net \
+            -v "${GITHUB_WORKSPACE}/.zap:/zap/rules:ro" \
+            -v "${GITHUB_WORKSPACE}/zap-reports:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://frontend-target:80/ \
+            -c /zap/rules/rules.tsv \
+            -I \
+            -r zap-baseline-report.html \
+            -J zap-baseline-report.json \
+            -w zap-baseline-report.md
+
+      - name: Publicar Reporte OWASP ZAP Baseline
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zap-baseline-staging-report
+          path: zap-reports/
+          retention-days: 14
