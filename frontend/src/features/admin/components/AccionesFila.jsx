@@ -2,7 +2,8 @@ import './adminUi.css';
 
 /**
  * Acciones de una fila de catálogo con baja lógica (RN-14): activa → Editar y Desactivar;
- * inactiva → Reactivar (deshabilitado mientras hay una mutación en curso). `nombre` sale en el
+ * inactiva → Reactivar (con `aria-disabled` y sin acción mientras hay una mutación en curso: un
+ * `disabled` real le quitaría el foco al teclado). `nombre` sale en el
  * nombre accesible de cada botón para distinguir las filas ("Editar Mobiliario").
  */
 export default function AccionesFila({
@@ -19,8 +20,8 @@ export default function AccionesFila({
         type="button"
         className="admin-boton"
         aria-label={`Reactivar ${nombre}`}
-        disabled={isSaving}
-        onClick={onReactivar}
+        aria-disabled={isSaving ? 'true' : undefined}
+        onClick={isSaving ? undefined : onReactivar}
       >
         Reactivar
       </button>
