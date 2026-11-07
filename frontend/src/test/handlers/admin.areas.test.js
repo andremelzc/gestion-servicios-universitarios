@@ -1,5 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { reiniciarAreas } from './admin.areas.js';
+import { describe, expect, it } from 'vitest';
 
 const API = 'http://localhost/api/v1';
 
@@ -11,8 +10,6 @@ const enviar = (metodo, ruta, cuerpo) =>
   });
 
 const nueva = { nombre: 'Servicios Generales', correoContacto: 'generales@uni.edu' };
-
-beforeEach(() => reiniciarAreas());
 
 describe('MSW · handlers de administración, áreas (API §3.5)', () => {
   it('[US-16] GET /areas devuelve las activas con su correo de contacto', async () => {
