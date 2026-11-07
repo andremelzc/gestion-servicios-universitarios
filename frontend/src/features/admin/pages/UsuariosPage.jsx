@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import { useAreas } from '../../dashboard/hooks/useAreas.js';
+import ConfirmarDesactivacion from '../components/ConfirmarDesactivacion.jsx';
 import UsuarioFormModal from '../components/UsuarioFormModal.jsx';
 import useCrud from '../hooks/useCrud.js';
 import { ROLES, etiquetaRol } from '../roles.js';
@@ -23,7 +24,7 @@ export default function UsuariosPage() {
   const [idArea, setIdArea] = useState('');
   const crud = useCrud('/admin/usuarios', { paramInactivos, filtros: { rol, idArea } });
   const { areas } = useAreas(true);
-  const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar', fila? }
+  const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar' | 'desactivar', fila? }
   const [aviso, setAviso] = useState('');
   const { general, campos } = crud.errorMutacion ?? SIN_ERROR;
 
@@ -37,14 +38,25 @@ export default function UsuariosPage() {
     setDialogo(null);
   };
 
-  async function guardar(datos) {
-    const creando = dialogo.tipo === 'crear';
-    const { ok } = await (creando ? crud.crear(datos) : crud.actualizar(dialogo.fila.id, datos));
+  // Si la mutación falla, el diálogo sigue abierto y `errorMutacion` lleva el motivo.
+  async function ejecutar(mutacion, mensaje) {
+    const { ok } = await mutacion();
     if (!ok) return;
-    const nombre = `${datos.nombre} ${datos.apellido}`;
     setDialogo(null);
-    setAviso(`Usuario «${nombre}» ${creando ? 'creado' : 'actualizado'}.`);
+    setAviso(mensaje);
   }
+
+  const guardar = (datos) => {
+    const nombre = `${datos.nombre} ${datos.apellido}`;
+    return dialogo.tipo === 'crear'
+      ? ejecutar(() => crud.crear(datos), `Usuario «${nombre}» creado.`)
+      : ejecutar(() => crud.actualizar(dialogo.fila.id, datos), `Usuario «${nombre}» actualizado.`);
+  };
+
+  const nombreDe = (fila) => `${fila.nombre} ${fila.apellido}`;
+  const reactivar = (fila) =>
+    ejecutar(() => crud.reactivar(fila.id), `Usuario «${nombreDe(fila)}» reactivado.`);
+  const formularioAbierto = dialogo?.tipo === 'crear' || dialogo?.tipo === 'editar';
 
   const nombreArea = useMemo(() => new Map(areas.map((a) => [a.id, a.nombre])), [areas]);
 
@@ -117,6 +129,11 @@ export default function UsuariosPage() {
       <p role="status" className="admin-exito">
         {aviso}
       </p>
+      {!dialogo && general && (
+        <p role="alert" className="admin-error">
+          {general}
+        </p>
+      )}
 
       <DataTable
         caption="Usuarios"
@@ -135,20 +152,42 @@ export default function UsuariosPage() {
         etiquetasActivo={{ activo: 'Activo', inactivo: 'Inactivo' }}
         filters={filtros}
         emptyMessage="No hay usuarios que coincidan con los filtros."
-        renderActions={(fila) => (
-          <button
-            type="button"
-            className="admin-boton"
-            aria-label={`Editar ${fila.nombre} ${fila.apellido}`}
-            onClick={() => abrir({ tipo: 'editar', fila })}
-          >
-            Editar
-          </button>
-        )}
+        renderActions={(fila) =>
+          fila.activo ? (
+            <>
+              <button
+                type="button"
+                className="admin-boton"
+                aria-label={`Editar ${nombreDe(fila)}`}
+                onClick={() => abrir({ tipo: 'editar', fila })}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                className="admin-boton"
+                aria-label={`Desactivar ${nombreDe(fila)}`}
+                onClick={() => abrir({ tipo: 'desactivar', fila })}
+              >
+                Desactivar
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="admin-boton"
+              aria-label={`Reactivar ${nombreDe(fila)}`}
+              disabled={crud.isSaving}
+              onClick={() => reactivar(fila)}
+            >
+              Reactivar
+            </button>
+          )
+        }
       />
 
       <UsuarioFormModal
-        isOpen={dialogo !== null}
+        isOpen={formularioAbierto}
         usuario={dialogo?.tipo === 'editar' ? dialogo.fila : null}
         areas={areas}
         onClose={cerrar}
@@ -156,6 +195,19 @@ export default function UsuariosPage() {
         isSaving={crud.isSaving}
         errorGeneral={general}
         errorCampos={campos}
+      />
+      <ConfirmarDesactivacion
+        isOpen={dialogo?.tipo === 'desactivar'}
+        nombre={dialogo?.fila ? nombreDe(dialogo.fila) : ''}
+        onCancel={cerrar}
+        onConfirm={() =>
+          ejecutar(
+            () => crud.desactivar(dialogo.fila.id),
+            `Usuario «${nombreDe(dialogo.fila)}» desactivado.`,
+          )
+        }
+        isSaving={crud.isSaving}
+        error={general}
       />
     </main>
   );

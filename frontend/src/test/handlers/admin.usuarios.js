@@ -55,6 +55,15 @@ const buscar = (params) => usuarios.find((u) => u.id === Number(params.id));
 const noEncontrado = (request) =>
   problema(404, 'no-encontrado', 'No encontrado', 'El usuario no existe.', ruta(request));
 
+const conflicto = (detalle, request) =>
+  problema(409, 'conflicto', 'Conflicto', detalle, ruta(request));
+
+// CA-11: el último ADMIN activo no se desactiva ni cambia de rol.
+const esUnicoAdmin = (usuario) =>
+  usuario.rol === 'ADMIN' &&
+  usuario.activo &&
+  usuarios.filter((u) => u.rol === 'ADMIN' && u.activo).length === 1;
+
 // RN-21 (CA-8): TECNICO y SUPERVISOR exigen `idArea`; ESTUDIANTE y ADMIN no la admiten.
 function validar({ rol, idArea, nombre, apellido, correo }, { alta }) {
   const errores = {};
@@ -81,13 +90,7 @@ function rechazar(cuerpo, request, idActual, { alta }) {
     });
   }
   if (alta && usuarios.some((u) => u.id !== idActual && u.correo === cuerpo.correo)) {
-    return problema(
-      409,
-      'conflicto',
-      'Conflicto',
-      'Ya existe un usuario con ese correo.',
-      ruta(request),
-    );
+    return conflicto('Ya existe un usuario con ese correo.', request);
   }
   return null;
 }
@@ -130,8 +133,30 @@ export const handlersUsuarios = [
     const cuerpo = await request.json();
     const rechazo = rechazar(cuerpo, request, usuario.id, { alta: false });
     if (rechazo) return rechazo;
+    if (esUnicoAdmin(usuario) && cuerpo.rol !== 'ADMIN') {
+      return conflicto('No se puede cambiar el rol del único administrador activo.', request);
+    }
     const { nombre, apellido, telefono = null, rol, idArea = null } = cuerpo;
     Object.assign(usuario, { nombre, apellido, telefono, rol, idArea });
     return HttpResponse.json(usuario);
+  }),
+
+  http.put('*/api/v1/admin/usuarios/:id/reactivar', ({ params, request }) => {
+    const usuario = buscar(params);
+    if (!usuario) return noEncontrado(request);
+    usuario.activo = true;
+    return HttpResponse.json(usuario);
+  }),
+
+  // Baja lógica (RN-14). El mock no conoce al usuario del token: la regla "no desactivarse a sí
+  // mismo" no se simula; sí la del último admin activo (CA-11), que da el mismo 409.
+  http.delete('*/api/v1/admin/usuarios/:id', ({ params, request }) => {
+    const usuario = buscar(params);
+    if (!usuario) return noEncontrado(request);
+    if (esUnicoAdmin(usuario)) {
+      return conflicto('No se puede desactivar al único administrador activo.', request);
+    }
+    usuario.activo = false;
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
