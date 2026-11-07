@@ -37,6 +37,10 @@ server:
     port: ${PORT:8080}
 
 management:
+    # OBS-07: Actuator solo en el puerto de gestion (red interna de Docker, no publicado).
+    # /actuator/health llega al exterior unicamente via el proxy de Nginx.
+    server:
+        port: ${MANAGEMENT_PORT:8081}
     endpoints:
         web:
             exposure:

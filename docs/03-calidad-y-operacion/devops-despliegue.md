@@ -24,9 +24,9 @@
 | Servicio | Imagen base | Puerto interno | Contenido y reglas |
 |:---|:---|:---:|:---|
 | **frontend** (Nginx) | *Multi-stage:* `node:20-alpine` compila → `nginx:stable-alpine` sirve | 80 (443 en prod) | Sirve la SPA y hace de **API Gateway**: proxy `/api/` → `backend:8080`, cabeceras de seguridad, *rate limit*, TLS. `VITE_API_URL=/api/v1` se fija en *build*. |
-| **backend** | *Multi-stage:* `maven:3-eclipse-temurin-17` compila → `eclipse-temurin:17-jre` ejecuta | 8080 | JAR en capas (dependencias cacheadas); usuario **no root**; `HEALTHCHECK` a `/actuator/health`; `-Duser.timezone=UTC`; volumen `evidencias`. |
+| **backend** | *Multi-stage:* `maven:3-eclipse-temurin-17` compila → `eclipse-temurin:17-jre` ejecuta | 8080 (API) · 8081 (Actuator, no publicado) | JAR en capas (dependencias cacheadas); usuario **no root**; `HEALTHCHECK` a `localhost:8081/actuator/health`; `-Duser.timezone=UTC`; volumen `evidencias`. |
 | **db** | `mysql:8.0` | 3306 (**no** publicado al host en prod) | Volumen `mysql_data`; `utf8mb4`; usuario de aplicación sin privilegios DDL en prod; el esquema lo aplica **Flyway** desde el backend. |
-| **prometheus** *(perfil `monitoring`)* | `prom/prometheus` | 9090 | Scrapea `backend:8080/actuator/prometheus`; reglas de alerta. |
+| **prometheus** *(perfil `monitoring`)* | `prom/prometheus` | 9090 | Scrapea `backend:8081/actuator/prometheus` (puerto de gestión `MANAGEMENT_PORT`, solo red interna); reglas de alerta. |
 | **grafana** *(perfil `monitoring`)* | `grafana/grafana` | 3000 | Dashboards y alertas provisionados desde archivos. |
 | **jaeger** *(perfil `monitoring`)* | `jaegertracing/all-in-one` | 16686 (UI) · 4318 (OTLP) | Visor de trazas. |
 
@@ -85,7 +85,7 @@ services:
       STORAGE_PATH: /var/app/evidencias
     volumes: [ "evidencias:/var/app/evidencias" ]
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 5
