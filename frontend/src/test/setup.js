@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { reiniciarAreas } from './handlers/admin.areas.js';
+import { reiniciarCategorias } from './handlers/admin.categorias.js';
 import { server } from './server.js';
 
 // jsdom no calcula el layout y `getClientRects()` siempre es vacío: se simula que todo elemento
@@ -17,6 +19,9 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  // Estado en memoria de los handlers de administración: no debe filtrarse entre pruebas.
+  reiniciarAreas();
+  reiniciarCategorias();
 });
 afterAll(() => server.close());
 

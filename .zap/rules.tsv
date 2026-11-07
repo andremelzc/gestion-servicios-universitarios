@@ -1,0 +1,11 @@
+# Reglas de triaje OWASP ZAP Baseline (TS-08 / OPS-17 / CA-18)
+# Formato: <id_regla>	<IGNORE|WARN|FAIL>	<justificacion>
+10020	FAIL	X-Frame-Options Header Not Set (exigido DENY en Nginx — CA-8)
+10021	FAIL	X-Content-Type-Options Header Missing (exigido nosniff en Nginx — CA-8)
+10035	FAIL	Strict-Transport-Security Header Not Set (exigido HSTS en Nginx/TLS — CA-8)
+10036	FAIL	Server Leaks Version Information via Server HTTP Response Header (server_tokens off — CA-8)
+10038	FAIL	Content Security Policy (CSP) Header Not Set (exigido CSP sin unsafe-inline — CA-8)
+10202	IGNORE	Absence of Anti-CSRF Tokens (Falso positivo: API REST stateless autenticada por cabecera Authorization Bearer JWT, sin cookies de sesion — ADR-004)
+10027	WARN	Information Disclosure - Suspicious Comments (bundles minificados de Vite/React)
+10096	WARN	Timestamp Disclosure - Unix (campos timestamp estandar en respuestas RFC 7807 — ADR-012)
+10049	IGNORE	Storable and Cacheable Content (assets estaticos versionados por hash de Vite)

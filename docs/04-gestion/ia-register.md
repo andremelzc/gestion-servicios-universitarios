@@ -101,7 +101,7 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 | R3 · Backend 2 / DBA | [`ia-registro/r3-backend-2-dba.md`](ia-registro/r3-backend-2-dba.md) | 1 |
 | R4 · Frontend 1 | [`ia-registro/r4-frontend-1.md`](ia-registro/r4-frontend-1.md) | 0 |
 | R5 · Frontend 2 | [`ia-registro/r5-frontend-2.md`](ia-registro/r5-frontend-2.md) | 6 |
-| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 0 |
+| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 8 |
 
 **Reglas de uso**
 

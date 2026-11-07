@@ -260,26 +260,28 @@ server {
 
 ---
 
-## 8. Operación del host
+## 8. Operación del host y servicios gestionados (OPS-21 · #117)
 
-Aplica a la VM de *staging*/*prod* ([ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue)).
+Aplica tanto al despliegue con `docker-compose.prod.yml` como a la arquitectura cloud gestionada adoptada en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue) (Vercel + Render + MySQL DBaaS):
 
-- [ ] Acceso SSH solo con clave; sin login `root`; *firewall* abierto solo en 80/443 (y 22 restringido).
-- [ ] Docker actualizado y paquetes del SO con parches de seguridad.
-- [ ] Certificado TLS (Let's Encrypt) con renovación automática verificada.
-- [ ] Espacio en disco y memoria monitoreados (alerta).
-- [ ] Documentados los pasos de recuperación ante desastre (RTO objetivo ≤ 1 h para la demo).
+- [x] **Acceso restringido y superficie de red mínima:** Sin acceso SSH público ni login `root`; en contenedores el backend corre como usuario sin privilegios (`appuser`, UID 1001) y `docker-compose.prod.yml` no publica el puerto `3306` de MySQL ni el puerto interno `8081` de Actuator; en la nube solo se exponen los puertos HTTPS (`443`) gestionados por el edge de Vercel y Render.
+- [x] **Imágenes y paquetes con parches de seguridad:** Imágenes base fijadas (`eclipse-temurin:21-jre-alpine`, `nginx:1.27-alpine`, `mysql:8.0`) y vigilancia continua de vulnerabilidades con Dependabot (`.github/dependabot.yml`) y CodeQL.
+- [x] **Certificado TLS (Let's Encrypt) con renovación automática verificada:** Terminación TLS 1.3 gestionada con certificados Let's Encrypt auto-renovados en los dominios de Vercel y Render, reforzada con cabecera `Strict-Transport-Security: max-age=31536000; includeSubDomains`.
+- [x] **Monitoreo de salud, recursos y alertas:** Reglas SEV1 activas en `ops/prometheus/alert-rules.yml` (`InstanciaCaida`, `ErrorRate5xxAlto`, `BDInaccesible`) y `HEALTHCHECK` configurado en todos los contenedores.
+- [x] **Recuperación ante desastre (RTO ≤ 1 h):** Reconstrucción determinista desde imágenes etiquetadas en GHCR (`ghcr.io/andremelzc/gestion-servicios-universitarios/*`), migraciones Flyway idempotentes (`V1`–`V6`) y `DemoDataSeeder` reproducible; validado en el simulacro [`INC-20261106-01`](../incidentes/INC-20261106-01-simulacro-caida-bd-y-backend.md).
 
 ---
 
-## 9. Plataforma cloud
+## 9. Plataforma cloud y GitHub Environments (OPS-22 · #118)
 
-La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: Aceptada.** La arquitectura consta de Vercel (Frontend) y Render (Backend y DBaaS externo):
+La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: Aceptada.** La arquitectura consta de Vercel (Frontend), Render (Backend), GHCR (registro de imágenes Docker por commit SHA) y MySQL gestionado:
 
 | Dato | Valor |
 |:---|:---|
-| Proveedor y región | Vercel (Front, Global) / Render (Back, US East) |
-| URL de *staging* | *Pendiente del primer despliegue automatizado* |
-| URL de producción/demo | *Pendiente del primer despliegue automatizado* |
-| Responsable de la infraestructura | andremelzc (Tech Lead / DevOps) |
-| Fecha de decisión | 05/10/2026 |
+| Proveedor y región | Vercel (Front, CDN Global) · Render (Back, US East) · GHCR (Imágenes Docker) |
+| GitHub Environment `staging` | Configurado en GitHub (`environment: staging`, disparado por `push` a `develop` en `.github/workflows/cd-staging.yml`) con secretos propios aislados (`RENDER_STAGING_HOOK`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) |
+| GitHub Environment `production` | Configurado en GitHub (`environment: production`, disparado por `push` a `main` / tag `v*` en `.github/workflows/cd-prod.yml`) con secretos propios aislados (`RENDER_DEPLOY_HOOK`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) |
+| URL de *staging* (Preview) | `https://frontend-servicios-2o4nr29q3.vercel.app` (desplegado automáticamente en cada merge a `develop`) |
+| URL de producción/demo | Desplegada automáticamente desde `main` y tags `v*` mediante `cd-prod.yml` |
+| Responsable de la infraestructura | `andremelzc` (R1 · Tech Lead) y `fabrizio25504` (R6 · QA / DevOps / Seguridad) |
+| Fecha de decisión y aprovisionamiento | 05/10/2026 |
