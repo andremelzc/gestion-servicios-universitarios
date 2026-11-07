@@ -38,7 +38,7 @@
 |:-:|:-:|:---|:---:|:---:|:---|
 | [ ] | 4.1 | **Manual de usuario** con capturas de la aplicación desplegada (4 roles) | TS-12 | R4 + R1 | `MANUAL_USUARIO.pdf` (CA-10) |
 | [ ] | 4.2 | **Manual técnico** que consolida y enlaza las fuentes + guía de instalación | TS-12 | R1 | `MANUAL_TECNICO.md` (CA-11) |
-| [ ] | 4.3 | **Informe de pruebas** | TS-12 | R6 | `INFORME_PRUEBAS` (CA-12) |
+| [x] | 4.3 | **Informe de pruebas** | TS-12 | R6 | `INFORME_PRUEBAS` (CA-12) |
 
 ## Fase 5 — Release y sustentación (semana 12, 14/11) · todos
 

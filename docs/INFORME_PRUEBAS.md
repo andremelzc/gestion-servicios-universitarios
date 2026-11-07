@@ -452,6 +452,27 @@ A continuación se documentan los 4 casos oficiales registrados por el Rol 6 en 
 - **Defecto Inicial de la IA Detectado:** Conflicto de nombres de tipo en la inyección de beans: `java.time.Clock` colisionaba con el bean interno de reloj de Micrometer (`io.micrometer.core.instrument.Clock`), impidiendo el arranque de la aplicación. Además, la configuración inicial exponía `/actuator/**` sin restricciones.
 - **Validación y Remediación Humana:** Se refinó `ClockConfig` declarando el calificador explícito `@ConditionalOnMissingBean(java.time.Clock.class)` y un bean diferenciado para el reloj de métricas. Se restringió `/actuator/prometheus` para su consumo exclusivo dentro de la red privada Docker. Commit `59c0326`.
 
+### Caso R6-05: Seguridad en el Alta y Validación de Archivos (`RegistroSeguridadIT` — #78, #154)
+- **Herramienta:** Claude Code (Claude Opus 4.6).
+- **Prompt:** *"Implementar RegistroSeguridadIT (#78, #154): pruebas de integración HTTP contra MySQL real para TC-009 (.exe renombrado a .jpg y extensión .exe directa), TC-010 (archivo de 6 MB > 5 MB), TC-011 (payloads XSS en descripción con @SinHtml) y TC-023 (IDOR entre estudiantes sobre detalle, historial y evidencia devolviendo 404). Verificar que ningún rechazo deje filas en BD ni archivos huérfanos en disco."*
+- **Resultado Generado:** Suite `RegistroSeguridadIT.java` (191 líneas) con helper `altaRechazada`.
+- **Defecto Inicial de la IA Detectado (§10.2):** La versión inicial esperaba `415 Unsupported Media Type` al subir `foto.jpg` con cabecera binaria `MZ` (`.exe` renombrado), pero `FileTypeValidator` distingue extensión no permitida (`415` para `setup.exe`) de discrepancia entre extensión permitida y firma mágica (`400` para `foto.jpg` con bytes `MZ`). Además, carecía de control positivo del propietario en TC-023.
+- **Mutación Manual y Versión Final:** Se retiró temporalmente `@SinHtml` de `SolicitudCrearRequest.descripcion` y la prueba `htmlEnDescripcionSeRechaza` falló en rojo (`201` en vez de `400`). Se dividió TC-009 en dos métodos explícitos (`exeRenombradoSeRechaza` → `400` y `exeConExtensionRealSeRechaza` → `415`) y se añadió control positivo (`200 OK` para el estudiante propietario). Commit `202ea39` (PR #363).
+
+### Caso R6-06: Matriz de Autorización e IDOR del Módulo Gestión (`GestionAutorizacionIT` — #122)
+- **Herramienta:** Claude Code (Claude Opus 4.6).
+- **Prompt:** *"Implementar GestionAutorizacionIT (#122 / GES-24): suite parametrizada rol × endpoint × propio/ajeno/otra área para el módulo de gestión (ver, historial, bandeja, técnicos, evaluar, asignar, iniciar-atencion, resolver, cerrar), cubriendo TC-016, TC-019 y TC-023 contra MySQL 8 real."*
+- **Resultado Generado:** Suite parametrizada `GestionAutorizacionIT.java` con 47 combinaciones.
+- **Defectos Iniciales de la IA Detectados (§10.2):** (1) El borrador probaba todas las transiciones dejando la solicitud en estado `REGISTRADA`; como el servicio evalúa visibilidad (`404`) → estado (`409`) → permiso (`403`), un estado incorrecto enmascaraba errores de autorización devolviendo `409`. (2) Esperaba `403` para un técnico no asignado (`tecTI2`) al intentar resolver, cuando `AccessPolicy` aplica ocultamiento anti-IDOR (`404`) según RN-16.
+- **Mutación Manual y Versión Final:** Se alteró `AccessPolicy` para permitir acceso entre áreas y las 9 combinaciones de `supMant` y `estB` fallaron inmediatamente en rojo. Se implementó `prepararEstado(estado)` antes de cada caso y se verificó que `historialRepository.count()` permanezca intacto en rechazos. Commit `f5c33d8` (PR #365).
+
+### Caso R6-07: Matriz de Escritura Exclusiva de Administrador (`AdminAutorizacionIT` — #151)
+- **Herramienta:** Claude Code (Claude Opus 4.6).
+- **Prompt:** *"Implementar AdminAutorizacionIT (#151 / ADM-22): matriz parametrizada que verifique que solo ADMIN puede ejecutar operaciones de escritura (POST, PUT, PATCH, DELETE) en /api/v1/admin/** y /api/v1/usuarios/**, mientras ESTUDIANTE, TECNICO y SUPERVISOR reciben 403 y sin token 401."*
+- **Resultado Generado:** Suite `AdminAutorizacionIT.java` con matriz de endpoints administrativos × roles.
+- **Defecto Inicial de la IA Detectado (§10.2):** El borrador inicial enviaba cuerpos `{}` en los endpoints `POST`/`PUT`, lo cual habría producido `400 Bad Request` por Bean Validation si el control de autorización hubiese fallado, en lugar de poner en evidencia una escritura exitosa no autorizada (`201`/`200`).
+- **Mutación Manual y Versión Final:** Se habilitó temporalmente `ROLE_SUPERVISOR` en `/api/v1/admin/**` y los casos de supervisor fallaron devolviendo `2xx` en lugar de `403`. Se reemplazaron todos los cuerpos por payloads válidos completos, incluyendo el caso `ADMIN → 2xx` en la misma tabla parametrizada. Commit `66d9082` (PR #364).
+
 ---
 
 ## 10. Defectos Encontrados y Gestionados
