@@ -1,8 +1,8 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
-import UsuariosPage from './UsuariosPage.jsx';
+import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -10,7 +10,7 @@ const fila = async (nombre) => within(await screen.findByRole('row', { name: new
 
 describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
   it('[US-34] lista los usuarios activos con rol y área, sin los inactivos', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Administración de usuarios' }),
@@ -26,7 +26,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
   });
 
   it('[US-34] "Mostrar inactivas" incluye a los usuarios dados de baja', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await fila('Luis Gómez');
 
     await userEvent.click(screen.getByRole('checkbox', { name: /mostrar inactivas/i }));
@@ -36,7 +36,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
   });
 
   it('[US-17] filtra por rol', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await fila('Luis Gómez');
 
     await userEvent.selectOptions(screen.getByLabelText('Rol'), 'ESTUDIANTE');
@@ -46,7 +46,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
   });
 
   it('[US-17] filtra por área', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await fila('Luis Gómez');
 
     await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
@@ -56,7 +56,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
   });
 
   it('[US-34] busca por nombre o correo con la caja de búsqueda', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await fila('Luis Gómez');
 
     await userEvent.type(screen.getByRole('searchbox', { name: /buscar/i }), 'marta');

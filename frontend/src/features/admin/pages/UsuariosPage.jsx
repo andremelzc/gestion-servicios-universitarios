@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
+import { useAuth } from '../../auth/AuthContext.jsx';
 import { useAreas } from '../../dashboard/hooks/useAreas.js';
 import ConfirmarDesactivacion from '../components/ConfirmarDesactivacion.jsx';
 import UsuarioFormModal from '../components/UsuarioFormModal.jsx';
@@ -24,6 +25,7 @@ export default function UsuariosPage() {
   const [rol, setRol] = useState('');
   const [idArea, setIdArea] = useState('');
   const crud = useCrud('/admin/usuarios', { paramInactivos, filtros: { rol, idArea } });
+  const { usuario: sesion } = useAuth(); // CA-11: no se ofrece la baja de la cuenta propia
   const { areas, error: errorAreas, reintentar: reintentarAreas } = useAreas(true);
   const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar' | 'desactivar', fila? }
   const [aviso, setAviso] = useState('');
@@ -55,8 +57,10 @@ export default function UsuariosPage() {
   };
 
   const nombreDe = (fila) => `${fila.nombre} ${fila.apellido}`;
-  const reactivar = (fila) =>
-    ejecutar(() => crud.reactivar(fila.id), `Usuario «${nombreDe(fila)}» reactivado.`);
+  const reactivar = (fila) => {
+    setAviso(''); // un éxito anterior no debe quedar junto a un error nuevo
+    return ejecutar(() => crud.reactivar(fila.id), `Usuario «${nombreDe(fila)}» reactivado.`);
+  };
   const formularioAbierto = dialogo?.tipo === 'crear' || dialogo?.tipo === 'editar';
 
   const nombreArea = useMemo(() => new Map(areas.map((a) => [a.id, a.nombre])), [areas]);
@@ -173,14 +177,33 @@ export default function UsuariosPage() {
               >
                 Editar
               </button>
-              <button
-                type="button"
-                className="admin-boton"
-                aria-label={`Desactivar ${nombreDe(fila)}`}
-                onClick={() => abrir({ tipo: 'desactivar', fila })}
-              >
-                Desactivar
-              </button>
+              {fila.id === sesion?.id ? (
+                // CA-11: no se puede desactivar la cuenta propia. `aria-disabled` (y no
+                // `disabled`) deja el botón en el orden de tabulación para anunciar el motivo.
+                <>
+                  <button
+                    type="button"
+                    className="admin-boton"
+                    aria-label={`Desactivar ${nombreDe(fila)}`}
+                    aria-disabled="true"
+                    aria-describedby={`propia-${fila.id}`}
+                  >
+                    Desactivar
+                  </button>
+                  <span id={`propia-${fila.id}`} className="data-table__sr-only">
+                    No puedes desactivar tu propia cuenta.
+                  </span>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="admin-boton"
+                  aria-label={`Desactivar ${nombreDe(fila)}`}
+                  onClick={() => abrir({ tipo: 'desactivar', fila })}
+                >
+                  Desactivar
+                </button>
+              )}
             </>
           ) : (
             <button

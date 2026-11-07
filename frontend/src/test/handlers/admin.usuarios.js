@@ -27,10 +27,18 @@ const SEMILLA = [
 }));
 
 let usuarios = structuredClone(SEMILLA);
+// Id del usuario de la sesión: el mock no lee el JWT, así que cada prueba lo fija (CA-11).
+let idSesion = null;
+
+/** Fija el usuario de la sesión; desactivarlo responde 409 (no se puede desactivar a sí mismo). */
+export function fijarSesionUsuarios(id) {
+  idSesion = id;
+}
 
 /** Restablece el estado en memoria; llamar en `beforeEach` de las pruebas que mutan. */
 export function reiniciarUsuarios() {
   usuarios = structuredClone(SEMILLA);
+  idSesion = null;
 }
 
 const normalizar = (texto) =>
@@ -148,11 +156,13 @@ export const handlersUsuarios = [
     return HttpResponse.json(usuario);
   }),
 
-  // Baja lógica (RN-14). El mock no conoce al usuario del token: la regla "no desactivarse a sí
-  // mismo" no se simula; sí la del último admin activo (CA-11), que da el mismo 409.
+  // Baja lógica (RN-14). CA-11: 409 si es el usuario de la sesión o el único admin activo.
   http.delete('*/api/v1/admin/usuarios/:id', ({ params, request }) => {
     const usuario = buscar(params);
     if (!usuario) return noEncontrado(request);
+    if (usuario.id === idSesion) {
+      return conflicto('No puedes desactivar tu propia cuenta.', request);
+    }
     if (esUnicoAdmin(usuario)) {
       return conflicto('No se puede desactivar al único administrador activo.', request);
     }
