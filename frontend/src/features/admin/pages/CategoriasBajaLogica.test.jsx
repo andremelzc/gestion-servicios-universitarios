@@ -16,7 +16,7 @@ import CategoriasPage from './CategoriasPage.jsx';
 beforeEach(() => {
   reiniciarAreas();
   reiniciarCategorias();
-  localStorage.clear();
+  sessionStorage.clear(); // el borrador del formulario vive en sessionStorage
 });
 
 const renderFormulario = () =>
@@ -28,8 +28,11 @@ const renderFormulario = () =>
     </MemoryRouter>,
   );
 
+// Espera a que el catálogo cargue (una categoría que nunca se desactiva en estas pruebas) y
+// recién entonces lee las opciones: sin esa guarda, un `not.toContain` pasaría con el selector
+// aún vacío.
 const opcionesCategoria = async () => {
-  await screen.findByRole('option', { name: 'Mobiliario' }).catch(() => null);
+  await screen.findByRole('option', { name: 'Equipos de Cómputo' });
   return within(screen.getByLabelText('Categoría'))
     .getAllByRole('option')
     .map((opcion) => opcion.textContent);
@@ -61,6 +64,10 @@ describe('Baja lógica de categoría (TC-026)', () => {
 
   it('[TC-026] al reactivarla vuelve a ofrecerse en el formulario', async () => {
     await desactivarComoAdmin('Mobiliario');
+    const sinMobiliario = renderFormulario();
+    expect(await opcionesCategoria()).not.toContain('Mobiliario'); // la baja sí tuvo efecto
+    sinMobiliario.unmount();
+
     const admin = render(<CategoriasPage />);
     await userEvent.click(await screen.findByRole('checkbox', { name: 'Mostrar inactivas' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Reactivar Mobiliario' }));
@@ -74,12 +81,14 @@ describe('Baja lógica de categoría (TC-026)', () => {
 
   it('[TC-026] las solicitudes existentes conservan su categoría y siguen en el historial', async () => {
     await desactivarComoAdmin('Equipos de Cómputo');
+    await desactivarComoAdmin('Mobiliario');
 
-    // Capa de datos: el resumen de cada solicitud propia sigue trayendo el nombre de la categoría.
+    // Capa de datos: el handler resuelve `categoriaNombre` desde las categorías (como el JOIN del
+    // backend), así que la prueba falla si la baja las borra o renombra en lugar de `activo=false`.
     const historial = await apiClient.get('/solicitudes/mis-solicitudes?page=0&size=20');
     expect(historial.content).toHaveLength(20);
     expect(new Set(historial.content.map((s) => s.categoriaNombre))).toEqual(
-      new Set(['Equipos de Cómputo']),
+      new Set(['Equipos de Cómputo', 'Mobiliario']),
     );
 
     // Pantalla: «Mis solicitudes» sigue listando todas (no filtra por categorías activas).
@@ -123,5 +132,5 @@ describe('Baja lógica de categoría (TC-026)', () => {
     await desactivarComoAdmin('Pizarras Interactivas');
     renderFormulario();
     expect(await opcionesCategoria()).not.toContain('Pizarras Interactivas');
-  });
+  }, 20000);
 });

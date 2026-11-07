@@ -22,7 +22,7 @@ import AreasPage from './AreasPage.jsx';
 beforeEach(() => {
   reiniciarAreas();
   reiniciarCategorias();
-  localStorage.clear();
+  sessionStorage.clear(); // el borrador del formulario vive en sessionStorage
 });
 
 const categoriaNueva = {

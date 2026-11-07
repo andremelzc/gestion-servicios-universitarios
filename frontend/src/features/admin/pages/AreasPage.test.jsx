@@ -1,10 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { reiniciarAreas } from '../../../test/handlers/admin.areas.js';
+import { describe, expect, it } from 'vitest';
 import AreasPage from './AreasPage.jsx';
-
-beforeEach(() => reiniciarAreas());
 
 const fila = async (nombre) => within(await screen.findByRole('row', { name: new RegExp(nombre) }));
 
@@ -19,6 +16,19 @@ describe('AreasPage (US-16, US-33)', () => {
       (await fila('Infraestructura')).getByRole('cell', { name: 'infra@universidad.edu' }),
     ).toBeVisible();
     expect(await screen.findAllByRole('row')).toHaveLength(3); // cabecera + 2
+  });
+
+  it('[US-16] un 409 al crear (nombre repetido) se asocia al campo Nombre', async () => {
+    render(<AreasPage />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Nueva área' }));
+    const dialogo = within(screen.getByRole('dialog', { name: 'Nueva área' }));
+    await userEvent.type(dialogo.getByLabelText('Nombre'), 'infraestructura');
+    await userEvent.type(dialogo.getByLabelText('Correo de contacto'), 'otra@universidad.edu');
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+    const nombre = await dialogo.findByLabelText('Nombre');
+    await waitFor(() => expect(nombre).toBeInvalid());
+    expect(nombre).toHaveAccessibleDescription('Ya existe un área con ese nombre.');
   });
 
   it('[US-16] crea un área y la anuncia', async () => {
@@ -72,9 +82,11 @@ describe('AreasPage (US-16, US-33)', () => {
     await userEvent.type(nombre, 'Tecnología de la Información');
     await userEvent.click(repetida.getByRole('button', { name: 'Guardar' }));
 
-    expect(await repetida.findByRole('alert')).toHaveTextContent(
-      'Ya existe un área con ese nombre.',
-    );
+    const nombreRepetido = await repetida.findByLabelText('Nombre');
+    await waitFor(() => expect(nombreRepetido).toBeInvalid());
+    expect(nombreRepetido).toHaveFocus();
+    expect(nombreRepetido).toHaveAccessibleDescription('Ya existe un área con ese nombre.');
+    expect(repetida.queryByRole('alert')).toBeNull();
   });
 
   it('[US-16 / RN-14] desactivar pide confirmación y la reactivación vuelve a mostrarla', async () => {
