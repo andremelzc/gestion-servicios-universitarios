@@ -67,10 +67,7 @@ export function requisitosPassword(password) {
 // el login (US-01) solo exige formato — su DTO no lleva @DominioInstitucional,
 // el "no eres de la universidad" lo dice el servidor con 401.
 const correoFormatoSchema = z
-  .string({
-    required_error: MSG_CORREO_REQUERIDO,
-    invalid_type_error: MSG_CORREO_REQUERIDO,
-  })
+  .string({ error: MSG_CORREO_REQUERIDO })
   .trim()
   .toLowerCase()
   .min(1, MSG_CORREO_REQUERIDO)
@@ -81,27 +78,18 @@ const correoSchema = correoFormatoSchema.refine(esCorreoInstitucional, MSG_DOMIN
 // Sin trim: la contraseña se usa tal cual (el backend no la recorta).
 // Sin .strict(): el backend solo rechaza campos extra en /registro (CA-6).
 const passwordLoginSchema = z
-  .string({
-    required_error: MSG_PASSWORD_REQUERIDA,
-    invalid_type_error: MSG_PASSWORD_REQUERIDA,
-  })
+  .string({ error: MSG_PASSWORD_REQUERIDA })
   .min(1, MSG_PASSWORD_REQUERIDA);
 
 const passwordPoliticaSchema = z
-  .string({
-    required_error: MSG_PASSWORD_REQUERIDA,
-    invalid_type_error: MSG_PASSWORD_REQUERIDA,
-  })
+  .string({ error: MSG_PASSWORD_REQUERIDA })
   .min(1, MSG_PASSWORD_REQUERIDA)
   .min(8, MSG_PASSWORD_POLITICA)
   .regex(REGEX_MAYUSCULA, MSG_PASSWORD_POLITICA)
   .regex(REGEX_NUMERO, MSG_PASSWORD_POLITICA);
 
 const nombreSchema = z
-  .string({
-    required_error: MSG_NOMBRE_REQUERIDO,
-    invalid_type_error: MSG_NOMBRE_REQUERIDO,
-  })
+  .string({ error: MSG_NOMBRE_REQUERIDO })
   .trim()
   .min(1, MSG_NOMBRE_REQUERIDO)
   .min(2, MSG_NOMBRE_LONGITUD)
@@ -109,10 +97,7 @@ const nombreSchema = z
   .refine((v) => !contieneHtml(v), MSG_SIN_HTML);
 
 const apellidoSchema = z
-  .string({
-    required_error: MSG_APELLIDO_REQUERIDO,
-    invalid_type_error: MSG_APELLIDO_REQUERIDO,
-  })
+  .string({ error: MSG_APELLIDO_REQUERIDO })
   .trim()
   .min(1, MSG_APELLIDO_REQUERIDO)
   .min(2, MSG_APELLIDO_LONGITUD)
@@ -128,10 +113,7 @@ export const LoginSchema = z.object({
 export const RegisterSchema = z
   .object({
     codigoInstitucional: z
-      .string({
-        required_error: MSG_CODIGO_REQUERIDO,
-        invalid_type_error: MSG_CODIGO_REQUERIDO,
-      })
+      .string({ error: MSG_CODIGO_REQUERIDO })
       .trim()
       .min(1, MSG_CODIGO_REQUERIDO)
       .regex(REGEX_CODIGO, MSG_CODIGO_FORMATO),
@@ -147,10 +129,7 @@ export const RegisterSchema = z
 export const CambiarPasswordSchema = z
   .object({
     passwordActual: z
-      .string({
-        required_error: MSG_PASSWORD_ACTUAL_REQUERIDA,
-        invalid_type_error: MSG_PASSWORD_ACTUAL_REQUERIDA,
-      })
+      .string({ error: MSG_PASSWORD_ACTUAL_REQUERIDA })
       .min(1, MSG_PASSWORD_ACTUAL_REQUERIDA),
     nuevaPassword: passwordPoliticaSchema,
   })
