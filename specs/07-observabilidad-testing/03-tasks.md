@@ -17,10 +17,10 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 2.1 | `docker-compose.monitoring.yml` con Prometheus, Grafana y Jaeger (perfil `monitoring`) | TS-05 | CA-7 |
-| [ ] | 2.2 | `prometheus.yml` y `alert-rules.yml` (3 alertas: instancia caída, error 5xx y BD inaccesible; ver [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas)) | TS-05 | Reglas cargadas |
-| [ ] | 2.3 | Dashboard provisionado de Salud del servicio | TS-05 | CA-7 |
-| [ ] | 2.4 | **Simulacro de incidente** (detener backend / BD) y *post-mortem* en `docs/incidentes/` | TS-05 | CA-5, CA-6 |
+| [x] | 2.1 | `docker-compose.monitoring.yml` con Prometheus, Grafana y Jaeger (perfil `monitoring`) | TS-05 | CA-7 |
+| [x] | 2.2 | `prometheus.yml` y `alert-rules.yml` (3 alertas: instancia caída, error 5xx y BD inaccesible; ver [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas)) | TS-05 | Reglas cargadas |
+| [x] | 2.3 | Dashboard provisionado de Salud del servicio | TS-05 | CA-7 |
+| [x] | 2.4 | **Simulacro de incidente** (detener backend / BD) y *post-mortem* en `docs/incidentes/` | TS-05 | CA-5, CA-6 |
 
 ## Fase 3 — Pruebas unitarias e integración (BE) · R6 con R2/R3
 
@@ -53,10 +53,10 @@
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 6.1 | Sembrar ~2 000 solicitudes (`DemoDataSeeder` modo `carga`) | TS-07 | Conteo en BD |
-| [ ] | 6.2 | Scripts k6: `setup` con tokens, escenario único con mezcla de login, solicitudes y dashboard, umbrales como código | TS-07 | CA-15 |
-| [ ] | 6.3 | Ejecutar el perfil nominal (50 VU) y el de estrés (hasta 500 VU) | TS-07 | CA-15, 16 |
-| [ ] | 6.4 | Identificar el cuello de botella (métricas / trazas) y aplicar al menos 1 mejora; repetir | TS-07 | Antes/después en el informe |
+| [x] | 6.1 | Sembrar ~2 000 solicitudes (`DemoDataSeeder` modo `carga`) | TS-07 | Conteo en BD |
+| [x] | 6.2 | Scripts k6: `setup` con tokens, escenario único con mezcla de login, solicitudes y dashboard, umbrales como código | TS-07 | CA-15 |
+| [x] | 6.3 | Ejecutar el perfil nominal (50 VU) y el de estrés (hasta 500 VU) | TS-07 | CA-15, 16 |
+| [x] | 6.4 | Identificar el cuello de botella (métricas / trazas) y aplicar al menos 1 mejora; repetir | TS-07 | Antes/después en el informe |
 | [x] | 6.5 | Redactar la sección de rendimiento del informe | TS-07 | CA-18 |
 
 ## Fase 7 — Aceptación, usuario e informe · R4 + R5 + R6

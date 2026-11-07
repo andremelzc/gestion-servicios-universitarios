@@ -165,7 +165,8 @@ Las alertas se ven en Prometheus/Grafana. Durante el periodo de demo, la guardia
 - Acciones correctivas (con responsable y fecha): …
 - Evidencia: capturas de alertas, `traceId`s, commits
 ```
-Los incidentes reales o simulados se archivan en `docs/incidentes/`.
+Los incidentes reales o simulados se archivan en `docs/incidentes/`:
+- [`INC-20261106-01 — Simulacro de caída de Base de Datos y Contenedor Backend`](../incidentes/INC-20261106-01-simulacro-caida-bd-y-backend.md) *(CA-5 y CA-6 verificados)*.
 
 ### 7.4 Runbooks breves
 
