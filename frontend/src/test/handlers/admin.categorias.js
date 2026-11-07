@@ -23,7 +23,10 @@ function validar({ nombre, descripcion, idArea, tiempoSlaHoras }) {
     errores.nombre = 'El nombre es obligatorio (hasta 80 caracteres).';
   }
   if ((descripcion ?? '').length > 255) errores.descripcion = 'Hasta 255 caracteres.';
-  if (!entero(idArea) || !buscarArea(idArea)) errores.idArea = 'El área no existe.';
+  // api-rest §3.5: el área debe existir y estar activa.
+  if (!entero(idArea) || !buscarArea(idArea)?.activo) {
+    errores.idArea = 'El área debe existir y estar activa.';
+  }
   if (!entero(tiempoSlaHoras)) errores.tiempoSlaHoras = 'El SLA debe ser mayor que 0.';
   return errores;
 }
@@ -53,12 +56,17 @@ const datosDe = (cuerpo) => ({
   nombre: cuerpo.nombre.trim(),
   descripcion: cuerpo.descripcion ?? null,
   idArea: cuerpo.idArea,
-  area: buscarArea(cuerpo.idArea).nombre,
   tiempoSlaHoras: cuerpo.tiempoSlaHoras,
 });
 
 const noEncontrada = (request) =>
   problema(404, 'no-encontrado', 'No encontrado', 'La categoría no existe.', ruta(request));
+
+// Como `CategoriaResponse.de` del backend: el nombre del área sale de la relación, no se copia.
+const conArea = (categoria) => ({
+  ...categoria,
+  area: buscarArea(categoria.idArea)?.nombre ?? null,
+});
 
 const buscar = (params) => categorias.find((c) => c.id === Number(params.id));
 
@@ -68,7 +76,9 @@ export const handlersAdminCategorias = [
     const incluir = parametros.get('incluirInactivos') === 'true';
     const idArea = parametros.get('idArea');
     return HttpResponse.json(
-      categorias.filter((c) => (incluir || c.activo) && (!idArea || c.idArea === Number(idArea))),
+      categorias
+        .filter((c) => (incluir || c.activo) && (!idArea || c.idArea === Number(idArea)))
+        .map(conArea),
     );
   }),
 
@@ -82,14 +92,14 @@ export const handlersAdminCategorias = [
       activo: true,
     };
     categorias.push(nueva);
-    return HttpResponse.json(nueva, { status: 201 });
+    return HttpResponse.json(conArea(nueva), { status: 201 });
   }),
 
   http.put('*/api/v1/categorias/:id/reactivar', ({ params, request }) => {
     const categoria = buscar(params);
     if (!categoria) return noEncontrada(request);
     categoria.activo = true;
-    return HttpResponse.json(categoria);
+    return HttpResponse.json(conArea(categoria));
   }),
 
   http.put('*/api/v1/categorias/:id', async ({ params, request }) => {
@@ -99,7 +109,7 @@ export const handlersAdminCategorias = [
     const rechazo = rechazar(cuerpo, request, categoria.id);
     if (rechazo) return rechazo;
     Object.assign(categoria, datosDe(cuerpo));
-    return HttpResponse.json(categoria);
+    return HttpResponse.json(conArea(categoria));
   }),
 
   // Baja lógica (RN-14): la categoría sigue en las solicitudes que ya la usan.

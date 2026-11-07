@@ -1,17 +1,11 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http } from 'msw';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { reiniciarAreas } from '../../../test/handlers/admin.areas.js';
-import { reiniciarCategorias } from '../../../test/handlers/admin.categorias.js';
+import { describe, expect, it } from 'vitest';
+import { apiClient } from '../../../services/apiClient.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import CategoriasPage from './CategoriasPage.jsx';
-
-beforeEach(() => {
-  reiniciarAreas();
-  reiniciarCategorias();
-});
 
 const fila = async (nombre) => within(await screen.findByRole('row', { name: new RegExp(nombre) }));
 
@@ -36,7 +30,7 @@ describe('CategoriasPage (US-15)', () => {
       screen.getByRole('heading', { level: 1, name: 'Administración de categorías' }),
     ).toBeVisible();
     const mobiliario = await fila('Mobiliario');
-    expect(mobiliario.getByRole('cell', { name: 'Servicios Generales' })).toBeVisible();
+    expect(mobiliario.getByRole('cell', { name: 'Infraestructura' })).toBeVisible();
     expect(mobiliario.getByRole('cell', { name: '48' })).toBeVisible();
     expect(await screen.findAllByRole('row')).toHaveLength(3); // cabecera + 2
   });
@@ -94,7 +88,7 @@ describe('CategoriasPage (US-15)', () => {
     expect(enviado).toBe(false);
   });
 
-  it('[US-15] muestra el 409 del servidor (nombre repetido) en el modal', async () => {
+  it('[US-15] un 409 sin campo (nombre repetido) se asocia al campo Nombre', async () => {
     render(<CategoriasPage />);
     const dialogo = await abrirAlta();
     await userEvent.type(dialogo.getByLabelText('Nombre'), 'Mobiliario');
@@ -102,9 +96,35 @@ describe('CategoriasPage (US-15)', () => {
     await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '10');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
-    expect(await dialogo.findByRole('alert')).toHaveTextContent(
-      'Ya existe una categoría con ese nombre.',
-    );
+    const nombre = await dialogo.findByLabelText('Nombre');
+    expect(nombre).toBeInvalid();
+    expect(nombre).toHaveFocus();
+    expect(nombre).toHaveAccessibleDescription('Ya existe una categoría con ese nombre.');
+    expect(dialogo.queryByRole('alert')).toBeNull();
+  });
+
+  it('[US-15] un 409 al editar también se asocia al campo Nombre', async () => {
+    render(<CategoriasPage />);
+    const dialogo = within(await abrirEdicion('Mobiliario'));
+    await dialogo.findByRole('option', { name: 'Infraestructura' });
+    const nombre = dialogo.getByLabelText('Nombre');
+    await userEvent.clear(nombre);
+    await userEvent.type(nombre, 'Equipos de Cómputo');
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+    await waitFor(() => expect(nombre).toBeInvalid());
+    expect(nombre).toHaveAccessibleDescription('Ya existe una categoría con ese nombre.');
+  });
+
+  it('[US-15] un área renombrada se ve con su nombre nuevo en las categorías', async () => {
+    await apiClient.put('/areas/2', {
+      nombre: 'Mantenimiento e Infraestructura',
+      correoContacto: 'infra@universidad.edu',
+    });
+    render(<CategoriasPage />);
+
+    const mobiliario = await fila('Mobiliario');
+    expect(mobiliario.getByRole('cell', { name: 'Mantenimiento e Infraestructura' })).toBeVisible();
   });
 
   it('[US-15] un 400 con campo se asocia a ese campo', async () => {
@@ -158,12 +178,27 @@ describe('CategoriasPage (US-15)', () => {
     expect(await screen.findByRole('button', { name: 'Desactivar Mobiliario' })).toBeVisible();
   });
 
-  it('[US-15] si no cargan las áreas, el modal lo avisa y no deja guardar sin área', async () => {
-    server.use(http.get('*/api/v1/areas', () => problema(500, 'interno', 'E', 'Falla', '/areas')));
+  it('[US-15] si no cargan las áreas, el modal lo avisa y no se puede guardar sin área', async () => {
+    let enviado = false;
+    server.use(
+      http.get('*/api/v1/areas', () => problema(500, 'interno', 'E', 'Falla', '/areas')),
+      http.post('*/api/v1/categorias', () => {
+        enviado = true;
+      }),
+    );
     render(<CategoriasPage />);
     await userEvent.click(await screen.findByRole('button', { name: 'Nueva categoría' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nueva categoría' }));
-
     expect(await dialogo.findByText('No se pudieron cargar las áreas.')).toBeVisible();
+
+    await userEvent.type(dialogo.getByLabelText('Nombre'), 'Otra');
+    await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '10');
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+    expect(dialogo.getByLabelText('Área responsable')).toBeInvalid();
+    expect(dialogo.getByLabelText('Área responsable')).toHaveAccessibleDescription(
+      'Selecciona el área responsable.',
+    );
+    expect(enviado).toBe(false);
   });
 });

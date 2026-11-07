@@ -78,7 +78,8 @@
   color: var(--color-surface);
 }
 
-.admin-boton:disabled {
+.admin-boton:disabled,
+.admin-boton[aria-disabled='true'] {
   border-color: var(--color-border);
   background: var(--color-disabled-bg);
   color: var(--color-disabled-text);
