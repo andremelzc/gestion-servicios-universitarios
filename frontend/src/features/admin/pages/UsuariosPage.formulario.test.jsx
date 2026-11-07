@@ -163,4 +163,48 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     expect(await dialogo.findByLabelText('Área')).toBeInvalid();
     expect(dialogo.getByText('El área es obligatoria para el rol TECNICO.')).toBeVisible();
   });
+
+  it('[US-17] el PUT de edición envía exactamente nombre, apellido, telefono, rol e idArea', async () => {
+    let cuerpo;
+    server.use(
+      http.put('*/api/v1/admin/usuarios/:id', async ({ request }) => {
+        cuerpo = await request.clone().json();
+      }),
+    );
+    render(<UsuariosPage />);
+    const dialogo = await abrirEdicion('Luis Gómez');
+
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+    await screen.findByRole('status');
+    expect(cuerpo).toEqual({
+      nombre: 'Luis',
+      apellido: 'Gómez',
+      telefono: null,
+      rol: 'TECNICO',
+      idArea: 1,
+    });
+  });
+
+  it.each(['ESTUDIANTE', 'ADMIN'])(
+    '[US-17 CA-8 RN-21] TECNICO con área que pasa a %s se envía con idArea null',
+    async (rol) => {
+      let cuerpo;
+      server.use(
+        http.put('*/api/v1/admin/usuarios/:id', async ({ request }) => {
+          cuerpo = await request.clone().json();
+        }),
+      );
+      render(<UsuariosPage />);
+      const dialogo = await abrirEdicion('Luis Gómez');
+
+      await userEvent.selectOptions(dialogo.getByLabelText('Rol'), rol);
+      expect(dialogo.queryByLabelText('Área')).not.toBeInTheDocument();
+      await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
+
+      await screen.findByRole('status');
+      expect(cuerpo).toMatchObject({ rol, idArea: null });
+      expect(await (await fila('Luis Gómez')).findByRole('cell', { name: '—' })).toBeVisible();
+    },
+  );
 });

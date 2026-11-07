@@ -17,13 +17,14 @@ const SIN_ERROR = { general: null, campos: {} };
 /**
  * Administración de usuarios (US-17, US-34, W-09). Contenedor: `useCrud` aporta el listado
  * paginado, la búsqueda y las mutaciones; la tabla es de presentación. Los filtros de rol y área
- * van por la URL (`?rol=&idArea=`).
+ * son estado local de la página y viajan como parámetros de la consulta (`rol`, `idArea`); no se
+ * reflejan en la URL del navegador.
  */
 export default function UsuariosPage() {
   const [rol, setRol] = useState('');
   const [idArea, setIdArea] = useState('');
   const crud = useCrud('/admin/usuarios', { paramInactivos, filtros: { rol, idArea } });
-  const { areas } = useAreas(true);
+  const { areas, error: errorAreas, reintentar: reintentarAreas } = useAreas(true);
   const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar' | 'desactivar', fila? }
   const [aviso, setAviso] = useState('');
   const { general, campos } = crud.errorMutacion ?? SIN_ERROR;
@@ -134,6 +135,15 @@ export default function UsuariosPage() {
           {general}
         </p>
       )}
+      {errorAreas && (
+        <p role="alert" className="admin-error">
+          No se pudieron cargar las áreas: el filtro por área no está disponible y no se pueden
+          guardar técnicos ni supervisores.{' '}
+          <button type="button" className="admin-boton" onClick={reintentarAreas}>
+            Reintentar
+          </button>
+        </p>
+      )}
 
       <DataTable
         caption="Usuarios"
@@ -190,6 +200,8 @@ export default function UsuariosPage() {
         isOpen={formularioAbierto}
         usuario={dialogo?.tipo === 'editar' ? dialogo.fila : null}
         areas={areas}
+        errorAreas={errorAreas}
+        onReintentarAreas={reintentarAreas}
         onClose={cerrar}
         onSubmit={guardar}
         isSaving={crud.isSaving}

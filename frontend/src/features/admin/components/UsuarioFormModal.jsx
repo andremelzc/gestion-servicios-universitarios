@@ -19,7 +19,16 @@ const CAMPOS = [
 const SIN_ERRORES = {};
 const SIN_AREAS = [];
 
-function Formulario({ usuario, areas, onClose, onSubmit, isSaving, errorCampos }) {
+function Formulario({
+  usuario,
+  areas,
+  errorAreas,
+  onReintentarAreas,
+  onClose,
+  onSubmit,
+  isSaving,
+  errorCampos,
+}) {
   const id = useId();
   const formRef = useRef(null);
   const modo = usuario ? 'edicion' : 'alta';
@@ -37,6 +46,8 @@ function Formulario({ usuario, areas, onClose, onSubmit, isSaving, errorCampos }
   const [intentos, setIntentos] = useState(0);
   const errores = { ...errorCampos, ...erroresLocales };
   const pideArea = ROLES_CON_AREA.includes(valores.rol);
+  // Con un rol que exige área y sin áreas por un fallo de carga, guardar es imposible (RN-21).
+  const sinAreasPorError = pideArea && errorAreas && areas.length === 0;
 
   // El foco va al primer campo inválido solo tras un envío o un error nuevo del servidor.
   useEffect(() => {
@@ -132,11 +143,23 @@ function Formulario({ usuario, areas, onClose, onSubmit, isSaving, errorCampos }
           </select>
         </CampoAdmin>
       )}
+      {sinAreasPorError && (
+        <p role="alert" className="admin-error">
+          No se pudieron cargar las áreas, por eso no se puede guardar con este rol.{' '}
+          <button type="button" className="admin-boton" onClick={onReintentarAreas}>
+            Reintentar
+          </button>
+        </p>
+      )}
       <div className="admin-acciones">
         <button type="button" className="admin-boton" onClick={onClose} disabled={isSaving}>
           Cancelar
         </button>
-        <button type="submit" className="admin-boton admin-boton--primario" disabled={isSaving}>
+        <button
+          type="submit"
+          className="admin-boton admin-boton--primario"
+          disabled={isSaving || sinAreasPorError}
+        >
           {isSaving ? 'Guardando…' : 'Guardar'}
         </button>
       </div>
@@ -154,6 +177,8 @@ export default function UsuarioFormModal({
   isOpen,
   usuario = null,
   areas = SIN_AREAS,
+  errorAreas = false,
+  onReintentarAreas,
   onClose,
   onSubmit,
   isSaving = false,
@@ -178,7 +203,18 @@ export default function UsuarioFormModal({
           {general}
         </p>
       )}
-      <Formulario {...{ usuario, areas, onClose, onSubmit, isSaving, errorCampos }} />
+      <Formulario
+        {...{
+          usuario,
+          areas,
+          errorAreas,
+          onReintentarAreas,
+          onClose,
+          onSubmit,
+          isSaving,
+          errorCampos,
+        }}
+      />
     </Modal>
   );
 }
