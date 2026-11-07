@@ -210,7 +210,26 @@ export const options = {
 
 **Excepción documentada:** `POST /auth/login` tiene objetivo P95 ≤ 800 ms porque el coste de BCrypt es una **medida de seguridad** deliberada; relajarlo para cumplir 300 ms sería un error de diseño.
 
-### 8.4 Qué se entrega
+### 8.4 Ejecución
+
+Script único: [`tests/performance/carga.js`](../../tests/performance/carga.js) (sin dependencias npm). Requiere el backend con el perfil `demo` (`DEMO_SOLICITUDES=2000` para la carga) y k6 local o en Docker:
+
+```bash
+# Perfil nominal (50 VU, RNF-02); PERFIL=estres para la rampa hasta 500 VU (RNF-07)
+docker run --rm -i -e DEMO_USER_PASSWORD -e PERFIL=nominal -e BASE_URL=http://host.docker.internal \
+  grafana/k6 run - < tests/performance/carga.js
+# Humo rápido: añadir --vus 1 --duration 10s tras "run"
+```
+
+| Variable | Defecto | Uso |
+|:---|:---|:---|
+| `DEMO_USER_PASSWORD` | — (obligatoria) | Contraseña de los usuarios demo; nunca se versiona |
+| `PERFIL` | `nominal` | `nominal` o `estres` |
+| `BASE_URL` | `http://localhost` | Gateway nginx o backend directo (`:8080`) |
+| `ESTUDIANTES`, `SUPERVISOR` | correos del `DemoDataSeeder` | Usuarios de prueba (lista separada por comas) |
+| `PAUSA_LOGIN_S` | `6.5` | Pausa entre logins de `setup()` por el límite de nginx (10 r/min por IP) |
+
+### 8.5 Qué se entrega
 
 Para cada perfil: gráficos de latencia (P50/P95/P99), tasa de errores, throughput, uso de CPU/memoria/pool (dashboard de Grafana), cuellos de botella observados, conclusión y acciones. Va al **informe de pruebas** (§13).
 
