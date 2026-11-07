@@ -57,7 +57,8 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     expect((await fila('Lucía Pérez')).getByRole('cell', { name: 'Supervisor' })).toBeVisible();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(cuerpo).toMatchObject({ rol: 'SUPERVISOR', idArea: 1, correo: 'lucia@universidad.edu' });
-  });
+    // Teclea seis campos: con la suite en paralelo supera los 5 s por defecto.
+  }, 15000);
 
   it('[US-17 CA-8] el campo Área aparece solo para TECNICO y SUPERVISOR (RN-21)', async () => {
     render(<UsuariosPage />);
