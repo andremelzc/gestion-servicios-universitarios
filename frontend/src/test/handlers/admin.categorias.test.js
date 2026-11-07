@@ -1,6 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { reiniciarAreas } from './admin.areas.js';
-import { reiniciarCategorias } from './admin.categorias.js';
+import { describe, expect, it } from 'vitest';
 
 const API = 'http://localhost/api/v1';
 
@@ -12,11 +10,6 @@ const enviar = (metodo, ruta, cuerpo) =>
   });
 
 const nueva = { nombre: 'Conectividad Wi-Fi', descripcion: null, idArea: 1, tiempoSlaHoras: 24 };
-
-beforeEach(() => {
-  reiniciarAreas();
-  reiniciarCategorias();
-});
 
 describe('MSW · handlers de administración, categorías (API §3.5)', () => {
   it('[US-15] GET /categorias devuelve solo las activas; con ?incluirInactivos=true, todas', async () => {
@@ -76,5 +69,33 @@ describe('MSW · handlers de administración, categorías (API §3.5)', () => {
 
     const reactivada = await (await enviar('PUT', '/categorias/2/reactivar')).json();
     expect(reactivada.activo).toBe(true);
+  });
+
+  it('[US-15] el nombre del área se resuelve del estado actual de las áreas (como un JOIN)', async () => {
+    await enviar('PUT', '/areas/2', { nombre: 'Mantenimiento', correoContacto: 'm@uni.edu' });
+
+    const lista = await (await enviar('GET', '/categorias?incluirInactivos=true')).json();
+
+    expect(lista.find((c) => c.id === 3).area).toBe('Mantenimiento');
+  });
+
+  it('[US-15] las categorías sembradas coinciden con los nombres de las áreas', async () => {
+    const lista = await (await enviar('GET', '/categorias')).json();
+
+    expect(lista.map((c) => [c.idArea, c.area])).toEqual([
+      [1, 'Tecnología de la Información'],
+      [2, 'Infraestructura'],
+    ]);
+  });
+
+  it('[US-15] rechaza un área inexistente o inactiva (api-rest §3.5: existente y activa)', async () => {
+    await enviar('DELETE', '/areas/2');
+
+    const inactiva = await enviar('POST', '/categorias', { ...nueva, idArea: 2 });
+    const inexistente = await enviar('POST', '/categorias', { ...nueva, idArea: 99 });
+
+    expect(inactiva.status).toBe(400);
+    expect(Object.keys((await inactiva.json()).errores)).toEqual(['idArea']);
+    expect(inexistente.status).toBe(400);
   });
 });

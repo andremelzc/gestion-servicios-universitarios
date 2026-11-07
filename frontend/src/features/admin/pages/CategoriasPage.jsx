@@ -7,6 +7,9 @@ import useAccionesCrud from '../hooks/useAccionesCrud.js';
 import useCrud from '../hooks/useCrud.js';
 import '../components/adminUi.css';
 
+// Un 409 al crear o editar es por nombre repetido (unicidad).
+const CONFLICTO_NOMBRE = { campoUnico: 'nombre' };
+
 const COLUMNAS = [
   { key: 'nombre', header: 'Nombre' },
   { key: 'area', header: 'Área' },
@@ -27,10 +30,11 @@ export default function CategoriasPage() {
 
   const guardar = (datos) =>
     dialogo.tipo === 'crear'
-      ? ejecutar(() => crud.crear(datos), `Categoría «${datos.nombre}» creada.`)
+      ? ejecutar(() => crud.crear(datos), `Categoría «${datos.nombre}» creada.`, CONFLICTO_NOMBRE)
       : ejecutar(
           () => crud.actualizar(dialogo.fila.id, datos),
           `Categoría «${datos.nombre}» actualizada.`,
+          CONFLICTO_NOMBRE,
         );
 
   const reactivar = (fila) =>
