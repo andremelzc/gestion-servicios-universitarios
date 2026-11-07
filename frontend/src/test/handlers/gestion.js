@@ -75,7 +75,33 @@ export const paginaDe = (content, extra = {}) => ({
   ...extra,
 });
 
+// `GET /solicitudes/{id}/historial` (api-rest §3.2): ejemplo del contrato, del más antiguo al más reciente.
+export const historialEjemplo = [
+  {
+    fecha: '2026-10-03T15:04:05Z',
+    usuario: 'Juan Pérez',
+    estadoAnterior: null,
+    estadoNuevo: 'REGISTRADA',
+    nota: null,
+  },
+  {
+    fecha: '2026-10-03T16:10:00Z',
+    usuario: 'Ana Torres',
+    estadoAnterior: 'REGISTRADA',
+    estadoNuevo: 'EN_EVALUACION',
+    nota: null,
+  },
+  {
+    fecha: '2026-10-03T16:10:00Z',
+    usuario: 'Ana Torres',
+    estadoAnterior: 'EN_EVALUACION',
+    estadoNuevo: 'ASIGNADA',
+    nota: 'Asignada a Carlos Ruiz',
+  },
+];
+
 export const handlersGestion = [
+  http.get('*/api/v1/solicitudes/:id/historial', () => HttpResponse.json(historialEjemplo)),
   http.get('*/api/v1/solicitudes', () => HttpResponse.json(paginaDe([resumenEjemplo]))),
   http.put('*/api/v1/solicitudes/:id/evaluar', ({ params }) =>
     HttpResponse.json({ ...solicitudDetalleEjemplo, id: Number(params.id) }),
