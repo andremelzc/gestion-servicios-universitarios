@@ -47,17 +47,17 @@
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
 | [x] | 4.1 | `security.yml`: CodeQL y gitleaks (Dependabot cubre las dependencias) | TS-08 | CA-16, CA-17 (PR de prueba bloqueado) |
-| [ ] | 4.2 | `.zap/rules.tsv` y job ZAP baseline tras desplegar a *staging* | TS-08 | CA-18 |
+| [x] | 4.2 | `.zap/rules.tsv` y job ZAP baseline tras desplegar a *staging* | TS-08 | CA-18 |
 
 ## Fase 5 — CD y cloud · R1 / R6
 
 | ☐ | # | Tarea | TS | Evidencia |
 |:-:|:-:|:---|:---:|:---|
-| [ ] | 5.1 | **Confirmar la plataforma** y completar [ADR-007](../../docs/02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue) y [DevOps §9](../../docs/03-calidad-y-operacion/devops-despliegue.md#9-plataforma-cloud) (antes del 23/10) | TS-03 | ADR actualizado |
-| [ ] | 5.2 | Aprovisionar VM/servicios, TLS (Let's Encrypt), dominio y *firewall* | TS-03 | Checklist [DevOps §8](../../docs/03-calidad-y-operacion/devops-despliegue.md#8-operación-del-host) |
-| [ ] | 5.3 | GitHub Environments `staging` y `production` con secretos propios | TS-03 | CA-4 |
-| [ ] | 5.4 | `cd-staging.yml`: GHCR, despliegue SSH, *smoke test* y ZAP | TS-03 | CA-13 |
-| [ ] | 5.5 | `cd-prod.yml`: despliegue por tag y *smoke test* | TS-03 | CA-14 |
+| [x] | 5.1 | **Confirmar la plataforma** y completar [ADR-007](../../docs/02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue) y [DevOps §9](../../docs/03-calidad-y-operacion/devops-despliegue.md#9-plataforma-cloud-y-github-environments-ops-22--118) (antes del 23/10) | TS-03 | ADR actualizado |
+| [x] | 5.2 | Aprovisionar VM/servicios, TLS (Let's Encrypt), dominio y *firewall* | TS-03 | Checklist [DevOps §8](../../docs/03-calidad-y-operacion/devops-despliegue.md#8-operación-del-host-y-servicios-gestionados-ops-21--117) |
+| [x] | 5.3 | GitHub Environments `staging` y `production` con secretos propios | TS-03 | CA-4 |
+| [x] | 5.4 | `cd-staging.yml`: GHCR, despliegue, *smoke test* y ZAP | TS-03 | CA-13 |
+| [x] | 5.5 | `cd-prod.yml`: despliegue por tag y *smoke test* | TS-03 | CA-14 |
 
 ## Fase 6 — API documentada · R2 / R3
 
