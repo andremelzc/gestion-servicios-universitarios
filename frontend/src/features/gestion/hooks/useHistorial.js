@@ -6,8 +6,10 @@ import { obtenerHistorial } from '../../../services/solicitudes.api.js';
  * cuando cambia el `id` o al llamar `refetch()`. Cancela con `AbortController` la petición que
  * queda obsoleta.
  *
- * Devuelve `{ data, isLoading, error, refetch }`. `isLoading` se deriva de la consulta vigente
- * (sin `setState` síncrono en el efecto); `error` es el normalizado por `apiClient`.
+ * Devuelve `{ data, isLoading, isRefreshing, error, refetch }`. `isLoading` solo es verdadero
+ * mientras no hay respuesta para esta solicitud (sin `setState` síncrono en el efecto);
+ * `isRefreshing`, mientras se repite la consulta de la misma solicitud y se conservan los datos
+ * previos. `error` es el normalizado por `apiClient`.
  */
 export default function useHistorial(id) {
   const [version, setVersion] = useState(0);
@@ -19,22 +21,26 @@ export default function useHistorial(id) {
     obtenerHistorial(id, { signal: control.signal })
       .then((data) => {
         if (control.signal.aborted) return;
-        setResultado({ clave, data: Array.isArray(data) ? data : [], error: null });
+        setResultado({ id, clave, data: Array.isArray(data) ? data : [], error: null });
       })
       .catch((error) => {
         if (control.signal.aborted) return;
-        setResultado({ clave, data: [], error });
+        setResultado({ id, clave, data: [], error });
       });
     return () => control.abort();
   }, [id, clave]);
 
   const refetch = useCallback(() => setVersion((v) => v + 1), []);
   const vigente = resultado?.clave === clave ? resultado : null;
+  // Con la misma solicitud (refetch) se siguen mostrando los datos previos; solo otra solicitud
+  // pasa por el esqueleto.
+  const mismaSolicitud = resultado?.id === id;
 
   return {
-    data: vigente?.data ?? [],
-    error: vigente?.error ?? null,
-    isLoading: vigente === null,
+    data: mismaSolicitud ? resultado.data : [],
+    error: mismaSolicitud ? resultado.error : null,
+    isLoading: !mismaSolicitud,
+    isRefreshing: mismaSolicitud && vigente === null,
     refetch,
   };
 }

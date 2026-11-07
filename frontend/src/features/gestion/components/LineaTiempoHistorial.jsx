@@ -48,26 +48,29 @@ export default function LineaTiempoHistorial({
   nivelTitulo = 2,
 }) {
   const tituloId = useId();
-  const { data, isLoading, error, refetch } = useHistorial(idSolicitud);
+  const { data, isLoading, isRefreshing, error, refetch } = useHistorial(idSolicitud);
+  // Tras un error, "Reintentar" vuelve al esqueleto; un refresco sin error conserva la lista.
+  const cargando = isLoading || (isRefreshing && Boolean(error));
 
   const Titulo =
     Number.isInteger(nivelTitulo) && nivelTitulo >= 1 && nivelTitulo <= 6
       ? `h${nivelTitulo}`
       : 'h2';
-  // Con 403 o 404 repetir la petición no cambia el resultado: no se ofrece reintento.
-  const reintentable = error && error.status !== 403 && error.status !== 404;
+  // El endpoint responde 404 si la solicitud no existe o está fuera de alcance: repetir no cambia
+  // el resultado, así que no se ofrece reintento.
+  const reintentable = error && error.status !== 404;
 
   return (
     <section
       className="linea-tiempo"
       aria-labelledby={tituloId}
-      aria-busy={isLoading ? 'true' : undefined}
+      aria-busy={cargando ? 'true' : undefined}
     >
       <Titulo id={tituloId} className="linea-tiempo__titulo">
         {titulo}
       </Titulo>
 
-      {isLoading && (
+      {cargando && (
         <>
           <p role="status" className="sr-only">
             Cargando historial…
@@ -76,7 +79,7 @@ export default function LineaTiempoHistorial({
         </>
       )}
 
-      {!isLoading && error && (
+      {!cargando && error && (
         <div className="linea-tiempo__error">
           <p role="alert" className="linea-tiempo__mensaje">
             <span aria-hidden="true">⚠ </span>
@@ -90,11 +93,11 @@ export default function LineaTiempoHistorial({
         </div>
       )}
 
-      {!isLoading && !error && data.length === 0 && (
+      {!cargando && !error && data.length === 0 && (
         <p className="linea-tiempo__vacio">Esta solicitud aún no tiene movimientos.</p>
       )}
 
-      {!isLoading && !error && data.length > 0 && (
+      {!cargando && !error && data.length > 0 && (
         <ol className="linea-tiempo__lista">
           {ordenarCronologicamente(data).map((evento, indice) => (
             <li key={`${evento.fecha}-${indice}`} className="linea-tiempo__evento">
