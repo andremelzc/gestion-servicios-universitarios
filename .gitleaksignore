@@ -1,0 +1,3 @@
+# JWT de demo (usuario admin.demo, expirado) commiteado en d3cc7e6 y retirado en el commit siguiente.
+d3cc7e65476e14b20027ed374f93cfbe8fa191ea:api-tests/environments/dev.yml:jwt:7
+d3cc7e65476e14b20027ed374f93cfbe8fa191ea:api-tests/environments/dev.bru:jwt:3
