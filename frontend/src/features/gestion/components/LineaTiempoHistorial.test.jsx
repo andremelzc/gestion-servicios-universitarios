@@ -50,6 +50,20 @@ describe('LineaTiempoHistorial', () => {
     expect(within(items[1]).queryByText('Asignada a Carlos Ruiz')).not.toBeInTheDocument();
   });
 
+  it('interpreta como UTC el LocalDateTime sin zona y con fracción de segundo (10:04 en Lima)', async () => {
+    responder([{ ...HISTORIAL[0], fecha: '2026-10-03T15:04:05.123456' }]);
+    render(<LineaTiempoHistorial idSolicitud={150} />);
+    const hora = await screen.findByText(/03\/10\/2026/);
+    expect(hora).toHaveTextContent('10:04');
+    expect(hora).toHaveAttribute('datetime', '2026-10-03T15:04:05.123456Z');
+  });
+
+  it('respeta una fecha que ya trae zona', async () => {
+    responder([{ ...HISTORIAL[0], fecha: '2026-10-03T15:04:05Z' }]);
+    render(<LineaTiempoHistorial idSolicitud={150} />);
+    expect(await screen.findByText(/03\/10\/2026/)).toHaveTextContent('10:04');
+  });
+
   it('indica el estado anterior solo cuando existe', async () => {
     responder(HISTORIAL);
     render(<LineaTiempoHistorial idSolicitud={150} />);
@@ -104,7 +118,7 @@ describe('LineaTiempoHistorial', () => {
     expect(llamadas).toBe(2);
   });
 
-  it('con 404 o 403 explica el motivo y no ofrece reintento', async () => {
+  it('con 404 explica el motivo y no ofrece reintento', async () => {
     responder({ status: 404 }, { status: 404 });
     render(<LineaTiempoHistorial idSolicitud={999} />);
     expect(await screen.findByRole('alert')).toHaveTextContent(/No encontramos esa solicitud/);

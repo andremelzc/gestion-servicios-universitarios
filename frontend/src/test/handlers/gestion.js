@@ -78,21 +78,21 @@ export const paginaDe = (content, extra = {}) => ({
 // `GET /solicitudes/{id}/historial` (api-rest §3.2): ejemplo del contrato, del más antiguo al más reciente.
 export const historialEjemplo = [
   {
-    fecha: '2026-10-03T15:04:05Z',
+    fecha: '2026-10-03T15:04:05',
     usuario: 'Juan Pérez',
     estadoAnterior: null,
     estadoNuevo: 'REGISTRADA',
     nota: null,
   },
   {
-    fecha: '2026-10-03T16:10:00Z',
+    fecha: '2026-10-03T16:10:00',
     usuario: 'Ana Torres',
     estadoAnterior: 'REGISTRADA',
     estadoNuevo: 'EN_EVALUACION',
     nota: null,
   },
   {
-    fecha: '2026-10-03T16:10:00Z',
+    fecha: '2026-10-03T16:10:00',
     usuario: 'Ana Torres',
     estadoAnterior: 'EN_EVALUACION',
     estadoNuevo: 'ASIGNADA',
