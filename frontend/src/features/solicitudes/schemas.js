@@ -33,7 +33,7 @@ export function mensajeDescripcionCorta(n) {
 const REGEX_HTML = /<[^>]+>/;
 
 const tituloSchema = z
-  .string({ required_error: MSG_TITULO_REQUERIDO, invalid_type_error: MSG_TITULO_REQUERIDO })
+  .string({ error: MSG_TITULO_REQUERIDO })
   .trim()
   .min(1, MSG_TITULO_REQUERIDO)
   .min(TITULO_MIN, MSG_TITULO_LONGITUD)
@@ -41,28 +41,24 @@ const tituloSchema = z
   .refine((valor) => !REGEX_HTML.test(valor), MSG_SIN_HTML);
 
 const descripcionSchema = z
-  .string({
-    required_error: MSG_DESCRIPCION_REQUERIDA,
-    invalid_type_error: MSG_DESCRIPCION_REQUERIDA,
-  })
+  .string({ error: MSG_DESCRIPCION_REQUERIDA })
   .trim()
   .min(1, MSG_DESCRIPCION_REQUERIDA)
   .max(DESCRIPCION_MAX, MSG_DESCRIPCION_LONGITUD)
   .refine((valor) => !REGEX_HTML.test(valor), MSG_SIN_HTML)
-  .refine(
-    (valor) => valor.length >= DESCRIPCION_MIN,
-    (valor) => ({ message: mensajeDescripcionCorta(valor.length) }),
-  );
+  .refine((valor) => valor.length >= DESCRIPCION_MIN, {
+    error: (iss) => mensajeDescripcionCorta(String(iss.input ?? '').length),
+  });
 
 const campusSchema = z
-  .string({ required_error: MSG_CAMPUS_REQUERIDO, invalid_type_error: MSG_CAMPUS_REQUERIDO })
+  .string({ error: MSG_CAMPUS_REQUERIDO })
   .trim()
   .min(1, MSG_CAMPUS_REQUERIDO)
   .max(UBICACION_MAX, MSG_CAMPUS_LONGITUD)
   .refine((valor) => !REGEX_HTML.test(valor), MSG_SIN_HTML);
 
 const ambienteSchema = z
-  .string({ required_error: MSG_AMBIENTE_REQUERIDO, invalid_type_error: MSG_AMBIENTE_REQUERIDO })
+  .string({ error: MSG_AMBIENTE_REQUERIDO })
   .trim()
   .min(1, MSG_AMBIENTE_REQUERIDO)
   .max(UBICACION_MAX, MSG_AMBIENTE_LONGITUD)
@@ -70,10 +66,7 @@ const ambienteSchema = z
 
 // Los <select> del formulario manejan texto ('' = sin elegir); el contrato envía el id numérico.
 const idCatalogoSchema = (requerido) =>
-  z
-    .string({ required_error: requerido, invalid_type_error: requerido })
-    .regex(/^\d+$/, requerido)
-    .transform(Number);
+  z.string({ error: requerido }).regex(/^\d+$/, requerido).transform(Number);
 
 export const NuevaSolicitudSchema = z.object({
   titulo: tituloSchema,
