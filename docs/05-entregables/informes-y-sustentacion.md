@@ -252,7 +252,7 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 - [ ] Prototipo → Figma ✅ ([enlace](https://www.figma.com/proto/9kiomLBppyJN9YjRjPEuUp/GU---Sistema-de-dise%C3%B1o?node-id=83-28893&p=f&t=koVwxnafwYMrZhOJ-1&scaling=min-zoom&content-scaling=fixed&page-id=83%3A2&starting-point-node-id=83%3A28893&show-proto-sidebar=1)); maqueta pendiente (TASK-003, 033)
 - [ ] HTML DOM y CSS → maqueta (TASK-033)
 - [x] Diseño responsive → UX §2.3 y §8 (especificación); verificación en la maqueta
-- [x] Usabilidad y UX → UX §7 (plan de evaluación)
+- [x] Usabilidad y UX → UX §7 (plan de evaluación); resultados preliminares en [revisión heurística](../01-definicion/revision-heuristica.md) (hecha con IA, pendiente de validación humana; prueba con 2 personas pendiente)
 
 #### 7.2.4 JavaScript (maqueta)
 - [ ] JavaScript moderno, formularios, validaciones, eventos, manipulación del DOM, `fetch`, API simulada → [UX §6.2](../01-definicion/ux-ui-prototipo.md#62-maqueta-html--css--javascript-con-api-simulada-task-033) (TASK-033)

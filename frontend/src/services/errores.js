@@ -1,7 +1,7 @@
 // Normalización de errores a texto de UI (arquitectura-tecnica §4.2, junto a apiClient).
 // Microcopy de docs/01-definicion/ux-ui-prototipo.md §9.
 const INESPERADO = 'Ocurrió un error inesperado.';
-const SIN_CONEXION = 'Sin conexión. Revisa tu internet; reintentaremos automáticamente.';
+const SIN_CONEXION = 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
 const TRANSICION_INVALIDA =
   'Esta solicitud ya cambió de estado. Actualiza la página para ver su situación actual.';
 const MENSAJES = {

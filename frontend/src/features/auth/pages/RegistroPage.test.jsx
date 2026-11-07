@@ -230,7 +230,7 @@ describe('RegistroPage (AUTH-17 · CA-5, CA-8)', () => {
     await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Sin conexión. Revisa tu internet; reintentaremos automáticamente.',
+      'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
     );
   });
 });
