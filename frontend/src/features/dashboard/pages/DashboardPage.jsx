@@ -9,6 +9,7 @@ import { describirRango } from '../format.js';
 import PrioridadBarChart from '../components/PrioridadBarChart.jsx';
 import ResponsableBarChart from '../components/ResponsableBarChart.jsx';
 import WidgetDashboard from '../components/WidgetDashboard.jsx';
+import VencidasWidget from '../components/VencidasWidget.jsx';
 import { useAreas } from '../hooks/useAreas.js';
 import './DashboardPage.css';
 
@@ -86,6 +87,8 @@ function DashboardContenido({ esAdmin }) {
       >
         {(datos) => <KpiResumen datos={datos} />}
       </WidgetDashboard>
+
+      <VencidasWidget key={JSON.stringify(filtros)} filtros={filtros} />
 
       <div className="dashboard-page__graficos">
         <WidgetDashboard

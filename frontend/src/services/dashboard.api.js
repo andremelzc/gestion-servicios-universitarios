@@ -4,7 +4,7 @@
 // strings: se construye aquí y se anexa a la ruta relativa.
 import { apiClient } from './apiClient.js';
 
-const PARAMETROS = ['desde', 'hasta', 'idArea'];
+const PARAMETROS = ['desde', 'hasta', 'idArea', 'page'];
 
 /** Query string (`?desde=…&hasta=…&idArea=…`) con solo los filtros informados; `''` si no hay. */
 export function construirConsulta(filtros = {}) {
@@ -25,6 +25,7 @@ function obtener(ruta, filtros, opciones) {
 }
 
 export const dashboardApi = {
+  vencidas: (filtros, opciones) => obtener('vencidas', filtros, opciones),
   kpis: (filtros, opciones) => obtener('kpis', filtros, opciones),
   porCategoria: (filtros, opciones) => obtener('por-categoria', filtros, opciones),
   porPrioridad: (filtros, opciones) => obtener('por-prioridad', filtros, opciones),
