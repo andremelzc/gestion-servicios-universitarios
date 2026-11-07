@@ -285,7 +285,7 @@ describe('DataTable', () => {
       [403, 'No tienes permiso para realizar esta acción.'],
       [404, 'No encontramos esa solicitud. Es posible que no exista o no tengas acceso.'],
       [429, 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'],
-      [0, 'Sin conexión. Revisa tu internet; reintentaremos automáticamente.'],
+      [0, 'Sin conexión. Revisa tu internet e inténtalo de nuevo.'],
     ])('[UX CA-14] estado %s muestra el microcopy de UX §9', (status, texto) => {
       renderTabla({ error: { status, detail: 'texto del servidor que no debe verse' } });
 
@@ -297,7 +297,7 @@ describe('DataTable', () => {
       renderTabla({ error: { sinConexion: true } });
 
       expect(screen.getByRole('alert')).toHaveTextContent(
-        'Sin conexión. Revisa tu internet; reintentaremos automáticamente.',
+        'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
       );
     });
 

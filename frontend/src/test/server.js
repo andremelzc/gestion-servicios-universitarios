@@ -6,6 +6,12 @@ import { handlersGestion } from './handlers/gestion.js';
 import { handlersSolicitudes } from './handlers/solicitudes.js';
 
 // Los handlers por recurso se agregan en cada feature (contratos de docs/02-diseno/api-rest.md).
-export const handlers = [...handlersGestion, ...handlersDashboard, ...handlersSolicitudes, ...handlersAreas, ...handlersAdmin];
+export const handlers = [
+  ...handlersGestion,
+  ...handlersDashboard,
+  ...handlersSolicitudes,
+  ...handlersAreas,
+  ...handlersAdmin,
+];
 
 export const server = setupServer(...handlers);

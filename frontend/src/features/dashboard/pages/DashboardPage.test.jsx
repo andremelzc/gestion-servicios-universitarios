@@ -184,7 +184,7 @@ describe('DashboardPage', () => {
     await esperarCarga();
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Sin conexión. Revisa tu internet; reintentaremos automáticamente.',
+      'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
     );
   });
 

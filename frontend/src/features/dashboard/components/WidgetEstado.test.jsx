@@ -46,7 +46,7 @@ describe('WidgetEstado', () => {
     );
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Sin conexión. Revisa tu internet; reintentaremos automáticamente.',
+      'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
     );
     await userEvent.click(
       screen.getByRole('button', { name: 'Reintentar: Solicitudes por estado' }),
