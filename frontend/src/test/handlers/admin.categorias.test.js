@@ -98,4 +98,23 @@ describe('MSW · handlers de administración, categorías (API §3.5)', () => {
     expect(Object.keys((await inactiva.json()).errores)).toEqual(['idArea']);
     expect(inexistente.status).toBe(400);
   });
+
+  it('[TC-026] el historial resuelve categoriaNombre desde las categorías (como el JOIN del backend)', async () => {
+    const lee = async () =>
+      (await (await enviar('GET', '/solicitudes/mis-solicitudes?page=0&size=25')).json()).content;
+
+    expect(new Set((await lee()).map((s) => s.categoriaNombre))).toEqual(
+      new Set(['Equipos de Cómputo', 'Mobiliario']),
+    );
+
+    // La baja lógica no toca el historial…
+    await enviar('DELETE', '/categorias/3');
+    expect(new Set((await lee()).map((s) => s.categoriaNombre))).toEqual(
+      new Set(['Equipos de Cómputo', 'Mobiliario']),
+    );
+
+    // …pero un cambio de nombre sí se refleja (prueba que el nombre sale de la categoría).
+    await enviar('PUT', '/categorias/3', { ...nueva, nombre: 'Muebles', idArea: 2 });
+    expect((await lee()).some((s) => s.categoriaNombre === 'Muebles')).toBe(true);
+  });
 });
