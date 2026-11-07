@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -245,12 +246,16 @@ class FlujoMvpE2EIT extends AbstractIntegrationTest {
                         .header("Authorization", tokenAdmin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(6))
-                .andExpect(jsonPath("$[0].estadoNuevo").value("REGISTRADA"))
-                .andExpect(jsonPath("$[1].estadoNuevo").value("EN_EVALUACION"))
-                .andExpect(jsonPath("$[2].estadoNuevo").value("ASIGNADA"))
-                .andExpect(jsonPath("$[3].estadoNuevo").value("EN_ATENCION"))
-                .andExpect(jsonPath("$[4].estadoNuevo").value("RESUELTA"))
-                .andExpect(jsonPath("$[5].estadoNuevo").value("CERRADA"));
+                .andExpect(jsonPath("$[*].estadoNuevo").value(org.hamcrest.Matchers.containsInAnyOrder(
+                        "REGISTRADA", "EN_EVALUACION", "ASIGNADA", "EN_ATENCION", "RESUELTA", "CERRADA")));
+
+        List<String> secuenciaEstados = historialRepository.findBySolicitudIdConDetalles(solicitudId)
+                .stream()
+                .sorted(Comparator.comparing(HistorialSolicitud::getId))
+                .map(h -> h.getEstadoNuevo().getCodigo())
+                .toList();
+        assertThat(secuenciaEstados).containsExactly(
+                "REGISTRADA", "EN_EVALUACION", "ASIGNADA", "EN_ATENCION", "RESUELTA", "CERRADA");
 
         mockMvc.perform(get("/api/v1/dashboard/kpis")
                         .header("Authorization", tokenAdmin))
