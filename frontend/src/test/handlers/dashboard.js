@@ -44,6 +44,9 @@ export const porResponsableEjemplo = [
 // verificarlos capturan la URL con `server.use` en lugar de simular el filtrado.
 export const handlersDashboard = [
   http.get('*/api/v1/dashboard/kpis', () => HttpResponse.json(kpisEjemplo)),
+  http.get('*/api/v1/dashboard/vencidas', () =>
+    HttpResponse.json({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }),
+  ),
   http.get('*/api/v1/dashboard/por-categoria', () => HttpResponse.json(porCategoriaEjemplo)),
   http.get('*/api/v1/dashboard/por-prioridad', () => HttpResponse.json(porPrioridadEjemplo)),
   http.get('*/api/v1/dashboard/por-estado', () => HttpResponse.json(porEstadoEjemplo)),
