@@ -23,7 +23,7 @@ export default function UsuariosPage() {
   const [rol, setRol] = useState('');
   const [idArea, setIdArea] = useState('');
   const crud = useCrud('/admin/usuarios', { paramInactivos, filtros: { rol, idArea } });
-  const { areas } = useAreas(true);
+  const { areas, error: errorAreas, reintentar: reintentarAreas } = useAreas(true);
   const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar', fila? }
   const [aviso, setAviso] = useState('');
   const { general, campos } = crud.errorMutacion ?? SIN_ERROR;
@@ -118,6 +118,15 @@ export default function UsuariosPage() {
       <p role="status" className="admin-exito">
         {aviso}
       </p>
+      {errorAreas && (
+        <p role="alert" className="admin-error">
+          No se pudieron cargar las áreas: el filtro por área no está disponible y no se pueden
+          guardar técnicos ni supervisores.{' '}
+          <button type="button" className="admin-boton" onClick={reintentarAreas}>
+            Reintentar
+          </button>
+        </p>
+      )}
 
       <DataTable
         caption="Usuarios"
@@ -152,6 +161,8 @@ export default function UsuariosPage() {
         isOpen={dialogo !== null}
         usuario={dialogo?.tipo === 'editar' ? dialogo.fila : null}
         areas={areas}
+        errorAreas={errorAreas}
+        onReintentarAreas={reintentarAreas}
         onClose={cerrar}
         onSubmit={guardar}
         isSaving={crud.isSaving}
