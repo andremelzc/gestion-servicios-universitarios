@@ -25,7 +25,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
     expect(screen.queryByRole('row', { name: /Pedro Inactivo/ })).not.toBeInTheDocument();
   });
 
-  it('[US-34 CA-14] "Mostrar inactivas" incluye a los usuarios dados de baja', async () => {
+  it('[US-34] "Mostrar inactivas" incluye a los usuarios dados de baja', async () => {
     render(<UsuariosPage />);
     await fila('Luis Gómez');
 

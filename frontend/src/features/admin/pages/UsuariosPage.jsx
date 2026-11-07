@@ -16,7 +16,8 @@ const SIN_ERROR = { general: null, campos: {} };
 /**
  * Administración de usuarios (US-17, US-34, W-09). Contenedor: `useCrud` aporta el listado
  * paginado, la búsqueda y las mutaciones; la tabla es de presentación. Los filtros de rol y área
- * van por la URL (`?rol=&idArea=`).
+ * son estado local de la página y viajan como parámetros de la consulta (`rol`, `idArea`); no se
+ * reflejan en la URL del navegador.
  */
 export default function UsuariosPage() {
   const [rol, setRol] = useState('');
