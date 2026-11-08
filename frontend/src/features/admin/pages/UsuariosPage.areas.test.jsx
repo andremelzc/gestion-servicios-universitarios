@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
-import UsuariosPage from './UsuariosPage.jsx';
+import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -19,7 +19,7 @@ const areasCaidas = () =>
 describe('UsuariosPage: fallo al cargar las áreas', () => {
   it('[US-17] avisa con role="alert" y permite reintentar; al recuperarse aparece el filtro de área', async () => {
     server.use(areasCaidas());
-    render(<UsuariosPage />);
+    renderizarUsuarios();
 
     const aviso = await screen.findByRole('alert');
     expect(aviso).toHaveTextContent('No se pudieron cargar las áreas');
@@ -33,7 +33,7 @@ describe('UsuariosPage: fallo al cargar las áreas', () => {
 
   it('[US-17 CA-8] sin áreas por el error, TECNICO y SUPERVISOR no se pueden guardar y se explica por qué', async () => {
     server.use(areasCaidas());
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('alert');
     await userEvent.click(screen.getByRole('button', { name: 'Nuevo usuario' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nuevo usuario' }));
@@ -50,7 +50,7 @@ describe('UsuariosPage: fallo al cargar las áreas', () => {
 
   it('[US-17] desde el formulario también se puede reintentar la carga de áreas', async () => {
     server.use(areasCaidas());
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('alert');
     await userEvent.click(screen.getByRole('button', { name: 'Nuevo usuario' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nuevo usuario' }));
