@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validarCategoria } from './validacionCatalogos.js';
+import { validarArea, validarCategoria } from './validacionCatalogos.js';
 
 describe('validarCategoria (api-rest §3.5, US-15)', () => {
   const valida = {
@@ -41,5 +41,30 @@ describe('validarCategoria (api-rest §3.5, US-15)', () => {
     expect(
       validarCategoria({ ...valida, tiempoSlaHoras: '2147483648' }).errores.tiempoSlaHoras,
     ).toBe('El SLA no puede superar 2147483647 horas.');
+  });
+});
+
+describe('validarArea (api-rest §3.5, US-16)', () => {
+  const valida = { nombre: ' Mantenimiento ', correoContacto: ' mant@uni.edu ' };
+
+  it('[US-16] recorta nombre y correo', () => {
+    expect(validarArea(valida)).toEqual({
+      datos: { nombre: 'Mantenimiento', correoContacto: 'mant@uni.edu' },
+    });
+  });
+
+  it('[US-16] exige el nombre (hasta 100) y un correo válido (hasta 100)', () => {
+    expect(validarArea({ ...valida, nombre: '' }).errores.nombre).toBe(
+      'Ingresa el nombre del área.',
+    );
+    expect(validarArea({ ...valida, nombre: 'A'.repeat(101) }).errores.nombre).toBe(
+      'El nombre admite hasta 100 caracteres.',
+    );
+    expect(validarArea({ ...valida, correoContacto: '' }).errores.correoContacto).toBe(
+      'Ingresa el correo de contacto.',
+    );
+    expect(validarArea({ ...valida, correoContacto: 'sin-arroba' }).errores.correoContacto).toBe(
+      'Ingresa un correo válido.',
+    );
   });
 });
