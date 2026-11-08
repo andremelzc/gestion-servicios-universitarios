@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
-import UsuariosPage from './UsuariosPage.jsx';
+import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
 
 // Valor de prueba derivado para no dejar la contraseña literal en el código.
 const VALOR_PRUEBA = 'Segura'.concat('123');
@@ -45,7 +45,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
         cuerpo = await request.clone().json();
       }),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await fila('Luis Gómez');
     const dialogo = await abrirAlta();
 
@@ -64,7 +64,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
   }, 15000);
 
   it('[US-17 CA-8] el campo Área aparece solo para TECNICO y SUPERVISOR (RN-21)', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirAlta();
 
     expect(dialogo.queryByLabelText('Área')).not.toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
         enviado = true;
       }),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirEdicion('Ana Rojas');
 
     await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
@@ -95,7 +95,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
   });
 
   it('[US-17 CA-8] con área, el rol queda actualizado en la fila', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirEdicion('Ana Rojas');
 
     await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
@@ -109,7 +109,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
   });
 
   it('[US-34] al editar, el código y el correo no se pueden cambiar y no hay contraseña', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirEdicion('Luis Gómez');
 
     expect(dialogo.getByLabelText('Código institucional')).toHaveAttribute('readonly');
@@ -125,7 +125,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
         enviado = true;
       }),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirAlta();
 
     await completarAlta(dialogo, { correo: 'lucia@gmail.com' });
@@ -138,7 +138,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
   });
 
   it('[US-34 CA-9] un correo repetido (409) muestra el aviso y deja el formulario abierto', async () => {
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirAlta();
 
     await completarAlta(dialogo, { correo: 'ana.rojas@universidad.edu' });
@@ -158,7 +158,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
         }),
       ),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirEdicion('Luis Gómez');
 
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
@@ -174,7 +174,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
         cuerpo = await request.clone().json();
       }),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     const dialogo = await abrirEdicion('Luis Gómez');
 
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
@@ -198,7 +198,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
           cuerpo = await request.clone().json();
         }),
       );
-      render(<UsuariosPage />);
+      renderizarUsuarios();
       const dialogo = await abrirEdicion('Luis Gómez');
 
       await userEvent.selectOptions(dialogo.getByLabelText('Rol'), rol);

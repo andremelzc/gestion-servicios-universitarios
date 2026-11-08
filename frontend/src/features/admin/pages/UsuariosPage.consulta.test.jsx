@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { paginaDe } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
-import UsuariosPage from './UsuariosPage.jsx';
+import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -25,7 +25,7 @@ const ultima = (consultas) => consultas[consultas.length - 1];
 describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', () => {
   it('[US-34] por defecto pide solo activos, 20 por página y sin filtros de rol ni área', async () => {
     const consultas = espiarListado();
-    render(<UsuariosPage />);
+    renderizarUsuarios();
 
     await screen.findByRole('row', { name: /Luis Gómez/ });
 
@@ -39,7 +39,7 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
 
   it('[US-17] los filtros de rol y área viajan como `rol` e `idArea`', async () => {
     const consultas = espiarListado();
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('row', { name: /Luis Gómez/ });
 
     await userEvent.selectOptions(screen.getByLabelText('Rol'), 'TECNICO');
@@ -52,7 +52,7 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
 
   it('[US-34 CA-14] con "Mostrar inactivas" se omite `activo`', async () => {
     const consultas = espiarListado();
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('row', { name: /Luis Gómez/ });
 
     await userEvent.click(screen.getByRole('checkbox', { name: /mostrar inactivas/i }));
@@ -62,7 +62,7 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
 
   it('[US-34 CA-14] la búsqueda viaja como `q`', async () => {
     const consultas = espiarListado();
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('row', { name: /Luis Gómez/ });
 
     await userEvent.type(screen.getByRole('searchbox', { name: /buscar/i }), 'marta');
@@ -93,7 +93,7 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
         );
       }),
     );
-    render(<UsuariosPage />);
+    renderizarUsuarios();
     await screen.findByRole('row', { name: /Persona1/ });
 
     await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
