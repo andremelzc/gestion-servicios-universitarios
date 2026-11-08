@@ -1,0 +1,38 @@
+.detalle-solicitud {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.detalle-solicitud__etiquetas {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.detalle-solicitud__datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+.detalle-solicitud__datos dt {
+  font-weight: 700;
+}
+.detalle-solicitud__datos dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}
+.detalle-solicitud__timeline {
+  padding-left: 1.5rem;
+}
+.detalle-solicitud__historial summary {
+  cursor: pointer;
+}
+.detalle-solicitud__historial summary h2 {
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+.detalle-solicitud__timeline li {
+  padding: 0 0 1rem 0.5rem;
+}
+.detalle-solicitud__timeline p {
+  margin: 0.25rem 0;
+}

@@ -1,0 +1,127 @@
+.linea-tiempo {
+  min-width: 0;
+  color: var(--color-text, #111827);
+}
+
+.linea-tiempo__titulo {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: 1.25rem;
+}
+
+/* Línea vertical continua: cada evento dibuja su tramo y su punto. */
+.linea-tiempo__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linea-tiempo__evento {
+  position: relative;
+  padding: 0 0 var(--space-4, 16px) var(--space-5, 24px);
+  border-left: 2px solid var(--color-border, #d1d5db);
+  margin-left: var(--space-2, 8px);
+}
+
+.linea-tiempo__evento:last-child {
+  padding-bottom: 0;
+  border-left-color: transparent;
+}
+
+.linea-tiempo__evento::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-surface, #ffffff);
+  border: 2px solid var(--color-text, #111827);
+  border-radius: 50%;
+}
+
+.linea-tiempo__evento:last-child::before {
+  left: -7px;
+}
+
+.linea-tiempo__estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+.linea-tiempo__anterior,
+.linea-tiempo__meta {
+  color: var(--color-text-muted, #4b5563);
+  font-size: 0.875rem;
+}
+
+.linea-tiempo__meta {
+  margin: var(--space-1, 4px) 0 0;
+}
+
+.linea-tiempo__actor {
+  font-weight: 500;
+}
+
+.linea-tiempo__nota {
+  margin: var(--space-2, 8px) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.linea-tiempo__vacio {
+  margin: 0;
+  color: var(--color-text-muted, #4b5563);
+}
+
+.linea-tiempo__esqueleto {
+  height: 96px;
+  border-radius: var(--radius, 8px);
+  background: linear-gradient(
+    90deg,
+    var(--color-border, #d1d5db) 25%,
+    var(--color-surface, #ffffff) 50%,
+    var(--color-border, #d1d5db) 75%
+  );
+  background-size: 200% 100%;
+  animation: linea-tiempo-brillo 1.4s ease-in-out infinite;
+}
+
+@keyframes linea-tiempo-brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linea-tiempo__esqueleto {
+    animation: none;
+  }
+}
+
+.linea-tiempo__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+}
+
+.linea-tiempo__mensaje {
+  margin: 0;
+  color: var(--color-danger, #b91c1c);
+}
+
+.linea-tiempo__boton {
+  min-height: var(--touch-target, 44px);
+  padding: 0 var(--space-4, 16px);
+  background: transparent;
+  border: 1px solid var(--color-primary, #1d4ed8);
+  border-radius: var(--radius, 8px);
+  color: var(--color-primary, #1d4ed8);
+  cursor: pointer;
+}
+
+.linea-tiempo__boton:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
