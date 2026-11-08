@@ -1,5 +1,6 @@
 import { setupServer } from 'msw/node';
 import { handlersAdmin } from './handlers/admin.js';
+import { handlersUsuarios } from './handlers/admin.usuarios.js';
 import { handlersAdminAreas } from './handlers/admin.areas.js';
 import { handlersAdminCategorias } from './handlers/admin.categorias.js';
 import { handlersAreas } from './handlers/areas.js';
@@ -16,6 +17,7 @@ export const handlers = [
   ...handlersSolicitudes,
   ...handlersAreas,
   ...handlersAdmin,
+  ...handlersUsuarios,
 ];
 
 export const server = setupServer(...handlers);
