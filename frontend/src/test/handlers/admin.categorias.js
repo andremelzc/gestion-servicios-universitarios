@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { buscarArea } from './admin.areas.js';
 import { problema } from './gestion.js';
-import { categoriasEjemplo } from './solicitudes.js';
+import { categoriasEjemplo, responderMisSolicitudes } from './solicitudes.js';
 
 // Contrato: docs/02-diseno/api-rest.md §3.5 (categorías) y §1.2 (errores); cuerpo de
 // `CategoriaResponse` del backend. El backend aún no tiene el CRUD de categorías: estos handlers
@@ -70,7 +70,22 @@ const conArea = (categoria) => ({
 
 const buscar = (params) => categorias.find((c) => c.id === Number(params.id));
 
+// El historial de solicitudes resuelve `categoriaNombre` desde el estado de las categorías, como
+// el JOIN del backend: una baja lógica (`activo = false`) no lo altera; borrar o renombrar sí.
+async function responderHistorialConCategorias(request) {
+  const cuerpo = await responderMisSolicitudes(request).json();
+  const content = cuerpo.content.map((solicitud) => ({
+    ...solicitud,
+    categoriaNombre: categorias.find((c) => c.id === solicitud.idCategoria)?.nombre ?? null,
+  }));
+  return HttpResponse.json({ ...cuerpo, content });
+}
+
 export const handlersAdminCategorias = [
+  http.get('*/api/v1/solicitudes/mis-solicitudes', ({ request }) =>
+    responderHistorialConCategorias(request),
+  ),
+
   http.get('*/api/v1/categorias', ({ request }) => {
     const parametros = new URL(request.url).searchParams;
     const incluir = parametros.get('incluirInactivos') === 'true';
