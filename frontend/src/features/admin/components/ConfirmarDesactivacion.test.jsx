@@ -44,6 +44,18 @@ describe('ConfirmarDesactivacion', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
+  it('mantiene el foco dentro del diálogo en ambas direcciones', async () => {
+    abrir();
+    const cancelar = screen.getByRole('button', { name: 'Cancelar' });
+    const confirmar = screen.getByRole('button', { name: 'Desactivar' });
+
+    expect(cancelar).toHaveFocus();
+    await userEvent.tab({ shift: true });
+    expect(confirmar).toHaveFocus();
+    await userEvent.tab();
+    expect(cancelar).toHaveFocus();
+  });
+
   it('muestra el error del servidor y bloquea los botones mientras guarda', () => {
     abrir({ error: 'No se pudo desactivar.', isSaving: true });
 
