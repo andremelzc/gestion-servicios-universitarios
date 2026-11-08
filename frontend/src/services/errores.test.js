@@ -8,12 +8,8 @@ const TRANSICION =
 // Tabla compartida con DataTable (`textoDeError`, PR #228): mismos textos de UX §9 para la misma entrada.
 // La única diferencia consciente es el 409 (ver las pruebas de abajo).
 const CASOS_COMUNES = [
-  ['status 0', { status: 0 }, 'Sin conexión. Revisa tu internet; reintentaremos automáticamente.'],
-  [
-    'sinConexion',
-    { sinConexion: true },
-    'Sin conexión. Revisa tu internet; reintentaremos automáticamente.',
-  ],
+  ['status 0', { status: 0 }, 'Sin conexión. Revisa tu internet e inténtalo de nuevo.'],
+  ['sinConexion', { sinConexion: true }, 'Sin conexión. Revisa tu internet e inténtalo de nuevo.'],
   ['401', { status: 401, detail: 'x' }, INESPERADO],
   ['403', { status: 403, detail: 'x' }, 'No tienes permiso para realizar esta acción.'],
   [

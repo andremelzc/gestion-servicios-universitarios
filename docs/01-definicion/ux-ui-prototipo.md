@@ -443,7 +443,7 @@ Antes de pasar a React se construye una **maqueta funcional mínima** en HTML/CS
 ### 6.3 Definición de terminado del diseño
 
 - [x] Los 4 flujos clave (login, registrar, asignar, resolver) navegables en el prototipo.
-- [ ] Revisión con el equipo y al menos 2 personas ajenas; ajustes registrados.
+- [ ] Revisión con el equipo y al menos 2 personas ajenas; ajustes registrados. *(En curso: revisión heurística preliminar hecha con IA, pendiente de validación humana; la prueba con 2 personas ajenas sigue pendiente. Ver [revisión heurística](revision-heuristica.md).)*
 - [x] Contrastes verificados (§8) y tamaños táctiles ≥ 44 px.
 - [ ] Wireframes y mockups consistentes con los contratos de la API (campos y reglas).
 
@@ -456,6 +456,8 @@ Cumple la exigencia del enunciado de **usabilidad y UX** y las **pruebas de usua
 ### 7.1 Heurísticas de Nielsen (revisión de expertos, antes de las pruebas con usuarios)
 
 Cada integrante revisa las 4 pantallas clave y puntúa cada heurística (0 = sin problema … 4 = catastrófico).
+
+> **Resultados:** [revisión heurística y prueba informal (UX-07)](revision-heuristica.md) para la aplicación React, y [plantilla de la maqueta HTML](evaluacion-heuristica-fase-i.md).
 
 | # | Heurística | Verificación en este sistema |
 |:-:|:---|:---|
@@ -575,6 +577,6 @@ Mensajes claros, en español, que dicen **qué pasó y qué hacer**. Referencia 
 | Sesión expirada (401) | "Tu sesión expiró. Inicia sesión de nuevo." |
 | Rate limit (429) | "Demasiados intentos. Espera unos minutos e inténtalo de nuevo." |
 | Error inesperado (500) | "Ocurrió un error inesperado. Si persiste, informa este código de soporte: **{traceId}**." |
-| Sin conexión | "Sin conexión. Revisa tu internet; reintentaremos automáticamente." |
+| Sin conexión | "Sin conexión. Revisa tu internet e inténtalo de nuevo." |
 | Confirmar desactivación | "{nombre} dejará de aparecer en los formularios. Los registros existentes no se modifican." |
 | Vacío (mis solicitudes) | "Aún no tienes solicitudes. Crea la primera para empezar." |

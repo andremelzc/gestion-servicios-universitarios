@@ -26,7 +26,7 @@ const RESPUESTA_OK = {
 
 const MSG_CREDENCIALES = 'Credenciales inválidas. Verifica tu correo y contraseña.';
 const MSG_RATE_LIMIT = 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
-const MSG_SIN_CONEXION = 'Sin conexión. Revisa tu internet; reintentaremos automáticamente.';
+const MSG_SIN_CONEXION = 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
 
 const handlerLogin = (respuesta) => http.post('*/api/v1/auth/login', () => respuesta);
 
