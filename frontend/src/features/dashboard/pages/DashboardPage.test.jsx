@@ -34,7 +34,7 @@ const TITULOS_GRAFICOS = [
 
 // Espera a que todos los widgets terminen de cargar.
 async function esperarCarga() {
-  await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryAllByText(/^Cargando/)).toHaveLength(0));
 }
 
 function fallar(ruta, status = 500) {
@@ -74,6 +74,7 @@ describe('DashboardPage', () => {
 
     expect(screen.getAllByRole('status').map((a) => a.textContent)).toEqual([
       'Cargando Indicadores clave…',
+      'Cargando solicitudes vencidas…',
       'Cargando Solicitudes por categoría…',
       'Cargando Solicitudes por prioridad…',
       'Cargando Solicitudes por responsable…',
@@ -199,8 +200,9 @@ describe('DashboardPage', () => {
       'por-estado',
       'por-prioridad',
       'por-responsable',
+      'vencidas',
     ]);
-    expect(urls.every((u) => u.search === '')).toBe(true);
+    expect(urls.every((u) => u.search === '' || u.search === '?page=0')).toBe(true);
   });
 
   it('[US-12 UAT-10] al aplicar un rango, los cinco widgets se recargan con desde y hasta', async () => {
@@ -213,7 +215,7 @@ describe('DashboardPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
     await esperarCarga();
 
-    expect(urls).toHaveLength(5);
+    expect(urls).toHaveLength(6);
     for (const url of urls) {
       expect(url.searchParams.get('desde')).toBe('2026-10-01');
       expect(url.searchParams.get('hasta')).toBe('2026-10-03');
@@ -296,7 +298,7 @@ describe('DashboardPage', () => {
 
         expect(screen.queryByLabelText('Área')).not.toBeInTheDocument();
         expect(rutas.some((r) => r.includes('/areas'))).toBe(false);
-        expect(rutas).toHaveLength(5);
+        expect(rutas).toHaveLength(6);
         expect(rutas.some((r) => r.includes('idArea'))).toBe(false);
       },
     );
@@ -311,7 +313,7 @@ describe('DashboardPage', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
       await esperarCarga();
 
-      expect(urls).toHaveLength(5);
+      expect(urls).toHaveLength(6);
       expect(urls.every((u) => u.searchParams.get('idArea') === '2')).toBe(true);
     });
 

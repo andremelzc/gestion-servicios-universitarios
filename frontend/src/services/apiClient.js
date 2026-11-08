@@ -95,7 +95,10 @@ function normalizarError(status, cuerpo) {
  * Petición al API. Devuelve el cuerpo JSON (o `null` en 204) y lanza el error normalizado
  * `{status, detail, errores, traceId, tipo?}` (o `{status: 0, sinConexion: true}` sin red).
  */
-export async function peticion(ruta, { method = 'GET', body, headers = {}, ...resto } = {}) {
+export async function peticion(
+  ruta,
+  { method = 'GET', body, headers = {}, responseType, ...resto } = {},
+) {
   const esFormData = typeof FormData !== 'undefined' && body instanceof FormData;
   const cabeceras = { ...headers };
 
@@ -121,6 +124,8 @@ export async function peticion(ruta, { method = 'GET', body, headers = {}, ...re
   } catch {
     throw { status: 0, sinConexion: true };
   }
+
+  if (respuesta.ok && responseType === 'blob') return respuesta.blob();
 
   // El cuerpo se lee una sola vez (json() falla con cuerpos vacíos como el 204).
   let cuerpo = null;
