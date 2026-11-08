@@ -13,7 +13,7 @@ describe('useAreas', () => {
   it('[DASH-15] deshabilitado no pide nada y no hay error', () => {
     const { result } = renderHook(() => useAreas(false));
 
-    expect(result.current).toEqual({ areas: [], error: false });
+    expect(result.current).toMatchObject({ areas: [], error: false });
   });
 
   it('[DASH-15] acepta un arreglo de áreas', async () => {

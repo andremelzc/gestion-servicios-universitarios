@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import { useAreas } from '../../dashboard/hooks/useAreas.js';
+import UsuarioFormModal from '../components/UsuarioFormModal.jsx';
 import useCrud from '../hooks/useCrud.js';
 import { ROLES, etiquetaRol } from '../roles.js';
 import '../components/adminUi.css';
@@ -8,6 +9,9 @@ import '../components/adminUi.css';
 // `/admin/usuarios` filtra por `activo` (api-rest §3.6), no por `incluirInactivos`. Como la API no
 // fija su valor por defecto, sin la casilla se pide `activo=true` y con ella se omite.
 const paramInactivos = (incluir) => (incluir ? {} : { activo: true });
+
+// Constante de módulo: referencia estable para el efecto de foco del formulario.
+const SIN_ERROR = { general: null, campos: {} };
 
 /**
  * Administración de usuarios (US-17, US-34, W-09). Contenedor: `useCrud` aporta el listado
@@ -19,7 +23,30 @@ export default function UsuariosPage() {
   const [rol, setRol] = useState('');
   const [idArea, setIdArea] = useState('');
   const crud = useCrud('/admin/usuarios', { paramInactivos, filtros: { rol, idArea } });
-  const { areas } = useAreas(true);
+  const { areas, error: errorAreas, reintentar: reintentarAreas } = useAreas(true);
+  const [dialogo, setDialogo] = useState(null); // { tipo: 'crear' | 'editar', fila? }
+  const [aviso, setAviso] = useState('');
+  const { general, campos } = crud.errorMutacion ?? SIN_ERROR;
+
+  const abrir = (siguiente) => {
+    crud.limpiarErrorMutacion();
+    setAviso('');
+    setDialogo(siguiente);
+  };
+  const cerrar = () => {
+    crud.limpiarErrorMutacion();
+    setDialogo(null);
+  };
+
+  async function guardar(datos) {
+    const creando = dialogo.tipo === 'crear';
+    const { ok } = await (creando ? crud.crear(datos) : crud.actualizar(dialogo.fila.id, datos));
+    if (!ok) return;
+    const nombre = `${datos.nombre} ${datos.apellido}`;
+    setDialogo(null);
+    setAviso(`Usuario «${nombre}» ${creando ? 'creado' : 'actualizado'}.`);
+  }
+
   const nombreArea = useMemo(() => new Map(areas.map((a) => [a.id, a.nombre])), [areas]);
 
   const columnas = [
@@ -79,7 +106,27 @@ export default function UsuariosPage() {
     <main className="admin-pagina">
       <div className="admin-pagina__cabecera">
         <h1>Administración de usuarios</h1>
+        <button
+          type="button"
+          className="admin-boton admin-boton--primario"
+          onClick={() => abrir({ tipo: 'crear' })}
+        >
+          Nuevo usuario
+        </button>
       </div>
+
+      <p role="status" className="admin-exito">
+        {aviso}
+      </p>
+      {errorAreas && (
+        <p role="alert" className="admin-error">
+          No se pudieron cargar las áreas: el filtro por área no está disponible y no se pueden
+          guardar técnicos ni supervisores.{' '}
+          <button type="button" className="admin-boton" onClick={reintentarAreas}>
+            Reintentar
+          </button>
+        </p>
+      )}
 
       <DataTable
         caption="Usuarios"
@@ -98,6 +145,29 @@ export default function UsuariosPage() {
         etiquetasActivo={{ activo: 'Activo', inactivo: 'Inactivo' }}
         filters={filtros}
         emptyMessage="No hay usuarios que coincidan con los filtros."
+        renderActions={(fila) => (
+          <button
+            type="button"
+            className="admin-boton"
+            aria-label={`Editar ${fila.nombre} ${fila.apellido}`}
+            onClick={() => abrir({ tipo: 'editar', fila })}
+          >
+            Editar
+          </button>
+        )}
+      />
+
+      <UsuarioFormModal
+        isOpen={dialogo !== null}
+        usuario={dialogo?.tipo === 'editar' ? dialogo.fila : null}
+        areas={areas}
+        errorAreas={errorAreas}
+        onReintentarAreas={reintentarAreas}
+        onClose={cerrar}
+        onSubmit={guardar}
+        isSaving={crud.isSaving}
+        errorGeneral={general}
+        errorCampos={campos}
       />
     </main>
   );
