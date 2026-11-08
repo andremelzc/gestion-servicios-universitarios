@@ -46,6 +46,26 @@ describe('apiClient (AUTH-15 · CA-11)', () => {
     expect(cuerpo).toEqual([{ id: 1 }]);
   });
 
+  it('descarga evidencias autenticadas como blob y conserva errores normalizados', async () => {
+    persistirSesion();
+    let auth;
+    server.use(
+      http.get('*/api/v1/solicitudes/1/evidencias/:id', ({ request, params }) => {
+        auth = request.headers.get('Authorization');
+        return params.id === '1'
+          ? new HttpResponse('contenido', { headers: { 'Content-Type': 'application/pdf' } })
+          : HttpResponse.json({ detail: 'No encontrada' }, { status: 404 });
+      }),
+    );
+    const archivo = await apiClient.get('/solicitudes/1/evidencias/1', { responseType: 'blob' });
+    expect(auth).toBe(`Bearer ${TOKEN}`);
+    expect(archivo.type).toBe('application/pdf');
+    expect(await archivo.text()).toBe('contenido');
+    await expect(
+      apiClient.get('/solicitudes/1/evidencias/2', { responseType: 'blob' }),
+    ).rejects.toMatchObject({ status: 404, detail: 'No encontrada' });
+  });
+
   it('[AUTH-15] sin sesión persistida no envía Authorization', async () => {
     let auth = 'sin-ver';
     server.use(
