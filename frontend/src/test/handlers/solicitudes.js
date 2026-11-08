@@ -55,7 +55,10 @@ export const misSolicitudesEjemplo = Array.from({ length: 25 }, (_, indice) => {
     id: numero,
     codigo: `SOL-2026-0${String(numero).padStart(3, '0')}`,
     titulo: indice === 1 ? 'Wi-Fi caído en la biblioteca' : `Solicitud de ejemplo ${numero}`,
-    categoriaNombre: 'Equipos de Cómputo',
+    // Las filas alternan entre las dos categorías sembradas; `idCategoria` solo lo usan los mocks
+    // de administración para resolver `categoriaNombre` desde el estado de las categorías.
+    idCategoria: indice % 2 === 0 ? 2 : 3,
+    categoriaNombre: indice % 2 === 0 ? 'Equipos de Cómputo' : 'Mobiliario',
     prioridadNivel: ['ALTA', 'MEDIA', 'BAJA'][indice % 3],
     estadoCodigo,
     estadoNombre: NOMBRES_ESTADO[estadoCodigo],
