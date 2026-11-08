@@ -1,4 +1,4 @@
-// Validación del formulario de categorías (US-15). Vive aparte de
+// Validación de los formularios de categorías y áreas (US-15, US-16). Vive aparte de
 // `validacion.js` para no mezclar el trabajo de pantallas distintas; mismo contrato: cada función
 // devuelve `{ datos }` listo para enviar o `{ errores }` (campo → mensaje).
 import { z } from 'zod';
@@ -42,6 +42,20 @@ const categoriaSchema = z.object({
   ),
 });
 
+const areaSchema = z.object({
+  nombre: textoObligatorio(
+    'Ingresa el nombre del área.',
+    100,
+    'El nombre admite hasta 100 caracteres.',
+  ),
+  correoContacto: z
+    .string()
+    .trim()
+    .min(1, 'Ingresa el correo de contacto.')
+    .max(100, 'El correo admite hasta 100 caracteres.')
+    .pipe(z.email('Ingresa un correo válido.')),
+});
+
 function resolver(schema, valores) {
   const resultado = schema.safeParse(valores);
   if (resultado.success) return { datos: resultado.data };
@@ -52,3 +66,6 @@ function resolver(schema, valores) {
 
 /** `valores`: `{nombre, descripcion, idArea, tiempoSlaHoras}` como texto; descripción vacía → `null`. */
 export const validarCategoria = (valores) => resolver(categoriaSchema, valores);
+
+/** `valores`: `{nombre, correoContacto}` como texto. */
+export const validarArea = (valores) => resolver(areaSchema, valores);
