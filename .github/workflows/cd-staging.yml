@@ -31,8 +31,10 @@ jobs:
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
 
-          docker build -t "ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}" \
-                       -t "ghcr.io/${REPO_LOWER}/backend:staging" ./backend
+          # backend/Dockerfile copia backend/ y database/ desde la raíz del repo
+          docker build -f backend/Dockerfile \
+                       -t "ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}" \
+                       -t "ghcr.io/${REPO_LOWER}/backend:staging" .
           docker push "ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}"
           docker push "ghcr.io/${REPO_LOWER}/backend:staging"
 
