@@ -15,9 +15,61 @@ jobs:
     name: Pruebas (CI)
     uses: ./.github/workflows/ci.yml
 
+  publish-ghcr:
+    name: Publicar Imágenes en GHCR (prod)
+    needs: [ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v7
+
+      - name: Iniciar sesión en GitHub Container Registry (GHCR)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Construir y publicar imágenes etiquetadas con SHA y versión
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          BACKEND_IMAGES=("ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}")
+          FRONTEND_IMAGES=("ghcr.io/${REPO_LOWER}/frontend:sha-${SHORT_SHA}")
+
+          # En main/tag se publica además el tag mutable "prod"
+          if [ "${GITHUB_REF}" = "refs/heads/main" ] || [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            BACKEND_IMAGES+=("ghcr.io/${REPO_LOWER}/backend:prod")
+            FRONTEND_IMAGES+=("ghcr.io/${REPO_LOWER}/frontend:prod")
+          fi
+
+          # En un tag vX.Y.Z se publica también la versión exacta
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            BACKEND_IMAGES+=("ghcr.io/${REPO_LOWER}/backend:${GITHUB_REF_NAME}")
+            FRONTEND_IMAGES+=("ghcr.io/${REPO_LOWER}/frontend:${GITHUB_REF_NAME}")
+          fi
+
+          BACKEND_ARGS=()
+          for image in "${BACKEND_IMAGES[@]}"; do
+            BACKEND_ARGS+=(-t "$image")
+          done
+
+          FRONTEND_ARGS=()
+          for image in "${FRONTEND_IMAGES[@]}"; do
+            FRONTEND_ARGS+=(-t "$image")
+          done
+
+          docker build -f backend/Dockerfile "${BACKEND_ARGS[@]}" .
+          docker build --build-arg VITE_API_URL=/api/v1 "${FRONTEND_ARGS[@]}" ./frontend
+
+          for image in "${BACKEND_IMAGES[@]}" "${FRONTEND_IMAGES[@]}"; do
+            docker push "$image"
+          done
+
   deploy-render:
     name: Desplegar Backend a Render
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -33,7 +85,7 @@ jobs:
 
   deploy-vercel:
     name: Desplegar Frontend a Vercel
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: production
     env:
