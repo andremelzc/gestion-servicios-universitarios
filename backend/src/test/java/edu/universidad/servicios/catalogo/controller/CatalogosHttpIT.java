@@ -10,7 +10,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
@@ -23,6 +25,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -32,13 +36,21 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = {
         "spring.flyway.enabled=true",
         "spring.jpa.hibernate.ddl-auto=validate",
-        "app.jwt.secret=catalogos-synthetic-test-secret-123456789012345",
     }
 )
 @ActiveProfiles("test")
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CatalogosHttpIT {
+
+    @DynamicPropertySource
+    static void jwtSecret(DynamicPropertyRegistry registry) {
+        byte[] secret = new byte[32];
+        new SecureRandom().nextBytes(secret);
+        registry.add("app.jwt.secret", () ->
+            Base64.getEncoder().encodeToString(secret)
+        );
+    }
 
     @Container
     @ServiceConnection
