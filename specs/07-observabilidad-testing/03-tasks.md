@@ -10,7 +10,7 @@
 | [x] | 1.2 | `TraceIdFilter` (+MDC, `X-Trace-Id`, `traceparent`) | TS-05 | CA-2 |
 | [x] | 1.3 | Logs JSON (test/prod) con el formato definido y texto en dev | TS-05 | CA-3 |
 | [x] | 1.4 | `GlobalExceptionHandler`: 500 genérico + `traceId`, *stacktrace* solo en log | TS-05 | CA-1 (TC-028) |
-| [ ] | 1.5 | Contadores de negocio básicos (transiciones y solicitudes creadas) | TS-05 | CA-4 |
+| [x] | 1.5 | Contadores de negocio básicos (transiciones y solicitudes creadas) | TS-05 | CA-4 |
 | [x] | 1.6 | Exposición de Actuator restringida por perfil/red; `prometheus` no público | TS-05 | CA-4 (verificado desde fuera) |
 
 ## Fase 2 — Monitoreo y alertas · R6 (apoyo R3)

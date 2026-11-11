@@ -105,7 +105,9 @@ Se activan histogramas de percentiles: `management.metrics.distribution.percenti
 | `auth_login_total` | Contador | `resultado=ok\|fallido` | Seguridad |
 | `evidencias_rechazadas_total` | Contador | `motivo=tipo\|tamano\|firma` | Intentos de subida inválida |
 
-Las métricas de **etiqueta de alta cardinalidad** (id de usuario, código de solicitud) están **prohibidas** en métricas; esos datos van en logs.
+Los dos contadores de solicitudes se incrementan solo después de confirmar la transacción, y sus series aparecen tras el primer evento confirmado. La creación inicial no cuenta como transición; el atajo de asignación registra dos transiciones y una reasignación cuenta como `ASIGNADA` → `ASIGNADA`. Los contadores viven en memoria y se reinician con el proceso; no son un registro durable de auditoría.
+
+Para limitar la cardinalidad, `prioridad` admite `BAJA`, `MEDIA`, `ALTA`, `CRITICA`; `area` admite los tres nombres iniciales del catálogo (`Tecnologías de la Información`, `Mantenimiento e Infraestructura`, `Servicios Generales`); `desde` y `hacia` admiten los seis códigos del flujo. Cualquier otro valor se agrupa como `otra`, incluso si se cambia un nombre del catálogo. Las métricas de **etiqueta de alta cardinalidad** (id de usuario, código de solicitud) están **prohibidas** en métricas; esos datos van en logs. Las demás métricas de negocio de la tabla son objetivos independientes, no implementados por estos contadores.
 
 ---
 

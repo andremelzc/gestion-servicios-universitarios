@@ -1,5 +1,8 @@
 package edu.universidad.servicios.solicitud.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
 import edu.universidad.servicios.solicitud.domain.EstadoSolicitud;
 import edu.universidad.servicios.solicitud.domain.HistorialSolicitud;
 import edu.universidad.servicios.solicitud.domain.Solicitud;
@@ -13,14 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class HistorialServiceTest {
 
     @Mock
     HistorialSolicitudRepository historialRepository;
+
+    @Mock
+    SolicitudMetrics metrics;
 
     @Test
     void registraUnaTransicionSinModificarRegistrosExistentes() {
@@ -28,11 +31,22 @@ class HistorialServiceTest {
         Usuario actor = new Usuario();
         EstadoSolicitud anterior = new EstadoSolicitud();
         EstadoSolicitud nuevo = new EstadoSolicitud();
-        HistorialService service = new HistorialService(historialRepository);
+        HistorialService service = new HistorialService(
+            historialRepository,
+            metrics
+        );
 
-        service.registrar(solicitud, actor, anterior, nuevo, "Asignación inicial");
+        service.registrar(
+            solicitud,
+            actor,
+            anterior,
+            nuevo,
+            "Asignación inicial"
+        );
 
-        ArgumentCaptor<HistorialSolicitud> captor = ArgumentCaptor.forClass(HistorialSolicitud.class);
+        ArgumentCaptor<HistorialSolicitud> captor = ArgumentCaptor.forClass(
+            HistorialSolicitud.class
+        );
         verify(historialRepository).save(captor.capture());
         HistorialSolicitud historial = captor.getValue();
         assertThat(historial.getSolicitud()).isSameAs(solicitud);
@@ -44,12 +58,21 @@ class HistorialServiceTest {
     }
 
     @Test
-    void exigeLaTransaccionDeLaOperacionPrincipal() throws NoSuchMethodException {
-        Transactional transactional = HistorialService.class.getMethod(
-                "registrar", Solicitud.class, Usuario.class, EstadoSolicitud.class,
-                EstadoSolicitud.class, String.class
-        ).getAnnotation(Transactional.class);
+    void exigeLaTransaccionDeLaOperacionPrincipal()
+        throws NoSuchMethodException {
+        Transactional transactional = HistorialService.class
+            .getMethod(
+                "registrar",
+                Solicitud.class,
+                Usuario.class,
+                EstadoSolicitud.class,
+                EstadoSolicitud.class,
+                String.class
+            )
+            .getAnnotation(Transactional.class);
 
-        assertThat(transactional.propagation()).isEqualTo(Propagation.MANDATORY);
+        assertThat(transactional.propagation()).isEqualTo(
+            Propagation.MANDATORY
+        );
     }
 }

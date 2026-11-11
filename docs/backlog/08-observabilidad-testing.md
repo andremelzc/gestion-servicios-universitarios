@@ -32,7 +32,7 @@
 
 ### OBS-06 · [Observabilidad] Backend - Métricas de negocio
 **Rol:** R3 · **Labels:** `backend` `observabilidad` `TS-05` · **Sprint:** S3 · **Milestone:** 2.5 Observabilidad, alertas e incidentes · **Límite:** 06/11 · **Bloqueado por:** OBS-01, GES-03
-- [ ] Contadores `solicitudes_transiciones_total` y `solicitudes_creadas_total`, con etiquetas de baja cardinalidad
+- [x] Contadores `solicitudes_transiciones_total` y `solicitudes_creadas_total`, con etiquetas de baja cardinalidad
 
 **Aceptación:** CA-4.
 
