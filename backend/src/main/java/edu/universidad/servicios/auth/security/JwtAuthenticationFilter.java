@@ -48,6 +48,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (correoUsuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Usuario usuario = usuarioRepository.findByCorreo(correoUsuario).orElse(null);
                 
+                if (usuario != null && !Boolean.TRUE.equals(usuario.getActivo())) {
+                    SecurityContextHolder.clearContext();
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
+
                 if (usuario != null && usuario.getActivo()) {
                     UsuarioDetails usuarioDetails = new UsuarioDetails(usuario);
                     

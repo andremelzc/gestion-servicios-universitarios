@@ -6,13 +6,36 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository
+    extends
+        JpaRepository<Usuario, Long>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Usuario>
+{
     @org.springframework.data.jpa.repository.EntityGraph(
         attributePaths = { "rol", "area" }
     )
     Optional<Usuario> findByCorreo(String correo);
 
     Optional<Usuario> findByCodigoInstitucional(String codigoInstitucional);
+
+    @org.springframework.data.jpa.repository.Lock(
+        jakarta.persistence.LockModeType.PESSIMISTIC_WRITE
+    )
+    @org.springframework.data.jpa.repository.Query(
+        "select u from Usuario u where u.id = :id"
+    )
+    Optional<Usuario> findByIdForUpdate(
+        @org.springframework.data.repository.query.Param("id") Long id
+    );
+
+    // Locking reads see the latest committed state even under MySQL REPEATABLE READ.
+    @org.springframework.data.jpa.repository.Query(
+        value = "SELECT id FROM usuarios WHERE activo = true AND id_rol IN (SELECT id FROM roles WHERE nombre IN ('ADMIN', 'ROLE_ADMIN')) ORDER BY id FOR UPDATE",
+        nativeQuery = true
+    )
+    java.util.List<Long> administradoresActivosActuales();
+
+    boolean existsByCorreoIgnoreCase(String correo);
 
     boolean existsByAreaIdAndActivoTrue(Integer areaId);
 
