@@ -72,20 +72,21 @@ public class CategoriaService {
         Integer idArea,
         Integer tiempoSlaHoras
     ) {
-        Categoria categoria = obtener(id);
+        Categoria categoria = obtenerParaActualizar(id);
         aplicar(categoria, nombre, descripcion, idArea, tiempoSlaHoras);
         return categorias.save(categoria);
     }
 
     public void desactivar(Integer id) {
-        Categoria categoria = obtener(id);
+        Categoria categoria = obtenerParaActualizar(id);
         categoria.setActivo(false);
         categorias.save(categoria);
     }
 
     public Categoria reactivar(Integer id) {
-        Categoria categoria = obtener(id);
-        if (!Boolean.TRUE.equals(categoria.getArea().getActivo())) {
+        Categoria categoria = obtenerParaActualizar(id);
+        Area area = bloquearArea(categoria.getArea().getId());
+        if (!Boolean.TRUE.equals(area.getActivo())) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
                 "El área debe estar activa para reactivar la categoría"
@@ -93,6 +94,28 @@ public class CategoriaService {
         }
         categoria.setActivo(true);
         return categorias.save(categoria);
+    }
+
+    private Categoria obtenerParaActualizar(Integer id) {
+        return categorias
+            .findByIdForUpdate(id)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Categoría no encontrada"
+                )
+            );
+    }
+
+    private Area bloquearArea(Integer id) {
+        return areas
+            .findByIdForUpdate(id)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Área inexistente"
+                )
+            );
     }
 
     private void aplicar(
@@ -128,14 +151,19 @@ public class CategoriaService {
                 "Ya existe una categoría con ese nombre"
             );
         }
-        Area area = areas
-            .findById(idArea)
-            .orElseThrow(() ->
-                new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Área inexistente"
-                )
-            );
+        Integer origen =
+            categoria.getArea() == null ? null : categoria.getArea().getId();
+        Area area;
+        // Bloquear siempre en orden ascendente evita ciclos entre reasignaciones opuestas.
+        if (origen != null && origen < idArea) {
+            bloquearArea(origen);
+            area = bloquearArea(idArea);
+        } else {
+            area = bloquearArea(idArea);
+            if (origen != null && origen > idArea) {
+                bloquearArea(origen);
+            }
+        }
         if (!Boolean.TRUE.equals(area.getActivo())) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,

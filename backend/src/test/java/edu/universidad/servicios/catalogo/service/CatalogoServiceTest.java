@@ -40,7 +40,7 @@ class CatalogoServiceTest {
         prioridades = mock(PrioridadRepository.class);
         estados = mock(EstadoSolicitudRepository.class);
         categoriaService = new CategoriaService(categorias, areas);
-        areaService = new AreaService(areas, usuarios);
+        areaService = new AreaService(areas, usuarios, categorias);
         prioridadService = new PrioridadService(prioridades);
         estadoService = new EstadoService(estados);
     }
@@ -48,7 +48,7 @@ class CatalogoServiceTest {
     @Test
     void categoriaCreacionYValidaciones() {
         Area area = area(1, true);
-        when(areas.findById(1)).thenReturn(Optional.of(area));
+        when(areas.findByIdForUpdate(1)).thenReturn(Optional.of(area));
         when(categorias.save(any())).thenAnswer(i -> i.getArgument(0));
         Categoria creada = categoriaService.crear(" Redes ", "Red", 1, 24);
         assertEquals("Redes", creada.getNombre());
@@ -81,7 +81,8 @@ class CatalogoServiceTest {
         c.setId(1);
         c.setNombre("Redes");
         c.setArea(area(2, true));
-        when(categorias.findById(1)).thenReturn(Optional.of(c));
+        when(areas.findByIdForUpdate(2)).thenReturn(Optional.of(c.getArea()));
+        when(categorias.findByIdForUpdate(1)).thenReturn(Optional.of(c));
         when(categorias.findAll()).thenReturn(List.of(c));
         when(categorias.save(any())).thenAnswer(i -> i.getArgument(0));
         categoriaService.desactivar(1);
@@ -98,7 +99,7 @@ class CatalogoServiceTest {
     @Test
     void areaRechazaUsuariosActivosYPermiteBajaYReactivacion() {
         Area area = area(1, true);
-        when(areas.findById(1)).thenReturn(Optional.of(area));
+        when(areas.findByIdForUpdate(1)).thenReturn(Optional.of(area));
         when(usuarios.existsByAreaIdAndActivoTrue(1)).thenReturn(true, false);
         assertStatus(HttpStatus.CONFLICT, () -> areaService.desactivar(1));
         assertTrue(area.getActivo());
@@ -108,7 +109,28 @@ class CatalogoServiceTest {
         when(areas.save(any())).thenAnswer(i -> i.getArgument(0));
         areaService.reactivar(1);
         assertTrue(area.getActivo());
+        verify(areas, times(3)).findByIdForUpdate(1);
+        verify(areas, never()).findById(1);
         verify(areas, never()).delete(any());
+    }
+
+    @Test
+    void areaRechazaCategoriasActivasSinModificarla() {
+        Area area = area(1, true);
+        when(areas.findByIdForUpdate(1)).thenReturn(Optional.of(area));
+        when(categorias.existsByAreaIdAndActivoTrue(1)).thenReturn(true);
+
+        var error = assertThrows(ResponseStatusException.class, () ->
+            areaService.desactivar(1)
+        );
+        assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+        assertEquals(
+            "Reasigne o desactive las categorías del área primero",
+            error.getReason()
+        );
+        assertTrue(area.getActivo());
+        verify(areas, never()).save(any());
+        verify(categorias, never()).findAll();
     }
 
     @Test
@@ -204,7 +226,12 @@ class CatalogoServiceTest {
         Categoria categoria = new Categoria();
         categoria.setArea(area(2, false));
         categoria.setActivo(false);
-        when(categorias.findById(1)).thenReturn(Optional.of(categoria));
+        when(categorias.findByIdForUpdate(1)).thenReturn(
+            Optional.of(categoria)
+        );
+        when(areas.findByIdForUpdate(2)).thenReturn(
+            Optional.of(categoria.getArea())
+        );
         assertStatus(HttpStatus.CONFLICT, () -> categoriaService.reactivar(1));
         assertFalse(categoria.getActivo());
         verify(categorias, never()).save(any());
@@ -214,13 +241,15 @@ class CatalogoServiceTest {
     void unicidadIncluyeInactivosYPuedeConservarNombrePropio() {
         Area area = area(1, false);
         area.setNombre("TI");
-        when(areas.findById(1)).thenReturn(Optional.of(area));
+        when(areas.findByIdForUpdate(1)).thenReturn(Optional.of(area));
         when(areas.findByNombreIgnoreCase("TI")).thenReturn(Optional.of(area));
         when(areas.save(any())).thenAnswer(i -> i.getArgument(0));
         assertStatus(HttpStatus.CONFLICT, () ->
             areaService.crear("TI", "ti@universidad.edu")
         );
         assertSame(area, areaService.actualizar(1, "TI", "ti@universidad.edu"));
+        verify(areas).findByIdForUpdate(1);
+        verify(areas, never()).findById(1);
         verify(areas, never()).findAll();
         verify(usuarios, never()).findAll();
     }

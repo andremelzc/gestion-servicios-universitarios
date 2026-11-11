@@ -1,5 +1,6 @@
 package edu.universidad.servicios.catalogo.service;
 
+import edu.universidad.servicios.solicitud.repository.CategoriaRepository;
 import edu.universidad.servicios.usuario.domain.Area;
 import edu.universidad.servicios.usuario.repository.AreaRepository;
 import edu.universidad.servicios.usuario.repository.UsuarioRepository;
@@ -23,6 +24,7 @@ public class AreaService {
     );
     private final AreaRepository areas;
     private final UsuarioRepository usuarios;
+    private final CategoriaRepository categorias;
 
     @Transactional(readOnly = true)
     public List<Area> listar(boolean incluirInactivos) {
@@ -59,17 +61,23 @@ public class AreaService {
     }
 
     public Area actualizar(Integer id, String nombre, String correoContacto) {
-        Area area = obtener(id);
+        Area area = obtenerParaActualizar(id);
         aplicar(area, nombre, correoContacto);
         return areas.save(area);
     }
 
     public void desactivar(Integer id) {
-        Area area = obtener(id);
+        Area area = obtenerParaActualizar(id);
         if (usuarios.existsByAreaIdAndActivoTrue(id)) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
                 "Reasigne o desactive los usuarios del área primero"
+            );
+        }
+        if (categorias.existsByAreaIdAndActivoTrue(id)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Reasigne o desactive las categorías del área primero"
             );
         }
         area.setActivo(false);
@@ -77,9 +85,20 @@ public class AreaService {
     }
 
     public Area reactivar(Integer id) {
-        Area area = obtener(id);
+        Area area = obtenerParaActualizar(id);
         area.setActivo(true);
         return areas.save(area);
+    }
+
+    private Area obtenerParaActualizar(Integer id) {
+        return areas
+            .findByIdForUpdate(id)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Área no encontrada"
+                )
+            );
     }
 
     private void aplicar(Area area, String nombre, String correo) {

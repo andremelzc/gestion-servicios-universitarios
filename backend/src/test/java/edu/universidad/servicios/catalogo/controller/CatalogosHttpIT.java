@@ -213,8 +213,7 @@ class CatalogosHttpIT {
     }
 
     @Test
-    void bajaConcurrenteConAsignacionSinProtocoloPuedeDejarUsuarioActivo()
-        throws Exception {
+    void bajaEsperaInsercionDeUsuarioYDetectaUsuarioActivo() throws Exception {
         int area = expect(
             "ADMIN",
             "POST",
@@ -251,18 +250,18 @@ class CatalogosHttpIT {
             connection.commit();
             assertThat(
                 response.get(15, TimeUnit.SECONDS).statusCode()
-            ).isEqualTo(204);
+            ).isEqualTo(409);
         }
         assertThat(
             jdbc.queryForObject(
-                "SELECT COUNT(*) FROM usuarios u JOIN areas a ON a.id = u.id_area WHERE u.codigo_institucional = 'CAT-CARRERA' AND u.activo = TRUE AND a.activo = FALSE",
+                "SELECT COUNT(*) FROM usuarios u JOIN areas a ON a.id = u.id_area WHERE u.codigo_institucional = 'CAT-CARRERA' AND u.activo = TRUE AND a.activo = TRUE",
                 Integer.class
             )
         ).isEqualTo(1);
     }
 
     @Test
-    void categoriaActivaDeAreaInactivaConservaVisibilidadActual()
+    void categoriaActivaImpideBajaDeAreaYConservaVisibilidad()
         throws Exception {
         int area = expect(
             "ADMIN",
@@ -284,7 +283,16 @@ class CatalogosHttpIT {
         )
             .path("id")
             .asInt();
-        expect("ADMIN", "DELETE", "areas/" + area, null, 204);
+        var conflicto = request("ADMIN", "DELETE", "areas/" + area, null);
+        assertThat(conflicto.statusCode()).isEqualTo(409);
+        assertThat(conflicto.body()).contains(
+            "Reasigne o desactive las categorías del área primero"
+        );
+        assertThat(
+            expect("ADMIN", "GET", "areas/" + area, null, 200)
+                .path("activo")
+                .asBoolean()
+        ).isTrue();
         assertThat(
             contains(
                 expect(
@@ -298,6 +306,367 @@ class CatalogosHttpIT {
             )
         ).isTrue();
         expect("ESTUDIANTE", "GET", "categorias/" + categoria, null, 200);
+        expect("ADMIN", "DELETE", "categorias/" + categoria, null, 204);
+        expect("ADMIN", "DELETE", "areas/" + area, null, 204);
+        assertThat(
+            expect(
+                "ADMIN",
+                "GET",
+                "areas/" + area + "?incluirInactivos=true",
+                null,
+                200
+            )
+                .path("activo")
+                .asBoolean()
+        ).isFalse();
+    }
+
+    @Test
+    void bajasYMutacionesDeCategoriaSeSerializanPorArea() throws Exception {
+        int origen = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Carrera origen categoria\",\"correoContacto\":\"origen-carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int destino = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Carrera destino categoria\",\"correoContacto\":\"destino-carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int categoria = expect(
+            "ADMIN",
+            "POST",
+            "categorias",
+            "{\"nombre\":\"Carrera categoria existente\",\"idArea\":" +
+                origen +
+                ",\"tiempoSlaHoras\":1}",
+            201
+        )
+            .path("id")
+            .asInt();
+        expect("ADMIN", "DELETE", "categorias/" + categoria, null, 204);
+
+        for (String operacion : List.of("crear", "reasignar", "reactivar")) {
+            int area = operacion.equals("reactivar") ? origen : destino;
+            try (var connection = dataSource.getConnection()) {
+                connection.setAutoCommit(false);
+                try (
+                    var statement = connection.prepareStatement(
+                        "UPDATE areas SET activo = FALSE WHERE id = ?"
+                    )
+                ) {
+                    statement.setInt(1, area);
+                    statement.executeUpdate();
+                }
+                String path = operacion.equals("crear")
+                    ? "categorias"
+                    : "categorias/" +
+                      categoria +
+                      (operacion.equals("reactivar") ? "/reactivar" : "");
+                String method = operacion.equals("crear") ? "POST" : "PUT";
+                String body = operacion.equals("reactivar")
+                    ? null
+                    : "{\"nombre\":\"Carrera " +
+                      operacion +
+                      "\",\"idArea\":" +
+                      area +
+                      ",\"tiempoSlaHoras\":1}";
+                var future = java.util.concurrent.CompletableFuture.supplyAsync(
+                    () -> {
+                        try {
+                            return request("ADMIN", method, path, body);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                );
+                Thread.sleep(500);
+                assertThat(future.isDone()).as(operacion).isFalse();
+                connection.commit();
+                var respuesta = future.get(15, TimeUnit.SECONDS);
+                assertThat(respuesta.statusCode())
+                    .as(operacion + ": " + respuesta.body())
+                    .isEqualTo(operacion.equals("reactivar") ? 409 : 400);
+            }
+            expect("ADMIN", "PUT", "areas/" + area + "/reactivar", null, 200);
+        }
+    }
+
+    @Test
+    void actualizarAreaEsperaYConservaEstadoActivoConCategoria()
+        throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Area carrera edicion\",\"correoContacto\":\"edicion-carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        expect("ADMIN", "DELETE", "areas/" + area, null, 204);
+        String adminToken = token("ADMIN");
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                var update = connection.prepareStatement(
+                    "UPDATE areas SET activo = TRUE WHERE id = ?"
+                )
+            ) {
+                update.setInt(1, area);
+                update.executeUpdate();
+            }
+            try (
+                var insert = connection.prepareStatement(
+                    "INSERT INTO categorias (nombre, id_area, tiempo_sla_horas, activo) VALUES ('Categoria carrera edicion', ?, 1, TRUE)"
+                )
+            ) {
+                insert.setInt(1, area);
+                insert.executeUpdate();
+            }
+            var http = HttpRequest.newBuilder(
+                URI.create("http://localhost:" + port + "/api/v1/areas/" + area)
+            )
+                .timeout(Duration.ofSeconds(15))
+                .header("Authorization", "Bearer " + adminToken)
+                .header("Content-Type", "application/json")
+                .PUT(
+                    HttpRequest.BodyPublishers.ofString(
+                        "{\"nombre\":\"Area carrera editada\",\"correoContacto\":\"editada-carrera@catalogos.test\"}"
+                    )
+                )
+                .build();
+            var future = client.sendAsync(
+                http,
+                HttpResponse.BodyHandlers.ofString()
+            );
+            Thread.sleep(1000);
+            assertThat(future.isDone()).isFalse();
+            connection.commit();
+            var response = future.get(15, TimeUnit.SECONDS);
+            assertThat(response.statusCode())
+                .as(response.body())
+                .isEqualTo(200);
+            assertThat(
+                mapper.readTree(response.body()).path("activo").asBoolean()
+            ).isTrue();
+        }
+        assertThat(
+            jdbc.queryForObject(
+                "SELECT COUNT(*) FROM categorias c JOIN areas a ON a.id = c.id_area WHERE c.id_area = ? AND c.activo = TRUE AND a.activo = TRUE",
+                Integer.class,
+                area
+            )
+        ).isEqualTo(1);
+    }
+
+    @Test
+    void reactivarAreaEsperaYConservaDatosConfirmados() throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Area carrera reactivacion\",\"correoContacto\":\"reactivacion-carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        expect("ADMIN", "DELETE", "areas/" + area, null, 204);
+        String adminToken = token("ADMIN");
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                var update = connection.prepareStatement(
+                    "UPDATE areas SET nombre = 'Area nombre confirmado' WHERE id = ?"
+                )
+            ) {
+                update.setInt(1, area);
+                update.executeUpdate();
+            }
+            var http = HttpRequest.newBuilder(
+                URI.create(
+                    "http://localhost:" +
+                        port +
+                        "/api/v1/areas/" +
+                        area +
+                        "/reactivar"
+                )
+            )
+                .timeout(Duration.ofSeconds(15))
+                .header("Authorization", "Bearer " + adminToken)
+                .PUT(HttpRequest.BodyPublishers.noBody())
+                .build();
+            var future = client.sendAsync(
+                http,
+                HttpResponse.BodyHandlers.ofString()
+            );
+            Thread.sleep(1000);
+            assertThat(future.isDone()).isFalse();
+            connection.commit();
+            var response = future.get(15, TimeUnit.SECONDS);
+            assertThat(response.statusCode())
+                .as(response.body())
+                .isEqualTo(200);
+            assertThat(
+                mapper.readTree(response.body()).path("nombre").asText()
+            ).isEqualTo("Area nombre confirmado");
+            assertThat(
+                mapper.readTree(response.body()).path("activo").asBoolean()
+            ).isTrue();
+        }
+    }
+
+    @Test
+    void bajaEsperaCategoriaConfirmadaYRechaza() throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Carrera baja categoria\",\"correoContacto\":\"baja-carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                var lock = connection.prepareStatement(
+                    "SELECT id FROM areas WHERE id = ? FOR UPDATE"
+                )
+            ) {
+                lock.setInt(1, area);
+                lock.executeQuery().close();
+            }
+            try (
+                var insert = connection.prepareStatement(
+                    "INSERT INTO categorias (nombre, id_area, tiempo_sla_horas, activo) VALUES ('Carrera confirmada', ?, 1, TRUE)"
+                )
+            ) {
+                insert.setInt(1, area);
+                insert.executeUpdate();
+            }
+            var future = java.util.concurrent.CompletableFuture.supplyAsync(
+                () -> {
+                    try {
+                        return request(
+                            "ADMIN",
+                            "DELETE",
+                            "areas/" + area,
+                            null
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            );
+            Thread.sleep(500);
+            assertThat(future.isDone()).isFalse();
+            connection.commit();
+            assertThat(future.get(15, TimeUnit.SECONDS).statusCode()).isEqualTo(
+                409
+            );
+        }
+    }
+
+    @Test
+    void reasignacionesOpuestasNoInterbloquean() throws Exception {
+        int a = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Carrera orden A\",\"correoContacto\":\"orden-a@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int b = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Carrera orden B\",\"correoContacto\":\"orden-b@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int c1 = expect(
+            "ADMIN",
+            "POST",
+            "categorias",
+            "{\"nombre\":\"Carrera orden uno\",\"idArea\":" +
+                a +
+                ",\"tiempoSlaHoras\":1}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int c2 = expect(
+            "ADMIN",
+            "POST",
+            "categorias",
+            "{\"nombre\":\"Carrera orden dos\",\"idArea\":" +
+                b +
+                ",\"tiempoSlaHoras\":1}",
+            201
+        )
+            .path("id")
+            .asInt();
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                var lock = connection.prepareStatement(
+                    "SELECT id FROM areas WHERE id = ? FOR UPDATE"
+                )
+            ) {
+                lock.setInt(1, a);
+                lock.executeQuery().close();
+            }
+            var f1 = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                try {
+                    return request(
+                        "ADMIN",
+                        "PUT",
+                        "categorias/" + c1,
+                        "{\"nombre\":\"Carrera orden uno\",\"idArea\":" +
+                            b +
+                            ",\"tiempoSlaHoras\":1}"
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            var f2 = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                try {
+                    return request(
+                        "ADMIN",
+                        "PUT",
+                        "categorias/" + c2,
+                        "{\"nombre\":\"Carrera orden dos\",\"idArea\":" +
+                            a +
+                            ",\"tiempoSlaHoras\":1}"
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            Thread.sleep(500);
+            assertThat(f1.isDone()).isFalse();
+            assertThat(f2.isDone()).isFalse();
+            connection.commit();
+            assertThat(f1.get(15, TimeUnit.SECONDS).statusCode()).isEqualTo(
+                200
+            );
+            assertThat(f2.get(15, TimeUnit.SECONDS).statusCode()).isEqualTo(
+                200
+            );
+        }
     }
 
     @Test

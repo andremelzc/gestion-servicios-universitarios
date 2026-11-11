@@ -1,15 +1,24 @@
 package edu.universidad.servicios.solicitud.repository;
 
 import edu.universidad.servicios.solicitud.domain.Categoria;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Categoria c where c.id = :id")
+    Optional<Categoria> findByIdForUpdate(@Param("id") Integer id);
+
     List<Categoria> findAllByActivoTrue();
+
+    boolean existsByAreaIdAndActivoTrue(Integer idArea);
 
     Optional<Categoria> findByNombreIgnoreCase(String nombre);
 
