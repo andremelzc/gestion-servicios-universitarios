@@ -78,7 +78,7 @@ class AdminUsuariosIT extends AbstractIntegrationTest {
             .substring(0, 12);
         d.setCodigoInstitucional(codigo);
         d.setCorreo(codigo + "@universidad.edu");
-        d.setPassword("Segura123");
+        d.setPassword("Aa1" + UUID.randomUUID().toString().replace("-", ""));
         d.setNombre("Lucia");
         d.setApellido("Torres");
         d.setRol(rol);
@@ -109,8 +109,13 @@ class AdminUsuariosIT extends AbstractIntegrationTest {
         );
         var d = alta("TECNICO", area());
         String json = """
-        {"codigoInstitucional":"%s","correo":"%s","password":"Segura123","nombre":"Lucia","apellido":"Torres","rol":"TECNICO","idArea":%d}
-        """.formatted(d.getCodigoInstitucional(), d.getCorreo(), d.getIdArea());
+        {"codigoInstitucional":"%s","correo":"%s","password":"%s","nombre":"Lucia","apellido":"Torres","rol":"TECNICO","idArea":%d}
+        """.formatted(
+            d.getCodigoInstitucional(),
+            d.getCorreo(),
+            d.getPassword(),
+            d.getIdArea()
+        );
         String body = mvc
             .perform(
                 post("/api/v1/admin/usuarios")
@@ -130,7 +135,7 @@ class AdminUsuariosIT extends AbstractIntegrationTest {
         assertThat(body).contains("TECNICO");
         assertThat(
             encoder.matches(
-                "Segura123",
+                d.getPassword(),
                 usuarios.findById(id).orElseThrow().getPasswordHash()
             )
         ).isTrue();
@@ -303,11 +308,18 @@ class AdminUsuariosIT extends AbstractIntegrationTest {
         ).isZero();
         long a = crear("ADMIN", null),
             b = crear("ADMIN", null);
-        carrera(() -> quitarAdmin(a, primera), () -> new TransactionTemplate(tm).executeWithoutResult(status -> {
-            // Establish an old REPEATABLE READ snapshot before waiting for the stable role lock.
-            jdbc.queryForObject("select count(*) from usuarios where activo=true", Integer.class);
-            quitarAdmin(b, segunda);
-        }));
+        carrera(
+            () -> quitarAdmin(a, primera),
+            () ->
+                new TransactionTemplate(tm).executeWithoutResult(status -> {
+                    // Establish an old REPEATABLE READ snapshot before waiting for the stable role lock.
+                    jdbc.queryForObject(
+                        "select count(*) from usuarios where activo=true",
+                        Integer.class
+                    );
+                    quitarAdmin(b, segunda);
+                })
+        );
         assertThat(
             jdbc.queryForObject(
                 "select count(*) from usuarios u join roles r on r.id=u.id_rol where u.activo=true and r.nombre='ROLE_ADMIN'",
