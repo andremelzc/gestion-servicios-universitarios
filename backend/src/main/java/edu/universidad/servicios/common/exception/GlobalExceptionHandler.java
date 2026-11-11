@@ -1,12 +1,14 @@
 package edu.universidad.servicios.common.exception;
 
 import java.net.URI;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -149,6 +151,44 @@ public class GlobalExceptionHandler {
 		addCommonProperties(pd);
 		return pd;
 	}
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(
+        DataIntegrityViolationException ex
+    ) {
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (
+                cause instanceof SQLException sql &&
+                sql.getErrorCode() == 1062 &&
+                sql.getMessage() != null
+            ) {
+                String message = sql.getMessage();
+                String detail = null;
+                if (
+                    message.contains("'uq_areas_nombre'") ||
+                    message.contains(".uq_areas_nombre'")
+                ) {
+                    detail = "Ya existe un área con ese nombre";
+                } else if (
+                    message.contains("'uq_categorias_nombre'") ||
+                    message.contains(".uq_categorias_nombre'")
+                ) {
+                    detail = "Ya existe una categoría con ese nombre";
+                } else if (
+                    message.contains("'uq_prioridades_nivel'") ||
+                    message.contains(".uq_prioridades_nivel'")
+                ) {
+                    detail = "Ya existe una prioridad con ese nivel";
+                }
+                if (detail != null) {
+                    return handleResponseStatusException(
+                        new ResponseStatusException(HttpStatus.CONFLICT, detail)
+                    );
+                }
+            }
+        }
+        return handleGlobalException(ex);
+    }
 
 	@ExceptionHandler(Exception.class)
 	public ProblemDetail handleGlobalException(Exception ex) {
