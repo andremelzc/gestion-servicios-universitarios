@@ -12,6 +12,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,9 @@ class CatalogosHttpIT {
 
     @Autowired
     JdbcTemplate jdbc;
+
+    @Autowired
+    DataSource dataSource;
 
     final HttpClient client = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(10))
@@ -126,6 +131,161 @@ class CatalogosHttpIT {
         for (JsonNode item : array)
             if (item.path("id").asInt() == id) return true;
         return false;
+    }
+
+    @Test
+    void conflictosDeUnicidadConcurrentesResponden409() throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Area concurrencia categorias\",\"correoContacto\":\"concurrencia@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        String[][] casos = {
+            {
+                "INSERT INTO areas (nombre, correo_contacto, activo) VALUES ('Area carrera unica', 'a@catalogos.test', TRUE)",
+                "areas",
+                "{\"nombre\":\"Area carrera unica\",\"correoContacto\":\"b@catalogos.test\"}",
+            },
+            {
+                "INSERT INTO categorias (nombre, id_area, tiempo_sla_horas, activo) VALUES ('Categoria carrera unica', " +
+                    area +
+                    ", 1, TRUE)",
+                "categorias",
+                "{\"nombre\":\"Categoria carrera unica\",\"idArea\":" +
+                    area +
+                    ",\"tiempoSlaHoras\":1}",
+            },
+            {
+                "INSERT INTO prioridades (nivel, ponderador, sla_max_horas, activo) VALUES ('Carrera unica', 1, 1, TRUE)",
+                "prioridades",
+                "{\"nivel\":\"Carrera unica\",\"ponderador\":1,\"slaMaxHoras\":1}",
+            },
+        };
+        String adminToken = token("ADMIN");
+        for (String[] caso : casos) {
+            try (var connection = dataSource.getConnection()) {
+                connection.setAutoCommit(false);
+                try (var statement = connection.createStatement()) {
+                    statement.executeUpdate(caso[0]);
+                }
+                var http = HttpRequest.newBuilder(
+                    URI.create(
+                        "http://localhost:" + port + "/api/v1/" + caso[1]
+                    )
+                )
+                    .timeout(Duration.ofSeconds(15))
+                    .header("Authorization", "Bearer " + adminToken)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(caso[2]))
+                    .build();
+                var response = client.sendAsync(
+                    http,
+                    HttpResponse.BodyHandlers.ofString()
+                );
+                // The duplicate insert waits for the competing uncommitted unique key.
+                Thread.sleep(1000);
+                assertThat(response.isDone())
+                    .as(caso[1] + " espera la transacción competidora")
+                    .isFalse();
+                connection.commit();
+                var result = response.get(15, TimeUnit.SECONDS);
+                assertThat(result.statusCode())
+                    .as(caso[1] + ": " + result.body())
+                    .isEqualTo(409);
+            }
+        }
+    }
+
+    @Test
+    void bajaConcurrenteConAsignacionSinProtocoloPuedeDejarUsuarioActivo()
+        throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Area carrera usuario\",\"correoContacto\":\"carrera@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        String adminToken = token("ADMIN");
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                var statement = connection.prepareStatement(
+                    "INSERT INTO usuarios (codigo_institucional, nombre, apellido, correo, password_hash, id_rol, id_area, activo) SELECT 'CAT-CARRERA', 'Test', 'Carrera', 'carrera@catalogos.test', 'test-only', id, ?, TRUE FROM roles WHERE nombre = 'ROLE_TECNICO'"
+                )
+            ) {
+                statement.setInt(1, area);
+                statement.executeUpdate();
+            }
+            var http = HttpRequest.newBuilder(
+                URI.create("http://localhost:" + port + "/api/v1/areas/" + area)
+            )
+                .timeout(Duration.ofSeconds(15))
+                .header("Authorization", "Bearer " + adminToken)
+                .DELETE()
+                .build();
+            var response = client.sendAsync(
+                http,
+                HttpResponse.BodyHandlers.ofString()
+            );
+            Thread.sleep(1000);
+            assertThat(response.isDone()).isFalse();
+            connection.commit();
+            assertThat(
+                response.get(15, TimeUnit.SECONDS).statusCode()
+            ).isEqualTo(204);
+        }
+        assertThat(
+            jdbc.queryForObject(
+                "SELECT COUNT(*) FROM usuarios u JOIN areas a ON a.id = u.id_area WHERE u.codigo_institucional = 'CAT-CARRERA' AND u.activo = TRUE AND a.activo = FALSE",
+                Integer.class
+            )
+        ).isEqualTo(1);
+    }
+
+    @Test
+    void categoriaActivaDeAreaInactivaConservaVisibilidadActual()
+        throws Exception {
+        int area = expect(
+            "ADMIN",
+            "POST",
+            "areas",
+            "{\"nombre\":\"Area categoria activa\",\"correoContacto\":\"activa@catalogos.test\"}",
+            201
+        )
+            .path("id")
+            .asInt();
+        int categoria = expect(
+            "ADMIN",
+            "POST",
+            "categorias",
+            "{\"nombre\":\"Categoria area inactiva\",\"idArea\":" +
+                area +
+                ",\"tiempoSlaHoras\":1}",
+            201
+        )
+            .path("id")
+            .asInt();
+        expect("ADMIN", "DELETE", "areas/" + area, null, 204);
+        assertThat(
+            contains(
+                expect(
+                    "ESTUDIANTE",
+                    "GET",
+                    "categorias?idArea=" + area,
+                    null,
+                    200
+                ),
+                categoria
+            )
+        ).isTrue();
+        expect("ESTUDIANTE", "GET", "categorias/" + categoria, null, 200);
     }
 
     @Test
