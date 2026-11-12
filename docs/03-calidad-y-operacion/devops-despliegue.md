@@ -205,6 +205,8 @@ Plantilla versionada en **`.env.example`**. Los valores reales **no** se version
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | backend | No | No | `http://jaeger:4318` | Destino de trazas |
 | `GRAFANA_ADMIN_PASSWORD` | grafana | **Sí** | Con monitoreo | *(vacío)* | Admin de Grafana |
 | `DEMO_USER_PASSWORD` | backend (`demo`) | **Sí** | Con `demo` | *(vacío)* | Contraseña de los usuarios de demostración |
+| `DEMO_MODO` | backend (`demo`) | No | No | `normal` | `normal` o `carga`; carga genera 2 000 solicitudes sintéticas |
+| `DEMO_SOLICITUDES` | backend (`demo`) | No | No | `200` | Cantidad en modo normal, mínimo 6; carga genera 2 000 |
 | `VITE_API_URL` | frontend (*build*) | No | Sí | `/api/v1` | URL base de la API (pública por naturaleza) |
 
 **Reglas:** (1) nada de la tabla marcado **Sí** en "¿Secreto?" aparece en el repo, en imágenes ni en logs; (2) los valores de `prod` son distintos de `test` y `dev`; (3) en GitHub se guardan como *Secrets* del *Environment* correspondiente.

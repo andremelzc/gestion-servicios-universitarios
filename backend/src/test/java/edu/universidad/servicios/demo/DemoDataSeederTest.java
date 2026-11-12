@@ -142,7 +142,7 @@ class DemoDataSeederTest {
 
         DemoDataSeeder seederConJdbc = new DemoDataSeeder(
             usuarios, roles, areas, categorias, prioridades, estados,
-            solicitudes, encoder, jdbcMock, "clave-demo", 6
+            solicitudes, encoder, jdbcMock, "clave-demo", 6, "normal"
         );
 
         seederConJdbc.run();
