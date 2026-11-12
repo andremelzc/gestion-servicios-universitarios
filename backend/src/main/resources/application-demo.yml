@@ -10,5 +10,6 @@ spring:
 app:
   demo:
     user-password: ${DEMO_USER_PASSWORD}
+    modo: ${DEMO_MODO:normal}
     solicitudes:
       cantidad: ${DEMO_SOLICITUDES:200}

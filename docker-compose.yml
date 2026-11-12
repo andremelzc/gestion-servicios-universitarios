@@ -42,6 +42,7 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:5173}
       ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-universidad.edu}
       DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      DEMO_MODO: ${DEMO_MODO:-normal}
       DEMO_SOLICITUDES: ${DEMO_SOLICITUDES:-200}
       STORAGE_PATH: /var/app/evidencias
       TZ: ${TZ:-UTC}

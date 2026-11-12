@@ -212,7 +212,13 @@ export const options = {
 
 ### 8.4 Ejecución
 
-Script único: [`tests/performance/carga.js`](../../tests/performance/carga.js) (sin dependencias npm). Requiere el backend con el perfil `demo` (`DEMO_SOLICITUDES=2000` para la carga) y k6 local o en Docker:
+Script único: [`tests/performance/carga.js`](../../tests/performance/carga.js) (sin dependencias npm). Requiere el backend con el perfil `demo`, `DEMO_MODO=carga` y k6 local o en Docker. Configure `DEMO_USER_PASSWORD` como secreto. Use exclusivamente una BD aislada de pruebas: el seeder agrega datos ficticios y no los elimina al desactivar el modo. Las 2 000 solicitudes tienen códigos `CARGA-0001` a `CARGA-2000`, independientes del año y de la secuencia normal; repetir el arranque completa las faltantes sin modificar las existentes. Si ya se ejecutó el modo normal, sus solicitudes permanecen y el total será mayor. Verifique en MySQL:
+
+```sql
+SELECT COUNT(*) FROM solicitudes WHERE codigo LIKE 'CARGA-%';
+```
+
+No arranque varias instancias del seeder simultáneamente sobre la misma BD. Luego ejecute k6:
 
 ```bash
 # Perfil nominal (50 VU, RNF-02); PERFIL=estres para la rampa hasta 500 VU (RNF-07)
