@@ -1,0 +1,722 @@
+
+=== 2026-11-12T01:34:45.288124+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=2.74% MEM=444.3MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=110.90% MEM=485.3MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=0.87% MEM=123.9MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 17
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.002847508
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.35196E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 17
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 7.436
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 44.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.16666666666666666
+system_cpu_usage 0.0
+
+=== 2026-11-12T01:34:52.613847+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=15.16% MEM=448.1MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=146.55% MEM=508.5MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=6.65% MEM=144.7MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 153
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.007311361
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.35196E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 153
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 10.231
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 14
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 0.353887763
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.087669762
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.069921005
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 6
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 0.324657906
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 13
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 0.417805689
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 13
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 0.299995605
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 9
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 0.488600817
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.056924545
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 44.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.06972730410769762
+system_cpu_usage 0.20541876388494848
+
+=== 2026-11-12T01:34:59.984968+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=18.56% MEM=450.4MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=144.40% MEM=525MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=9.53% MEM=171.8MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 669
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.014583464
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.35196E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 669
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 13.287
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 74
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 1.013296437
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 13
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.194473038
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 13
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.173840103
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 23
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 0.786390326
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 73
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 1.864360817
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 73
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 1.117420391
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 43
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 1.593551098
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 9
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.268945275
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 44.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.09464022859122002
+system_cpu_usage 0.242811448878853
+
+=== 2026-11-12T01:35:07.288013+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=21.39% MEM=452.2MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=109.98% MEM=536MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=10.19% MEM=160MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 1545
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.021590112
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 1545
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 16.571
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 180
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 1.73592386
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 32
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.363115352
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 32
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.332082662
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 51
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 1.304864438
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 179
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 3.495848049
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 179
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 2.056624537
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 87
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 2.603319158
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 18
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.427600524
+jvm_threads_daemon_threads 33.0
+jvm_threads_live_threads 41.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 45.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 10.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.09601731601731603
+system_cpu_usage 0.23216456301414337
+
+=== 2026-11-12T01:35:14.671978+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=24.23% MEM=453.1MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=157.06% MEM=538.8MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=9.05% MEM=162.6MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 2471
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.028343297
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 1.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 9.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 2470
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 19.607
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 291
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 2.358190881
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 52
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.518719595
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 52
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.497922186
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 82
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 1.843739816
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 290
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 4.968017704
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 290
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 2.921478212
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 131
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 3.607798656
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 29
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.601445493
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 45.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 12.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 19.0
+process_cpu_usage 0.0709048563788493
+system_cpu_usage 0.25085391522522116
+
+=== 2026-11-12T01:35:22.024640+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=30.27% MEM=453.6MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=92.45% MEM=536.6MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=8.54% MEM=162.5MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 3341
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.034911333
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 3.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 7.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 3340
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 22.87
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 404
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 3.042782409
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 66
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.637144124
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 66
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.621449546
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 100
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 2.202490531
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 404
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 6.631922771
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 403
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 3.869726569
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 174
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 4.691327451
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 33
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.680923015
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 45.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 13.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 18.0
+process_cpu_usage 0.07736142289759973
+system_cpu_usage 0.20144495103732507
+
+=== 2026-11-12T01:35:29.368893+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=21.58% MEM=454.7MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=75.95% MEM=540.2MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=13.59% MEM=156.1MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 4212
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.042452608
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 4212
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 26.0
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 513
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 3.649122201
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 80
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.752869148
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 80
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.739345735
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 129
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 2.705850053
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 512
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 8.127779805
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 512
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 4.738733563
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 214
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 5.585666676
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 48
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 0.902422527
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 10.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 21.0
+process_cpu_usage 0.060341096009003545
+system_cpu_usage 0.17568787059026583
+
+=== 2026-11-12T01:35:36.715403+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=24.02% MEM=454.6MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=89.27% MEM=547.9MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=9.73% MEM=156.6MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 5103
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.049289061
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 5102
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 29.318
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 615
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 4.215491797
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 103
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 0.942741418
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 103
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 0.965893909
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 165
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 3.356094496
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 614
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 9.551626225
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 614
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 5.53444326
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 257
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 6.625807888
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 61
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.098172599
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 10.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 21.0
+process_cpu_usage 0.057785467128027686
+system_cpu_usage 0.17567760838848323
+
+=== 2026-11-12T01:35:44.086740+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=22.30% MEM=455.1MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=48.18% MEM=549.2MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=9.08% MEM=167.2MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 5951
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.056612985
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 5951
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 32.662
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 712
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 4.750416474
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 127
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.158054904
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 127
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.26577165
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 195
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 3.938397121
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 711
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 10.857306012
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 711
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 6.287722041
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 307
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 7.928358981
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 67
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.202389437
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.04999133599029631
+system_cpu_usage 0.22679405639114864
+
+=== 2026-11-12T01:35:51.453393+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=29.28% MEM=455.5MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=55.67% MEM=552.6MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=8.65% MEM=166.8MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 6867
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.061684265
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 1.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 9.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 6866
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 36.087
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 823
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 5.352096014
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 144
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.31160512
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 144
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.483207781
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 229
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 4.544229229
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 822
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 12.416546666
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 822
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 7.171598879
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 344
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 8.769403018
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 84
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.477191356
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 10.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 21.0
+process_cpu_usage 0.06292856522871279
+system_cpu_usage 0.2564218749649336
+
+=== 2026-11-12T01:35:58.804066+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=25.38% MEM=455.1MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=60.31% MEM=552.6MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=10.37% MEM=165.2MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 7765
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.066428734
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 1.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 9.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 7765
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 39.272
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 938
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 5.939431627
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 162
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.469564667
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 162
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.704515327
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 256
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 5.025464274
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 937
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 13.882214137
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 937
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 8.016454688
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 376
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 9.586633959
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 93
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.630406978
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 10.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 21.0
+process_cpu_usage 0.04038561750911933
+system_cpu_usage 0.20401411698493402
+
+=== 2026-11-12T01:36:06.151559+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=13.93% MEM=455MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=36.81% MEM=554MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=8.09% MEM=164.6MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 8627
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.071117553
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 8627
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 42.302
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 1047
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 6.504122337
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 180
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.625892801
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 180
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.930237165
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 279
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 5.452797372
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 1046
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 15.292033542
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 1046
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 8.808787679
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 415
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 10.576035915
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 98
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.693939856
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.03763253954458543
+system_cpu_usage 0.17511204836061697
+
+=== 2026-11-12T01:36:13.500230+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=3.71% MEM=454.1MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=7.80% MEM=553.4MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=3.79% MEM=158.9MiB / 20.84GiB
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 8865
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.081220413
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 5.5971E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 8865
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 43.201
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 1076
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 6.645512829
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 181
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.633620984
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 181
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.941129872
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 282
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 5.496931402
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 1075
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 15.666623063
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 1075
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 9.013010196
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 440
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 11.14617397
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 100
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.720247444
+jvm_threads_daemon_threads 32.0
+jvm_threads_live_threads 40.0
+jvm_threads_peak_threads 41.0
+jvm_threads_started_threads_total 46.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 9.0
+jvm_threads_states_threads{state="waiting"} 22.0
+process_cpu_usage 0.013469176308064238
+system_cpu_usage 0.12618427800060086
+
+=== 2026-11-12T01:36:20.858810+00:00 ===
+gisu-diag-20261112013408-3180f3-db CPU=0.89% MEM=453.7MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-backend CPU=0.30% MEM=552.7MiB / 20.84GiB
+gisu-diag-20261112013408-3180f3-k6 CPU=0.00% MEM=0B / 0B
+lock_waits=0
+hikaricp_connections_acquire_seconds_count{pool="HikariPool-1"} 8869
+hikaricp_connections_acquire_seconds_sum{pool="HikariPool-1"} 0.082265942
+hikaricp_connections_acquire_seconds_max{pool="HikariPool-1"} 6.39121E-4
+hikaricp_connections_active{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_count{pool="HikariPool-1"} 0
+hikaricp_connections_creation_seconds_sum{pool="HikariPool-1"} 0.0
+hikaricp_connections_creation_seconds_max{pool="HikariPool-1"} 0.0
+hikaricp_connections_idle{pool="HikariPool-1"} 10.0
+hikaricp_connections_max{pool="HikariPool-1"} 10.0
+hikaricp_connections_min{pool="HikariPool-1"} 10.0
+hikaricp_connections_pending{pool="HikariPool-1"} 0.0
+hikaricp_connections_timeout_total{pool="HikariPool-1"} 0.0
+hikaricp_connections_usage_seconds_count{pool="HikariPool-1"} 8869
+hikaricp_connections_usage_seconds_sum{pool="HikariPool-1"} 43.201
+hikaricp_connections_usage_seconds_max{pool="HikariPool-1"} 7.431
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 1076
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/categorias"} 6.645512829
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 181
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/kpis"} 1.633620984
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 181
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/dashboard/por-estado"} 1.941129872
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/prioridades"} 0.023042604
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 282
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes"} 5.496931402
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 1075
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/mis-solicitudes"} 15.666623063
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 1075
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}"} 9.013010196
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 4
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="200",uri="/api/v1/auth/login"} 2.085258449
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 440
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="SUCCESS",status="201",uri="/api/v1/solicitudes"} 11.14617397
+http_server_requests_seconds_count{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 100
+http_server_requests_seconds_sum{error="none",exception="none",method="PUT",outcome="SUCCESS",status="200",uri="/api/v1/solicitudes/{id}/evaluar"} 1.720247444
+jvm_threads_daemon_threads 37.0
+jvm_threads_live_threads 45.0
+jvm_threads_peak_threads 45.0
+jvm_threads_started_threads_total 51.0
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 24.0
+jvm_threads_states_threads{state="waiting"} 12.0
+process_cpu_usage 7.767995857068876E-4
+system_cpu_usage 0.16611359867830897
