@@ -120,6 +120,11 @@ class FlujoMvpE2EIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.tipo").value("Bearer"))
                 .andExpect(jsonPath("$.correo").value(correo))
                 .andExpect(jsonPath("$.rol").value(rolEsperado))
+                .andExpect(jsonPath("$.usuario.id").isNumber())
+                .andExpect(jsonPath("$.usuario.nombre").isNotEmpty())
+                .andExpect(jsonPath("$.usuario.apellido").isNotEmpty())
+                .andExpect(jsonPath("$.usuario.correo").value(correo))
+                .andExpect(jsonPath("$.usuario.rol").value(rolEsperado.replaceFirst("^ROLE_", "")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);

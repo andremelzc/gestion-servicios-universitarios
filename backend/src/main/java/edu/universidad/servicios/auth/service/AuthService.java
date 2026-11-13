@@ -146,12 +146,16 @@ public class AuthService {
      * Construye la respuesta de autenticación estandarizada.
      */
     private AuthResponse buildAuthResponse(Usuario usuario, String jwtToken) {
+        String rol = usuario.getRol().getNombre();
+        Integer idArea = usuario.getArea() != null ? usuario.getArea().getId() : null;
         return AuthResponse.builder()
                 .token(jwtToken)
                 .tipo("Bearer")
                 .correo(usuario.getCorreo())
-                .rol(usuario.getRol().getNombre())
-                .idArea(usuario.getArea() != null ? usuario.getArea().getId() : null)
+                .rol(rol)
+                .idArea(idArea)
+                .usuario(new AuthResponse.UsuarioSesion(usuario.getId(), usuario.getNombre(),
+                        usuario.getApellido(), usuario.getCorreo(), rol.replaceFirst("^ROLE_", ""), idArea))
                 .build();
     }
 }
