@@ -88,6 +88,11 @@ class AuthServiceTest {
         assertEquals("Bearer", response.getTipo());
         assertEquals("estudiante@universidad.edu", response.getCorreo());
         assertEquals("ESTUDIANTE", response.getRol());
+        assertEquals(estudiante.getId(), response.getUsuario().id());
+        assertEquals(estudiante.getNombre(), response.getUsuario().nombre());
+        assertEquals(estudiante.getApellido(), response.getUsuario().apellido());
+        assertEquals("estudiante@universidad.edu", response.getUsuario().correo());
+        assertEquals("ESTUDIANTE", response.getUsuario().rol());
         assertNotNull(estudiante.getUltimoAcceso());
         ArgumentCaptor<UsernamePasswordAuthenticationToken> authenticationCaptor =
                 ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
@@ -134,6 +139,10 @@ class AuthServiceTest {
         assertEquals("jwt.token.nuevo", response.getToken());
         assertEquals("juan.perez@universidad.edu", response.getCorreo());
         assertEquals("ROLE_ESTUDIANTE", response.getRol());
+        assertEquals("ESTUDIANTE", response.getUsuario().rol());
+        assertEquals("Juan", response.getUsuario().nombre());
+        assertEquals("Perez", response.getUsuario().apellido());
+        assertEquals("juan.perez@universidad.edu", response.getUsuario().correo());
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarioRepository).save(usuarioCaptor.capture());
         Usuario usuarioGuardado = usuarioCaptor.getValue();
