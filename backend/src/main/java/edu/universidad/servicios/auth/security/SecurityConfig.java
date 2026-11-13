@@ -32,6 +32,22 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:*}")
     private String allowedOrigins;
 
+    private final org.springframework.core.env.Environment environment;
+
+    /**
+     * /actuator/prometheus solo es público en un puerto de gestión distinto al de la
+     * aplicación (red interna). Si ambos puertos coinciden (p. ej. en Render, donde se
+     * publica un único puerto), no existe puerto de gestión separado y el endpoint
+     * exige autenticación para no quedar expuesto a Internet.
+     */
+    private boolean prometheusSoloEnPuertoDeGestion(jakarta.servlet.http.HttpServletRequest request) {
+        Integer gestion = environment.getProperty("local.management.port", Integer.class);
+        Integer aplicacion = environment.getProperty("local.server.port", Integer.class);
+        return gestion != null && !gestion.equals(aplicacion)
+                && request.getLocalPort() == gestion
+                && "/actuator/prometheus".equals(request.getRequestURI());
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -48,7 +64,8 @@ public class SecurityConfig {
                 // OBS-07: Actuator vive en el puerto de gestión (MANAGEMENT_PORT, red interna).
                 // Solo health es público; prometheus se permite porque ese puerto no se publica.
                 // El resto de /actuator exige autenticación.
-                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/prometheus").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers(this::prometheusSoloEnPuertoDeGestion).permitAll()
                 // Swagger (se debería limitar en prod)
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Reglas RBAC
