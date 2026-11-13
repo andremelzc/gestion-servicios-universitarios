@@ -63,4 +63,24 @@ describe('ConfirmarDesactivacion', () => {
     expect(screen.getByRole('button', { name: 'Desactivando…' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
   });
+
+  it('mantiene el foco en el diálogo durante el guardado y lo devuelve a Cancelar al terminar', async () => {
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+    const props = { isOpen: true, nombre: 'ALTA', onConfirm, onCancel };
+    const { rerender } = render(<ConfirmarDesactivacion {...props} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar' }));
+    rerender(<ConfirmarDesactivacion {...props} isSaving />);
+
+    const estado = screen.getByRole('status');
+    expect(estado).toHaveTextContent('Desactivando…');
+    expect(estado).toHaveFocus();
+    await userEvent.tab();
+    expect(estado).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    expect(onCancel).not.toHaveBeenCalled();
+
+    rerender(<ConfirmarDesactivacion {...props} error="No se pudo desactivar." />);
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toHaveFocus();
+  });
 });
