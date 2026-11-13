@@ -111,14 +111,15 @@ jobs:
     needs: [deploy-render]
     environment: production
     steps:
-      - name: Esperar despliegue de Render
+      - name: Verificar Actuator Health en producción
         run: |
-          echo "Esperando 90 segundos para que el contenedor Docker levante en Render..."
-          sleep 90
-      
-      - name: Verificar Actuator Health
-        run: |
-          # En un proyecto real, se reemplaza la URL por la URL real de Render
-          # backend_url="https://backend-servicios.onrender.com"
-          # curl -f "$backend_url/actuator/health" || echo "Fallo en el Smoke Test"
-          echo "Smoke Test básico ejecutado (simulado hasta tener la URL real de Producción)."
+          backend_url="${{ vars.PROD_BACKEND_URL }}"
+          if [ -z "$backend_url" ]; then
+            echo "::error::La variable PROD_BACKEND_URL no está configurada en el Environment production."
+            exit 1
+          fi
+          echo "Esperando el despliegue de Render (arranque en frío puede tardar)..."
+          # Render tarda en levantar el contenedor: hasta ~10 min de reintentos
+          body=$(curl -fsS --retry 30 --retry-delay 20 --retry-all-errors --max-time 60 "$backend_url/actuator/health")
+          echo "$body"
+          echo "$body" | grep -q '"status":"UP"'

@@ -131,7 +131,9 @@ Se conservan como guía de cuánto detalle se espera. **No** deben contarse en l
 | R<n>-NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
 ```
 
-## 10. Reflexión final (se completa en la Fase IV)
+## 10. Reflexión final
+
+> Completada en [Lecciones aprendidas](../05-entregables/lecciones-aprendidas.md) con el aporte de cada rol.
 
 Para la sustentación, el equipo prepara una reflexión breve (≤ 1 página) que responde:
 

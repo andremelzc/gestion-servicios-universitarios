@@ -146,14 +146,14 @@ El enunciado evalúa **Especificar → Diseñar → Construir → Integrar → P
 
 | Etapa | Evidencia principal | Semana |
 |:---|:---|:---:|
-| **Especificar** | SRS, specs, BDD, trazabilidad | 7 |
-| **Diseñar** | Arquitectura, ADRs, modelo de datos, UX/UI, API | 7 |
-| **Construir** | Backend y frontend por HU | 7–8 |
-| **Integrar** | E2E del MVP; contrato OpenAPI; CI | 8 |
-| **Probar** | Unitarias, integración, API, aceptación, usuario | 8–12 |
-| **Asegurar** | OWASP, SAST/DAST, secretos | 9–12 |
-| **Desplegar** | Docker, CD a staging/prod | 9–11 |
-| **Monitorear** | Logs, métricas, trazas, alertas, simulacro | 11–12 |
+| **Especificar** | SRS, specs, BDD, trazabilidad: [Especificaciones técnicas](../01-definicion/especificaciones-tecnicas.md), [specs/](../../specs) | 7 |
+| **Diseñar** | [Arquitectura](../02-diseno/arquitectura-tecnica.md), [ADRs](../02-diseno/decisiones-arquitectura.md), [modelo de datos](../02-diseno/modelo-datos.md), [UX/UI](../01-definicion/ux-ui-prototipo.md), [API](../02-diseno/api-rest.md) | 7 |
+| **Construir** | Backend y frontend por HU: PR fusionados en [GitHub](https://github.com/andremelzc/gestion-servicios-universitarios/pulls?q=is%3Apr+is%3Amerged) | 7–8 |
+| **Integrar** | [E2E del MVP](../03-calidad-y-operacion/evidencia-e2e-mvp.md); [CI](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/40566834644) | 8 |
+| **Probar** | [Informe de pruebas](../INFORME_PRUEBAS.md), [UAT-09/10](../03-calidad-y-operacion/evidencia-uat-09-10.md) | 8–12 |
+| **Asegurar** | [Seguridad OWASP](../03-calidad-y-operacion/seguridad-owasp.md); [run de seguridad](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/43363285839); [estado del hardening](../03-calidad-y-operacion/evidencias/fase-3.md#estado-del-checklist-de-hardening-103) | 9–12 |
+| **Desplegar** | [DevOps](../03-calidad-y-operacion/devops-despliegue.md); [CD staging](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/43363285861); [CD prod](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/40592126003) | 9–11 |
+| **Monitorear** | [Observabilidad](../03-calidad-y-operacion/observabilidad.md); [simulacro INC-20261106-01](../incidentes/INC-20261106-01-simulacro-caida-bd-y-backend.md) | 11–12 |
 | **Mejorar** | Retrospectivas, post-mortem, informe final (acciones de mejora) | 11–12 |
 
 ---
