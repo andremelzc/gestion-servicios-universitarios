@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Modal from './Modal.jsx';
 import './ConfirmDialog.css';
 
@@ -15,6 +15,18 @@ export default function ConfirmDialog({
   savingLabel = 'Guardando…',
 }) {
   const cancelarRef = useRef(null);
+  const estadoRef = useRef(null);
+  const estabaGuardando = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      estabaGuardando.current = false;
+      return;
+    }
+    if (isSaving) estadoRef.current?.focus();
+    else if (estabaGuardando.current) cancelarRef.current?.focus();
+    estabaGuardando.current = isSaving;
+  }, [isOpen, isSaving]);
   return (
     <Modal
       isOpen={isOpen}
@@ -25,6 +37,11 @@ export default function ConfirmDialog({
       closeOnEsc={!isSaving}
       initialFocusRef={cancelarRef}
     >
+      {isSaving && (
+        <p ref={estadoRef} role="status" tabIndex={-1}>
+          {savingLabel}
+        </p>
+      )}
       {error && (
         <p role="alert" className="confirm-dialog__error">
           {error}
