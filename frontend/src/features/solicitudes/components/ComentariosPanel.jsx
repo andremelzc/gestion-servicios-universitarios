@@ -4,6 +4,18 @@ import { contieneHtml } from '../../auth/schemas.js';
 
 const INTERNOS = ['TECNICO', 'SUPERVISOR', 'ADMIN'];
 
+function fechaComentario(valor) {
+  if (!valor) return null;
+  const zona = /(Z|[+-]\d{2}:?\d{2})$/.test(valor) ? valor : `${valor}Z`;
+  const fecha = new Date(zona);
+  if (Number.isNaN(fecha.getTime())) return null;
+  return new Intl.DateTimeFormat('es-PE', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'America/Lima',
+  }).format(fecha);
+}
+
 /** Comentarios visibles para el usuario; la API aplica permisos y estados finales. */
 export default function ComentariosPanel({ solicitudId, rol, puedeComentar = true }) {
   const id = useId();
@@ -11,7 +23,7 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
   const [texto, setTexto] = useState('');
   const [privado, setPrivado] = useState(false);
   const [error, setError] = useState(null);
-  const [errorCarga, setErrorCarga] = useState(false);
+  const [errorCarga, setErrorCarga] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [intento, setIntento] = useState(0);
   const ruta = `/solicitudes/${encodeURIComponent(solicitudId)}/comentarios`;
@@ -22,14 +34,12 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
       (datos) => {
         if (!controller.signal.aborted) {
           setComentarios(Array.isArray(datos) ? datos : (datos?.content ?? []));
-          setError(null);
-          setErrorCarga(false);
+          setErrorCarga(null);
         }
       },
       () => {
         if (!controller.signal.aborted) {
-          setError('No se pudieron cargar los comentarios.');
-          setErrorCarga(true);
+          setErrorCarga('No se pudieron cargar los comentarios.');
         }
       },
     );
@@ -39,7 +49,6 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
   async function enviar(evento) {
     evento.preventDefault();
     if (!texto.trim() || guardando) return;
-    setErrorCarga(false);
     if (contieneHtml(texto)) {
       setError('El comentario no debe contener etiquetas HTML.');
       return;
@@ -68,26 +77,30 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
   return (
     <section aria-labelledby={`${id}-titulo`}>
       <h2 id={`${id}-titulo`}>Comentarios</h2>
-      {error && (
+      {errorCarga && (
         <p role="alert">
-          {error}{' '}
-          {errorCarga && (
-            <button type="button" onClick={() => setIntento((valor) => valor + 1)}>
-              Reintentar carga
-            </button>
-          )}
+          {errorCarga}{' '}
+          <button type="button" onClick={() => setIntento((valor) => valor + 1)}>
+            Reintentar carga
+          </button>
         </p>
       )}
-      {comentarios === null && !error && <p role="status">Cargando comentarios…</p>}
+      {error && <p role="alert">{error}</p>}
+      {comentarios === null && !errorCarga && <p role="status">Cargando comentarios…</p>}
       {comentarios?.length === 0 && <p>No hay comentarios.</p>}
       {comentarios?.length > 0 && (
         <ul>
-          {comentarios.map((item) => (
-            <li key={item.id}>
-              <p>{item.comentario}</p>
-              {item.privado && <span>Privado</span>}
-            </li>
-          ))}
+          {comentarios.map((item) => {
+            const fecha = fechaComentario(item.fechaComentario);
+            return (
+              <li key={item.id}>
+                {item.usuario && <strong>{item.usuario}</strong>}
+                {fecha && <p>{fecha}</p>}
+                <p>{item.comentario}</p>
+                {item.privado && <span>Privado</span>}
+              </li>
+            );
+          })}
         </ul>
       )}
       {puedeComentar && (

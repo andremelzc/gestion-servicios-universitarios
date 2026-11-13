@@ -97,3 +97,24 @@ it('permite reintentar cuando falla la carga de comentarios', async () => {
   expect(await screen.findByText('Recuperado')).toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
+
+it('conserva el error de envío cuando la carga inicial termina después', async () => {
+  let resolverCarga;
+  const carga = new Promise((resolve) => {
+    resolverCarga = resolve;
+  });
+  server.use(
+    http.get('*/api/v1/solicitudes/4/comentarios', async () => {
+      await carga;
+      return HttpResponse.json([]);
+    }),
+    http.post('*/api/v1/solicitudes/4/comentarios', () => HttpResponse.json({}, { status: 409 })),
+  );
+  render(<ComentariosPanel solicitudId={4} rol="ESTUDIANTE" />);
+  await userEvent.type(screen.getByLabelText('Comentario'), 'Consulta');
+  await userEvent.click(screen.getByRole('button', { name: 'Enviar comentario' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('solicitud finalizada');
+  resolverCarga();
+  await screen.findByText('No hay comentarios.');
+  expect(screen.getByRole('alert')).toHaveTextContent('solicitud finalizada');
+});

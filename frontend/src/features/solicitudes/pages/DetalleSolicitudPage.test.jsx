@@ -60,6 +60,7 @@ it('permite reintentar cuando falla la carga', async () => {
   apiClient.get.mockResolvedValueOnce([]);
   apiClient.get.mockResolvedValueOnce({ codigo: 'SOL-002', titulo: 'Equipo', evidencias: [] });
   apiClient.get.mockResolvedValueOnce([]);
+  apiClient.get.mockResolvedValue([]);
   render(
     <MemoryRouter initialEntries={['/solicitudes/42']}>
       <Routes>
