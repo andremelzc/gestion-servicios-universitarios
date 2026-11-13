@@ -78,6 +78,7 @@ beforeEach(() => {
       }),
     ),
     http.get('*/api/v1/solicitudes/42/historial', () => HttpResponse.json([])),
+    http.get('*/api/v1/solicitudes/42/comentarios', () => HttpResponse.json([])),
   );
 });
 

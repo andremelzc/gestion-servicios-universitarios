@@ -8,6 +8,7 @@ import { interpretarError } from '../../../services/errores.js';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import SlaIndicador from '../../gestion/components/SlaIndicador.jsx';
 import useAhora from '../../gestion/hooks/useAhora.js';
+import ComentariosPanel from '../components/ComentariosPanel.jsx';
 import './DetalleSolicitudPage.css';
 
 function fecha(valor) {
@@ -208,6 +209,11 @@ function DetalleSolicitud({ id }) {
         </summary>
         <Timeline historial={historial} />
       </details>
+      <ComentariosPanel
+        solicitudId={id}
+        rol={usuario?.rol}
+        puedeComentar={datos.accionesPermitidas?.includes('COMENTAR') ?? false}
+      />
     </main>
   );
 }
