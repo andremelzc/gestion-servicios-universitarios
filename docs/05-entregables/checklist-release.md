@@ -14,6 +14,6 @@
 | 4.5 | Escenarios BDD y trazabilidad | ✔ | [Informe de pruebas](../INFORME_PRUEBAS.md), [E2E](../03-calidad-y-operacion/evidencia-e2e-mvp.md), [UAT-09/10](../03-calidad-y-operacion/evidencia-uat-09-10.md) |
 | 4.6 | Registro de IA y lecciones | ✔ | [Registro de IA](../04-gestion/ia-register.md), [Lecciones aprendidas](lecciones-aprendidas.md) |
 | 4.7 | Ciclo completo | ◐ | [Calendario §6](../04-gestion/calendario-y-contingencia.md#6-cumplimiento-del-ciclo-exigido) (8 de 9 etapas enlazadas) |
-| 4.8 | Hardening | ◐ | [Estado del hardening](../03-calidad-y-operacion/evidencias/fase-3.md#estado-del-checklist-de-hardening-103) |
+| 4.8 | Hardening | ◐ | [Estado del hardening](../03-calidad-y-operacion/evidencias/fase-3/README.md#estado-del-checklist-de-hardening-103) |
 | 4.8 | Manual técnico | ✔ | [MANUAL_TECNICO.md](../MANUAL_TECNICO.md) |
 | 4.8 | Tag `v1.0.0` y notas | ✘ | Se crea al cerrar el release |

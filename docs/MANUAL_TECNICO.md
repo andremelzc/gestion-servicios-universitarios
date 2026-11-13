@@ -61,6 +61,6 @@ Perfiles Spring: `dev`, `test`, `prod` (+ `demo`) en `backend/src/main/resources
 Flujo de ramas, PR y convenciones: [Gobernanza](04-gestion/equipo-y-flujo-de-trabajo.md). Resumen en [DevOps §7](03-calidad-y-operacion/devops-despliegue.md#7-flujo-de-trabajo-del-desarrollador-resumen).
 
 ## 11. Problemas conocidos
-- Al 13/11/2026 el backend de staging responde 500 en todas sus rutas, incluido `/actuator/health`, y `/actuator/prometheus` es público en producción (ver [evidencias Fase III](03-calidad-y-operacion/evidencias/fase-3.md)).
+- Al 13/11/2026 el backend de staging responde 500 en todas sus rutas, incluido `/actuator/health`, y `/actuator/prometheus` es público en producción (ver [evidencias Fase III](03-calidad-y-operacion/evidencias/fase-3/README.md)).
 - Render usa arranque en frío: la primera petición puede tardar más de un minuto.
 - El staging de Vercel sirve solo el frontend; el UAT se hizo con Compose local ([evidencia](03-calidad-y-operacion/evidencia-uat-09-10.md)).
