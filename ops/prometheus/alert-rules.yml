@@ -1,0 +1,34 @@
+# OBS-10: alertas mínimas de docs/03-calidad-y-operacion/observabilidad.md §6.
+groups:
+  - name: servicio
+    rules:
+      - alert: InstanciaCaida
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: SEV1
+        annotations:
+          summary: "Backend caído ({{ $labels.instance }})"
+          description: "Prometheus no puede scrapear el backend. Revisar docker ps y docker logs backend; reiniciar; escalar al Rol 6."
+
+      - alert: ErrorRate5xxAlto
+        # Se excluye /actuator: el propio scrape de Prometheus diluiría la tasa de errores.
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="backend", uri!~"/actuator.*", status=~"5.."}[5m]))
+            / sum(rate(http_server_requests_seconds_count{job="backend", uri!~"/actuator.*"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: SEV1
+        annotations:
+          summary: "Tasa de errores 5xx > 5 % ({{ $value | humanizePercentage }})"
+          description: "Buscar el traceId de los errores en los logs; revisar el último despliegue; rollback si coincide."
+
+      - alert: BDInaccesible
+        # health_db_up: gauge 1/0 que publica el backend con el último resultado del indicador de salud "db".
+        expr: health_db_up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: SEV1
+        annotations:
+          summary: "Base de datos inaccesible desde el backend"
+          description: "/actuator/health reporta db != UP. Revisar contenedor db, disco y credenciales."

@@ -16,7 +16,9 @@ import edu.universidad.servicios.usuario.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -111,8 +113,39 @@ public class DemoDataSeeder implements CommandLineRunner {
 	private final EstadoSolicitudRepository estadoRepository;
 	private final SolicitudRepository solicitudRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JdbcTemplate jdbcTemplate;
 	private final String password;
 	private final int cantidadSolicitudes;
+	private final String modo;
+
+	@Autowired
+	public DemoDataSeeder(
+		UsuarioRepository usuarioRepository,
+		RolRepository rolRepository,
+		AreaRepository areaRepository,
+		CategoriaRepository categoriaRepository,
+		PrioridadRepository prioridadRepository,
+		EstadoSolicitudRepository estadoRepository,
+		SolicitudRepository solicitudRepository,
+		PasswordEncoder passwordEncoder,
+		@Autowired(required = false) JdbcTemplate jdbcTemplate,
+		@Value("${app.demo.user-password}") String password,
+		@Value("${app.demo.solicitudes.cantidad:200}") int cantidadSolicitudes,
+		@Value("${app.demo.modo:normal}") String modo
+	) {
+		this.usuarioRepository = usuarioRepository;
+		this.rolRepository = rolRepository;
+		this.areaRepository = areaRepository;
+		this.categoriaRepository = categoriaRepository;
+		this.prioridadRepository = prioridadRepository;
+		this.estadoRepository = estadoRepository;
+		this.solicitudRepository = solicitudRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.jdbcTemplate = jdbcTemplate;
+		this.password = password;
+		this.cantidadSolicitudes = cantidadSolicitudes;
+		this.modo = modo;
+	}
 
 	public DemoDataSeeder(
 		UsuarioRepository usuarioRepository,
@@ -123,19 +156,23 @@ public class DemoDataSeeder implements CommandLineRunner {
 		EstadoSolicitudRepository estadoRepository,
 		SolicitudRepository solicitudRepository,
 		PasswordEncoder passwordEncoder,
-		@Value("${app.demo.user-password}") String password,
-		@Value("${app.demo.solicitudes.cantidad:200}") int cantidadSolicitudes
+		String password,
+		int cantidadSolicitudes
 	) {
-		this.usuarioRepository = usuarioRepository;
-		this.rolRepository = rolRepository;
-		this.areaRepository = areaRepository;
-		this.categoriaRepository = categoriaRepository;
-		this.prioridadRepository = prioridadRepository;
-		this.estadoRepository = estadoRepository;
-		this.solicitudRepository = solicitudRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.password = password;
-		this.cantidadSolicitudes = cantidadSolicitudes;
+		this(
+			usuarioRepository,
+			rolRepository,
+			areaRepository,
+			categoriaRepository,
+			prioridadRepository,
+			estadoRepository,
+			solicitudRepository,
+			passwordEncoder,
+			null,
+			password,
+			cantidadSolicitudes,
+			"normal"
+		);
 	}
 
 	@Override
@@ -152,6 +189,9 @@ public class DemoDataSeeder implements CommandLineRunner {
 			throw new IllegalStateException(
 				"DEMO_USER_PASSWORD debe configurarse para activar el perfil demo"
 			);
+		}
+		if (!"normal".equals(modo) && !"carga".equals(modo)) {
+			throw new IllegalStateException("app.demo.modo debe ser normal o carga");
 		}
 		if (cantidadSolicitudes < ESTADOS_EJEMPLO.size()) {
 			throw new IllegalStateException(
@@ -251,8 +291,11 @@ public class DemoDataSeeder implements CommandLineRunner {
 		int anio = Year.now().getValue();
 		LocalDateTime ahora = LocalDateTime.now();
 
-		for (int i = 1; i <= cantidadSolicitudes; i++) {
-			String codigo = "SOL-%d-%04d".formatted(anio, i);
+		int cantidad = "carga".equals(modo) ? 2000 : cantidadSolicitudes;
+		for (int i = 1; i <= cantidad; i++) {
+			String codigo = "carga".equals(modo)
+				? "CARGA-%04d".formatted(i)
+				: "SOL-%d-%04d".formatted(anio, i);
 			if (solicitudRepository.existsByCodigo(codigo)) {
 				continue;
 			}
@@ -303,6 +346,24 @@ public class DemoDataSeeder implements CommandLineRunner {
 				registro.plusHours(prioridad.getSlaMaxHoras())
 			);
 			solicitudRepository.save(solicitud);
+		}
+		if ("normal".equals(modo)) {
+			sincronizarSecuencia(anio);
+		}
+	}
+
+	private void sincronizarSecuencia(int anio) {
+		if (jdbcTemplate != null) {
+			jdbcTemplate.update(
+				"""
+				INSERT INTO secuencias_solicitud (anio, ultimo_numero)
+				VALUES (?, ?)
+				ON DUPLICATE KEY UPDATE ultimo_numero = GREATEST(ultimo_numero, ?)
+				""",
+				anio,
+				cantidadSolicitudes,
+				cantidadSolicitudes
+			);
 		}
 	}
 

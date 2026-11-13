@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { http, HttpResponse } from 'msw';
 import { STORAGE_KEY } from '../features/auth/AuthContext.jsx';
+import { server } from '../test/server.js';
 import Providers from './providers.jsx';
 import { routes } from './router.jsx';
 
@@ -49,7 +51,7 @@ const placeholders = [
   ['/registro', 'Crear cuenta'],
   ['/mis-solicitudes', 'Mis solicitudes'],
   ['/solicitudes/nueva', 'Nueva solicitud'],
-  ['/solicitudes/42', 'Detalle de solicitud'],
+  ['/solicitudes/42', 'SOL-2026-0042 · Proyector sin imagen'],
   ['/perfil', 'Perfil'],
   ['/dashboard', 'Dashboard'],
   ['/admin/usuarios', 'Administración de usuarios'],
@@ -61,6 +63,23 @@ const placeholders = [
 
 beforeEach(() => {
   localStorage.clear();
+  server.use(
+    http.get('*/api/v1/solicitudes/42', () =>
+      HttpResponse.json({
+        id: 42,
+        codigo: 'SOL-2026-0042',
+        titulo: 'Proyector sin imagen',
+        descripcion: 'No muestra imagen',
+        estadoCodigo: 'REGISTRADA',
+        estadoNombre: 'Registrada',
+        prioridadNivel: 'ALTA',
+        evidencias: [],
+        accionesPermitidas: [],
+      }),
+    ),
+    http.get('*/api/v1/solicitudes/42/historial', () => HttpResponse.json([])),
+    http.get('*/api/v1/solicitudes/42/comentarios', () => HttpResponse.json([])),
+  );
 });
 
 describe('router', () => {
@@ -209,7 +228,7 @@ describe('router', () => {
   const protegidas = [
     ['/mis-solicitudes', 'ESTUDIANTE', 'Mis solicitudes'],
     ['/solicitudes/nueva', 'ESTUDIANTE', 'Nueva solicitud'],
-    ['/solicitudes/42', 'ESTUDIANTE', 'Detalle de solicitud'],
+    ['/solicitudes/42', 'ESTUDIANTE', 'SOL-2026-0042 · Proyector sin imagen'],
     ['/perfil', 'ESTUDIANTE', 'Perfil'],
     ['/bandeja', 'ESTUDIANTE', NO],
     ['/dashboard', 'ESTUDIANTE', NO],

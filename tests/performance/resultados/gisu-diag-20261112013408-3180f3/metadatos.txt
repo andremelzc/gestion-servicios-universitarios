@@ -1,0 +1,4 @@
+run=gisu-diag-20261112013408-3180f3
+UTC=2026-11-12T01:34:08.091315+00:00
+perfil=nominal modificado: 15s rampa 50 VU, 60s sostenido, 10s bajada; backend directo sin nginx
+imagenes=gisu-perf-175-backend:local mysql:8.0.36 grafana/k6:0.54.0

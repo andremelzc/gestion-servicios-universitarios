@@ -1,0 +1,32 @@
+info:
+  name: Iniciar Sesion (Estudiante 1)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "correo": "estudiante1.demo@universidad.edu",
+        "password": "contraseña123_"
+      }
+  auth: none
+
+
+runtime:
+  scripts:
+    - type: post-response
+      code: |
+        const data = typeof res.getBody === "function" ? res.getBody() : res.body;
+        if (data && data.token) {
+          bru.setEnvVar("token", data.token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

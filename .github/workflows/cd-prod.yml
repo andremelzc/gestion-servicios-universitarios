@@ -15,9 +15,61 @@ jobs:
     name: Pruebas (CI)
     uses: ./.github/workflows/ci.yml
 
+  publish-ghcr:
+    name: Publicar Imágenes en GHCR (prod)
+    needs: [ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v7
+
+      - name: Iniciar sesión en GitHub Container Registry (GHCR)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Construir y publicar imágenes etiquetadas con SHA y versión
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          BACKEND_IMAGES=("ghcr.io/${REPO_LOWER}/backend:sha-${SHORT_SHA}")
+          FRONTEND_IMAGES=("ghcr.io/${REPO_LOWER}/frontend:sha-${SHORT_SHA}")
+
+          # En main/tag se publica además el tag mutable "prod"
+          if [ "${GITHUB_REF}" = "refs/heads/main" ] || [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            BACKEND_IMAGES+=("ghcr.io/${REPO_LOWER}/backend:prod")
+            FRONTEND_IMAGES+=("ghcr.io/${REPO_LOWER}/frontend:prod")
+          fi
+
+          # En un tag vX.Y.Z se publica también la versión exacta
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            BACKEND_IMAGES+=("ghcr.io/${REPO_LOWER}/backend:${GITHUB_REF_NAME}")
+            FRONTEND_IMAGES+=("ghcr.io/${REPO_LOWER}/frontend:${GITHUB_REF_NAME}")
+          fi
+
+          BACKEND_ARGS=()
+          for image in "${BACKEND_IMAGES[@]}"; do
+            BACKEND_ARGS+=(-t "$image")
+          done
+
+          FRONTEND_ARGS=()
+          for image in "${FRONTEND_IMAGES[@]}"; do
+            FRONTEND_ARGS+=(-t "$image")
+          done
+
+          docker build -f backend/Dockerfile "${BACKEND_ARGS[@]}" .
+          docker build --build-arg VITE_API_URL=/api/v1 "${FRONTEND_ARGS[@]}" ./frontend
+
+          for image in "${BACKEND_IMAGES[@]}" "${FRONTEND_IMAGES[@]}"; do
+            docker push "$image"
+          done
+
   deploy-render:
     name: Desplegar Backend a Render
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -33,7 +85,7 @@ jobs:
 
   deploy-vercel:
     name: Desplegar Frontend a Vercel
-    needs: [ci]
+    needs: [ci, publish-ghcr]
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -59,14 +111,15 @@ jobs:
     needs: [deploy-render]
     environment: production
     steps:
-      - name: Esperar despliegue de Render
+      - name: Verificar Actuator Health en producción
         run: |
-          echo "Esperando 90 segundos para que el contenedor Docker levante en Render..."
-          sleep 90
-      
-      - name: Verificar Actuator Health
-        run: |
-          # En un proyecto real, se reemplaza la URL por la URL real de Render
-          # backend_url="https://backend-servicios.onrender.com"
-          # curl -f "$backend_url/actuator/health" || echo "Fallo en el Smoke Test"
-          echo "Smoke Test básico ejecutado (simulado hasta tener la URL real de Producción)."
+          backend_url="${{ vars.PROD_BACKEND_URL }}"
+          if [ -z "$backend_url" ]; then
+            echo "::error::La variable PROD_BACKEND_URL no está configurada en el Environment production."
+            exit 1
+          fi
+          echo "Esperando el despliegue de Render (arranque en frío puede tardar)..."
+          # Render tarda en levantar el contenedor: hasta ~10 min de reintentos
+          body=$(curl -fsS --retry 30 --retry-delay 20 --retry-all-errors --max-time 60 "$backend_url/actuator/health")
+          echo "$body"
+          echo "$body" | grep -q '"status":"UP"'

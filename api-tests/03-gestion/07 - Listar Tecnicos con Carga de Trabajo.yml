@@ -1,0 +1,17 @@
+info:
+  name: Listar Tecnicos con Carga de Trabajo
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/usuarios/tecnicos?idArea=1"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

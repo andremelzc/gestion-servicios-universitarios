@@ -101,7 +101,7 @@ Estas cifras son una guía de **cobertura**, no una cuota: lo importante es que 
 | R3 · Backend 2 / DBA | [`ia-registro/r3-backend-2-dba.md`](ia-registro/r3-backend-2-dba.md) | 1 |
 | R4 · Frontend 1 | [`ia-registro/r4-frontend-1.md`](ia-registro/r4-frontend-1.md) | 0 |
 | R5 · Frontend 2 | [`ia-registro/r5-frontend-2.md`](ia-registro/r5-frontend-2.md) | 6 |
-| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 0 |
+| R6 · QA / DevOps / Seguridad | [`ia-registro/r6-qa-devops-seguridad.md`](ia-registro/r6-qa-devops-seguridad.md) | 8 |
 
 **Reglas de uso**
 
@@ -131,7 +131,9 @@ Se conservan como guía de cuánto detalle se espera. **No** deben contarse en l
 | R<n>-NN | <herramienta y modelo> | <prompt real, sin secretos> | <qué generó> | <Sí/No/Parcialmente (qué parte)> | <qué prueba o comprobación concreta se hizo> | <cuántas y cuáles modificaciones> | <Rol N — nombre> | AAAA-MM-DD |
 ```
 
-## 10. Reflexión final (se completa en la Fase IV)
+## 10. Reflexión final
+
+> Completada en [Lecciones aprendidas](../05-entregables/lecciones-aprendidas.md) con el aporte de cada rol.
 
 Para la sustentación, el equipo prepara una reflexión breve (≤ 1 página) que responde:
 

@@ -24,9 +24,9 @@
 | Servicio | Imagen base | Puerto interno | Contenido y reglas |
 |:---|:---|:---:|:---|
 | **frontend** (Nginx) | *Multi-stage:* `node:20-alpine` compila → `nginx:stable-alpine` sirve | 80 (443 en prod) | Sirve la SPA y hace de **API Gateway**: proxy `/api/` → `backend:8080`, cabeceras de seguridad, *rate limit*, TLS. `VITE_API_URL=/api/v1` se fija en *build*. |
-| **backend** | *Multi-stage:* `maven:3-eclipse-temurin-17` compila → `eclipse-temurin:17-jre` ejecuta | 8080 | JAR en capas (dependencias cacheadas); usuario **no root**; `HEALTHCHECK` a `/actuator/health`; `-Duser.timezone=UTC`; volumen `evidencias`. |
+| **backend** | *Multi-stage:* `maven:3-eclipse-temurin-17` compila → `eclipse-temurin:17-jre` ejecuta | 8080 (API) · 8081 (Actuator, no publicado) | JAR en capas (dependencias cacheadas); usuario **no root**; `HEALTHCHECK` a `localhost:8081/actuator/health`; `-Duser.timezone=UTC`; volumen `evidencias`. |
 | **db** | `mysql:8.0` | 3306 (**no** publicado al host en prod) | Volumen `mysql_data`; `utf8mb4`; usuario de aplicación sin privilegios DDL en prod; el esquema lo aplica **Flyway** desde el backend. |
-| **prometheus** *(perfil `monitoring`)* | `prom/prometheus` | 9090 | Scrapea `backend:8080/actuator/prometheus`; reglas de alerta. |
+| **prometheus** *(perfil `monitoring`)* | `prom/prometheus` | 9090 | Scrapea `backend:8081/actuator/prometheus` (puerto de gestión `MANAGEMENT_PORT`, solo red interna); reglas de alerta. |
 | **grafana** *(perfil `monitoring`)* | `grafana/grafana` | 3000 | Dashboards y alertas provisionados desde archivos. |
 | **jaeger** *(perfil `monitoring`)* | `jaegertracing/all-in-one` | 16686 (UI) · 4318 (OTLP) | Visor de trazas. |
 
@@ -85,7 +85,7 @@ services:
       STORAGE_PATH: /var/app/evidencias
     volumes: [ "evidencias:/var/app/evidencias" ]
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -141,7 +141,7 @@ graph LR
         D["docker: build de imágenes"]
     end
     CI -->|merge a develop| STG["CD staging: push de imágenes a GHCR, despliegue, smoke test, ZAP baseline"]
-    STG -->|release/* → main + tag vX.Y.Z| PROD["CD producción: despliegue por tag, smoke test"]
+    STG -->|release/* → main + tag vX.Y.Z| PROD["CD producción: publicación de imágenes vX.Y.Z en GHCR, despliegue, smoke test"]
 ```
 
 ### 4.2 Jobs del pipeline objetivo
@@ -151,9 +151,11 @@ graph LR
 | **`ci.yml`** | `pull_request` y `push` a `develop`/`main` | `backend` (JDK 17, `mvn -B verify`, JaCoCo con umbral **≥ 70 %**, publica reporte) · `frontend` (Node 22.22.2, `npm ci`, `lint`, `vitest run --coverage`, `build`) · `docker-build` (construye sin publicar) | Todos verdes |
 | **`security.yml`** | PR, `push` y programado (semanal) | `codeql` (java, javascript) · `gitleaks` (Dependabot cubre las dependencias) | 0 hallazgos altos/críticos sin justificar |
 | **`cd-staging.yml`** | `push` a `develop` (tras CI verde) | Construye y publica imágenes en **GHCR** con *tag* `sha-<commit>`; se conecta al servidor *staging*; `docker compose pull && up -d`; *smoke test* `GET /actuator/health` y login de prueba; **ZAP baseline** | Smoke OK; 0 alertas ZAP altas |
-| **`cd-prod.yml`** | `push` de *tag* `v*` | Despliega las imágenes del *tag* `vX.Y.Z` con las variables del *Environment* `production`; *smoke test* | Smoke OK |
+| **`cd-prod.yml`** | `push` a `main`, *tag* `v*` o ejecución manual | Publica imágenes en **GHCR** (`sha-<commit>`, `prod` y `vX.Y.Z` cuando el disparador es un tag); despliega frontend en Vercel y backend en Render; *smoke test* | Smoke OK |
 
 Reglas comunes: acciones fijadas por versión; permisos mínimos (`permissions: contents: read`); secretos solo del *Environment*; `concurrency` para evitar despliegues simultáneos; caché de Maven/npm.
+
+> **Nota:** Render y Vercel despliegan desde el código fuente (ADR-007). Las imágenes de GHCR se publican como artefacto versionado para trazabilidad, rollback y recuperación ante desastre. Para que Render consuma directamente `backend:prod` o `backend:vX.Y.Z`, el servicio debe configurarse para desplegar desde GHCR con las credenciales del registro.
 
 ### 4.3 Versionado y releases
 
@@ -203,6 +205,8 @@ Plantilla versionada en **`.env.example`**. Los valores reales **no** se version
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | backend | No | No | `http://jaeger:4318` | Destino de trazas |
 | `GRAFANA_ADMIN_PASSWORD` | grafana | **Sí** | Con monitoreo | *(vacío)* | Admin de Grafana |
 | `DEMO_USER_PASSWORD` | backend (`demo`) | **Sí** | Con `demo` | *(vacío)* | Contraseña de los usuarios de demostración |
+| `DEMO_MODO` | backend (`demo`) | No | No | `normal` | `normal` o `carga`; carga genera 2 000 solicitudes sintéticas |
+| `DEMO_SOLICITUDES` | backend (`demo`) | No | No | `200` | Cantidad en modo normal, mínimo 6; carga genera 2 000 |
 | `VITE_API_URL` | frontend (*build*) | No | Sí | `/api/v1` | URL base de la API (pública por naturaleza) |
 
 **Reglas:** (1) nada de la tabla marcado **Sí** en "¿Secreto?" aparece en el repo, en imágenes ni en logs; (2) los valores de `prod` son distintos de `test` y `dev`; (3) en GitHub se guardan como *Secrets* del *Environment* correspondiente.
@@ -260,26 +264,28 @@ server {
 
 ---
 
-## 8. Operación del host
+## 8. Operación del host y servicios gestionados (OPS-21 · #117)
 
-Aplica a la VM de *staging*/*prod* ([ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue)).
+Aplica tanto al despliegue con `docker-compose.prod.yml` como a la arquitectura cloud gestionada adoptada en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue) (Vercel + Render + MySQL DBaaS):
 
-- [ ] Acceso SSH solo con clave; sin login `root`; *firewall* abierto solo en 80/443 (y 22 restringido).
-- [ ] Docker actualizado y paquetes del SO con parches de seguridad.
-- [ ] Certificado TLS (Let's Encrypt) con renovación automática verificada.
-- [ ] Espacio en disco y memoria monitoreados (alerta).
-- [ ] Documentados los pasos de recuperación ante desastre (RTO objetivo ≤ 1 h para la demo).
+- [x] **Acceso restringido y superficie de red mínima:** Sin acceso SSH público ni login `root`; en contenedores el backend corre como usuario sin privilegios (`appuser`, UID 1001) y `docker-compose.prod.yml` no publica el puerto `3306` de MySQL ni el puerto interno `8081` de Actuator; en la nube solo se exponen los puertos HTTPS (`443`) gestionados por el edge de Vercel y Render.
+- [x] **Imágenes y paquetes con parches de seguridad:** Imágenes base fijadas (`eclipse-temurin:21-jre-alpine`, `nginx:1.27-alpine`, `mysql:8.0`) y vigilancia continua de vulnerabilidades con Dependabot (`.github/dependabot.yml`) y CodeQL.
+- [x] **Certificado TLS (Let's Encrypt) con renovación automática verificada:** Terminación TLS 1.3 gestionada con certificados Let's Encrypt auto-renovados en los dominios de Vercel y Render, reforzada con cabecera `Strict-Transport-Security: max-age=31536000; includeSubDomains`.
+- [x] **Monitoreo de salud, recursos y alertas:** Reglas SEV1 activas en `ops/prometheus/alert-rules.yml` (`InstanciaCaida`, `ErrorRate5xxAlto`, `BDInaccesible`) y `HEALTHCHECK` configurado en todos los contenedores.
+- [x] **Recuperación ante desastre (RTO ≤ 1 h):** Reconstrucción determinista desde imágenes etiquetadas en GHCR (`ghcr.io/andremelzc/gestion-servicios-universitarios/*`), migraciones Flyway idempotentes (`V1`–`V6`) y `DemoDataSeeder` reproducible; validado en el simulacro [`INC-20261106-01`](../incidentes/INC-20261106-01-simulacro-caida-bd-y-backend.md).
 
 ---
 
-## 9. Plataforma cloud
+## 9. Plataforma cloud y GitHub Environments (OPS-22 · #118)
 
-La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: Aceptada.** La arquitectura consta de Vercel (Frontend) y Render (Backend y DBaaS externo):
+La decisión (con alternativas y criterios) está en [ADR-007](../02-diseno/decisiones-arquitectura.md#adr-007--plataforma-de-despliegue). **Estado: Aceptada.** La arquitectura consta de Vercel (Frontend), Render (Backend), GHCR (registro de imágenes Docker por commit SHA) y MySQL gestionado:
 
 | Dato | Valor |
 |:---|:---|
-| Proveedor y región | Vercel (Front, Global) / Render (Back, US East) |
-| URL de *staging* | *Pendiente del primer despliegue automatizado* |
-| URL de producción/demo | *Pendiente del primer despliegue automatizado* |
-| Responsable de la infraestructura | andremelzc (Tech Lead / DevOps) |
-| Fecha de decisión | 05/10/2026 |
+| Proveedor y región | Vercel (Front, CDN Global) · Render (Back, US East) · GHCR (Imágenes Docker) |
+| GitHub Environment `staging` | Configurado en GitHub (`environment: staging`, disparado por `push` a `develop` en `.github/workflows/cd-staging.yml`) con secretos propios aislados (`RENDER_STAGING_HOOK`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) |
+| GitHub Environment `production` | Configurado en GitHub (`environment: production`, disparado por `push` a `main` / tag `v*` en `.github/workflows/cd-prod.yml`) con secretos propios aislados (`RENDER_DEPLOY_HOOK`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) |
+| URL de *staging* (Preview) | `https://frontend-servicios-2o4nr29q3.vercel.app` (desplegado automáticamente en cada merge a `develop`) |
+| URL de producción/demo | Desplegada automáticamente desde `main` y tags `v*` mediante `cd-prod.yml` |
+| Responsable de la infraestructura | `andremelzc` (R1 · Tech Lead) y `fabrizio25504` (R6 · QA / DevOps / Seguridad) |
+| Fecha de decisión y aprovisionamiento | 05/10/2026 |

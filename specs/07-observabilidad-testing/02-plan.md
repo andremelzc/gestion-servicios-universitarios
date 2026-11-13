@@ -15,7 +15,7 @@
 | Dependencias | `spring-boot-starter-actuator`, `micrometer-registry-prometheus`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`. |
 
 ### 1.2 Infraestructura (`ops/`)
-- `ops/prometheus/prometheus.yml` (scrape `backend:8080/actuator/prometheus` cada 15 s) y `alert-rules.yml` con 3 reglas de [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas).
+- `ops/prometheus/prometheus.yml` (scrape `backend:8081/actuator/prometheus`, puerto de gestión cada 15 s) y `alert-rules.yml` con 3 reglas de [Observabilidad §6](../../docs/03-calidad-y-operacion/observabilidad.md#6-alertas).
 - `ops/grafana/provisioning` (datasources, *alerting*) y `dashboards/*.json`: **Salud del servicio**.
 - `docker-compose.monitoring.yml` (perfil `monitoring`): Prometheus, Grafana y Jaeger *all-in-one* (visor de trazas OTLP).
 

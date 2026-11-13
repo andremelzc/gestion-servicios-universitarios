@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { areasApi } from '../../../services/areas.api.js';
 
 const SIN_AREAS = { areas: [], error: false };
@@ -12,12 +12,13 @@ function extraerAreas(cuerpo) {
 }
 
 /**
- * Áreas para el filtro del dashboard. Con `habilitado` en `false` (cualquier rol salvo ADMIN)
+ * Áreas para el filtro del dashboard y de la pantalla de usuarios. Con `habilitado` en `false` (cualquier rol salvo ADMIN)
  * no se hace ninguna petición. El resultado se escribe solo en los callbacks de la promesa
  * (regla `react-hooks/set-state-in-effect`); si falla, el dashboard sigue sin áreas que elegir.
  */
 export function useAreas(habilitado) {
   const [resultado, setResultado] = useState(SIN_AREAS);
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     if (!habilitado) return undefined;
@@ -33,7 +34,10 @@ export function useAreas(habilitado) {
       },
     );
     return () => controlador.abort();
-  }, [habilitado]);
+  }, [habilitado, intento]);
 
-  return resultado;
+  // Vuelve a pedir las áreas tras un fallo (la pantalla de usuarios ofrece "Reintentar").
+  const reintentar = useCallback(() => setIntento((n) => n + 1), []);
+
+  return { ...resultado, reintentar };
 }

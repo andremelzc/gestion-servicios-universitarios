@@ -45,11 +45,11 @@ ENV TZ=UTC \
 
 VOLUME ["/var/app/evidencias"]
 
-EXPOSE 8080
+EXPOSE 8080 8081
 
 # Healthcheck consultando Actuator Health
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8081/actuator/health || exit 1
 
 # EntryPoint con JarLauncher oficial (Spring Boot 3.2+ y 4.x)
 ENTRYPOINT ["java", "-Duser.timezone=UTC", "-jar", "/app/app.jar"]

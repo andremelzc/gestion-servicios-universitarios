@@ -210,7 +210,32 @@ export const options = {
 
 **Excepción documentada:** `POST /auth/login` tiene objetivo P95 ≤ 800 ms porque el coste de BCrypt es una **medida de seguridad** deliberada; relajarlo para cumplir 300 ms sería un error de diseño.
 
-### 8.4 Qué se entrega
+### 8.4 Ejecución
+
+Script único: [`tests/performance/carga.js`](../../tests/performance/carga.js) (sin dependencias npm). Requiere el backend con el perfil `demo`, `DEMO_MODO=carga` y k6 local o en Docker. Configure `DEMO_USER_PASSWORD` como secreto. Use exclusivamente una BD aislada de pruebas: el seeder agrega datos ficticios y no los elimina al desactivar el modo. Las 2 000 solicitudes tienen códigos `CARGA-0001` a `CARGA-2000`, independientes del año y de la secuencia normal; repetir el arranque completa las faltantes sin modificar las existentes. Si ya se ejecutó el modo normal, sus solicitudes permanecen y el total será mayor. Verifique en MySQL:
+
+```sql
+SELECT COUNT(*) FROM solicitudes WHERE codigo LIKE 'CARGA-%';
+```
+
+No arranque varias instancias del seeder simultáneamente sobre la misma BD. Luego ejecute k6:
+
+```bash
+# Perfil nominal (50 VU, RNF-02); PERFIL=estres para la rampa hasta 500 VU (RNF-07)
+docker run --rm -i -e DEMO_USER_PASSWORD -e PERFIL=nominal -e BASE_URL=http://host.docker.internal \
+  grafana/k6 run - < tests/performance/carga.js
+# Humo rápido: añadir --vus 1 --duration 10s tras "run"
+```
+
+| Variable | Defecto | Uso |
+|:---|:---|:---|
+| `DEMO_USER_PASSWORD` | — (obligatoria) | Contraseña de los usuarios demo; nunca se versiona |
+| `PERFIL` | `nominal` | `nominal` o `estres` |
+| `BASE_URL` | `http://localhost` | Gateway nginx o backend directo (`:8080`) |
+| `ESTUDIANTES`, `SUPERVISOR` | correos del `DemoDataSeeder` | Usuarios de prueba (lista separada por comas) |
+| `PAUSA_LOGIN_S` | `6.5` | Pausa entre logins de `setup()` por el límite de nginx (10 r/min por IP) |
+
+### 8.5 Qué se entrega
 
 Para cada perfil: gráficos de latencia (P50/P95/P99), tasa de errores, throughput, uso de CPU/memoria/pool (dashboard de Grafana), cuellos de botella observados, conclusión y acciones. Va al **informe de pruebas** (§13).
 
@@ -257,9 +282,15 @@ El enunciado pide **generación asistida por IA** y **revisión de las pruebas g
 - [ ] Sigue las **convenciones** (nombre con `US-xx CA-n`, patrón Given-When-Then).
 - [ ] El autor **entiende cada línea** y puede explicarla en la sustentación.
 
-### 10.3 Evidencia
+### 10.3 Evidencia (3 casos documentados: prompt → defectos → versión final)
 
-Para al menos 3 casos significativos se documenta: prompt → prueba generada → defectos encontrados en ella → versión final, y se anota el resultado de la verificación (p. ej. mutación detectada).
+Para al menos 3 casos significativos se documenta: prompt → prueba generada → defectos encontrados en ella → versión final, y se anota el resultado de la verificación (mutación manual detectada). Entradas completas en [`docs/04-gestion/ia-registro/r6-qa-devops-seguridad.md`](../04-gestion/ia-registro/r6-qa-devops-seguridad.md):
+
+| Caso | Suite / Archivo | Prompt resumido | Defectos detectados en el código generado por IA (§10.2) | Verificación por mutación manual y versión final |
+|:---:|:---|:---|:---|:---|
+| **1 (`R6-05`)** | [`RegistroSeguridadIT.java`](../../backend/src/test/java/edu/universidad/servicios/solicitud/RegistroSeguridadIT.java) (`#78`, `#154`) | *"Generar pruebas HTTP contra MySQL real para TC-009 (.exe renombrado a .jpg), TC-010 (> 5 MB), TC-011 (@SinHtml) y TC-023 (IDOR → 404), verificando 0 filas y 0 archivos tras rechazo."* | **1.** Asumía `415 Unsupported Media Type` para `foto.jpg` con firma `MZ`, pero `FileTypeValidator` devuelve `400 Bad Request` cuando la firma difiere de la extensión permitida y `415` cuando la extensión es `.exe`.<br>**2.** En TC-023 no incluía control positivo del propietario (`estudianteA` → `200`). | Se retiró `@SinHtml` temporalmente en `SolicitudCrearRequest.descripcion` y `htmlEnDescripcionSeRechaza` falló en rojo (`201 Created`). Versión final separa `exeRenombradoSeRechaza` (`400`) y `exeConExtensionRealSeRechaza` (`415`) y verifica conteos en 3 repositorios + disco. |
+| **2 (`R6-06`)** | [`GestionAutorizacionIT.java`](../../backend/src/test/java/edu/universidad/servicios/solicitud/GestionAutorizacionIT.java) (`#122`) | *"Generar suite parametrizada rol × endpoint × propio/ajeno/otra área para el módulo de gestión (TC-016, TC-019, TC-023) contra MySQL 8."* | **1.** Ejecutaba todas las transiciones dejando la solicitud en `REGISTRADA`, por lo que `iniciar-atencion`, `resolver` y `cerrar` habrían fallado con `409 Conflict` antes de evaluar los permisos (`403`).<br>**2.** Esperaba `403` para `tecTI2` en `resolver` cuando `AccessPolicy` devuelve `404` por alcance (RN-16). | Se alteró `AccessPolicy` para permitir lectura entre áreas y 9 casos de `supMant`/`estB` se pusieron en rojo (`200` en vez de `404`). Versión final añade `prepararEstado(estado)` antes de cada fila y comprueba que `historialRepository.count()` no cambie en errores ≥ 400. |
+| **3 (`R6-07`)** | [`AdminAutorizacionIT.java`](../../backend/src/test/java/edu/universidad/servicios/auth/AdminAutorizacionIT.java) (`#151`) | *"Generar matriz parametrizada verificando que solo ADMIN escribe (POST/PUT/PATCH/DELETE) en `/api/v1/admin/**` y `/api/v1/usuarios/**`."* | **1.** Usaba cuerpos JSON vacíos `{}` en peticiones `POST`/`PUT`, lo que habría devuelto `400 Bad Request` por Bean Validation si se rompía la regla de seguridad, ocultando un fallo de autorización.<br>**2.** Omitía comprobar que `ADMIN` sí recibe `2xx` con el mismo payload. | Se abrió `/api/v1/admin/**` a `ROLE_SUPERVISOR` en `SecurityConfig` y las filas de supervisor fallaron devolviendo `200/201/204`. Versión final usa payloads válidos completos y comprueba `2xx` para `ADMIN`, `403` para otros roles y `401` sin token. |
 
 ---
 

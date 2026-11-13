@@ -11,4 +11,8 @@ public class AuthResponse {
     private String correo;
     private String rol;
     private Integer idArea;
+    private UsuarioSesion usuario;
+
+    public record UsuarioSesion(Long id, String nombre, String apellido, String correo,
+                                String rol, Integer idArea) {}
 }

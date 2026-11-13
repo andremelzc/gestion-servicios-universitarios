@@ -512,6 +512,70 @@ class SolicitudControllerTest {
         verify(solicitudWorkflowService).cerrar(eq(150L), isNull(), eq(usuario));
     }
 
+    @Test
+    @DisplayName("GET /api/v1/solicitudes/mis-solicitudes con sort no permitido retorna 400 Bad Request RFC 7807 (CA-6 / OPS-11)")
+    void debeRetornar400CuandoSortNoEstaEnListaBlancaMisSolicitudes() throws Exception {
+        mockMvc.perform(get("/api/v1/solicitudes/mis-solicitudes")
+                        .param("sort", "passwordHash,asc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", is("Petición inválida")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("passwordHash")));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/solicitudes con inyección en sort retorna 400 Bad Request RFC 7807 (CA-6 / OPS-11)")
+    void debeRetornar400CuandoHayInyeccionEnSortBandeja() throws Exception {
+        mockMvc.perform(get("/api/v1/solicitudes")
+                        .param("sort", "' OR 1=1 --"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", is("Petición inválida")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("' OR 1=1 --")));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/solicitudes con tamaño mayor a 100 retorna 400 Bad Request RFC 7807 (OPS-11)")
+    void debeRetornar400CuandoSizeExcedeLimiteMaximo() throws Exception {
+        mockMvc.perform(get("/api/v1/solicitudes")
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", is("Petición inválida")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("excede el límite máximo permitido de 100")));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/asignar con HTML en nota retorna 400 Bad Request RFC 7807 (RN-18 / OPS-08)")
+    void debeRetornar400CuandoAsignarContieneHtml() throws Exception {
+        SolicitudAsignarRequest req = new SolicitudAsignarRequest(20L, "<script>alert('xss')</script>Nota");
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/solicitudes/150/asignar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", is("Error de validación")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.errores.nota").value(org.hamcrest.Matchers.containsString("etiquetas HTML")));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/solicitudes/{id}/resolver con HTML en informe retorna 400 Bad Request RFC 7807 (RN-18 / OPS-08)")
+    void debeRetornar400CuandoResolverContieneHtml() throws Exception {
+        MockMultipartFile datosPart = new MockMultipartFile(
+                "datos", "", MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(new SolicitudResolverRequest("<img src=x onerror=alert(1)> Se solucionó el problema."))
+        );
+
+        mockMvc.perform(multipart("/api/v1/solicitudes/150/resolver")
+                        .file(datosPart)
+                        .with(request -> { request.setMethod("PUT"); return request; }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", is("Error de validación")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.errores.informe").value(org.hamcrest.Matchers.containsString("etiquetas HTML")));
+    }
+
     private SolicitudDetalleResponse crearDetalleMock(Long id, String estadoCodigo, String estadoNombre, String colorHex, Long tecnicoId, String informe) {
         return new SolicitudDetalleResponse(
                 id, "SOL-2026-0150", "Titulo", "Descripcion", "Campus Central", "Aula 101",

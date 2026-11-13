@@ -68,7 +68,7 @@ const MENSAJES_ESTADO = {
   429: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 };
 
-const SIN_CONEXION = 'Sin conexión. Revisa tu internet; reintentaremos automáticamente.';
+const SIN_CONEXION = 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
 
 function textoDeError({ status, detail, traceId, sinConexion } = {}) {
   if (sinConexion || status === 0) return SIN_CONEXION;

@@ -1,0 +1,8 @@
+name: ci
+variables:
+  - name: baseUrl
+    value: "http://localhost:8080"
+    enabled: true
+  - name: token
+    value: ""
+    enabled: true

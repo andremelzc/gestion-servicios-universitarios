@@ -9,6 +9,7 @@ import {
   iniciarAtencion,
   listarBandeja,
   listarPrioridades,
+  obtenerHistorial,
   resolver,
 } from './solicitudes.api.js';
 
@@ -135,5 +136,37 @@ describe('acciones del técnico', () => {
     expect(JSON.parse(texto)).toEqual({ informe: 'Se reemplazó el cable de video.' });
     expect(cuerpo.getAll('archivos')).toEqual(archivos);
     put.mockRestore();
+  });
+});
+
+describe('obtenerHistorial', () => {
+  it('pide GET /solicitudes/{id}/historial y devuelve el arreglo tal cual', async () => {
+    const historial = [
+      {
+        fecha: '2026-10-03T15:04:05Z',
+        usuario: 'Juan Pérez',
+        estadoAnterior: null,
+        estadoNuevo: 'REGISTRADA',
+        nota: null,
+      },
+    ];
+    let ruta;
+    server.use(
+      http.get('*/api/v1/solicitudes/:id/historial', ({ request }) => {
+        ruta = new URL(request.url).pathname;
+        return HttpResponse.json(historial);
+      }),
+    );
+    await expect(obtenerHistorial(150)).resolves.toEqual(historial);
+    expect(ruta).toBe('/api/v1/solicitudes/150/historial');
+  });
+
+  it('rechaza con el error normalizado (404)', async () => {
+    server.use(
+      http.get('*/api/v1/solicitudes/:id/historial', () =>
+        HttpResponse.json({ status: 404 }, { status: 404 }),
+      ),
+    );
+    await expect(obtenerHistorial(999)).rejects.toMatchObject({ status: 404 });
   });
 });
