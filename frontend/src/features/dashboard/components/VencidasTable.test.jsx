@@ -23,7 +23,7 @@ it('enlaza el código de cada solicitud a su detalle', () => {
     </MemoryRouter>,
   );
   expect(screen.getByRole('link', { name: 'SOL-005' })).toHaveAttribute('href', '/solicitudes/5');
-  expect(screen.getByText('ALTA')).toBeInTheDocument();
+  expect(screen.getByText('Alta')).toBeInTheDocument();
   expect(screen.getByText('Asignada')).toBeInTheDocument();
   expect(screen.getByText('3/10/2026')).toBeInTheDocument();
 });

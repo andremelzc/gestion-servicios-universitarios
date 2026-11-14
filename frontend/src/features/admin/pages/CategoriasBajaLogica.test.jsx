@@ -8,6 +8,7 @@ import { reiniciarCategorias } from '../../../test/handlers/admin.categorias.js'
 import MisSolicitudesPage from '../../solicitudes/pages/MisSolicitudesPage.jsx';
 import NuevaSolicitudPage from '../../solicitudes/pages/NuevaSolicitudPage.jsx';
 import CategoriasPage from './CategoriasPage.jsx';
+import { esperarOpcion, seleccionar, opcionesDe } from '../../../test/seleccionar.js';
 
 // ADM-21 (TC-026, RN-14): la baja lógica de una categoría la oculta del formulario de solicitud
 // pero no toca las solicitudes que ya la usan. Se prueba de extremo a extremo en el frontend:
@@ -32,10 +33,8 @@ const renderFormulario = () =>
 // recién entonces lee las opciones: sin esa guarda, un `not.toContain` pasaría con el selector
 // aún vacío.
 const opcionesCategoria = async () => {
-  await screen.findByRole('option', { name: 'Equipos de Cómputo' });
-  return within(screen.getByLabelText('Categoría'))
-    .getAllByRole('option')
-    .map((opcion) => opcion.textContent);
+  await esperarOpcion(screen.getByLabelText('Categoría'), 'Equipos de Cómputo');
+  return opcionesDe(screen.getByLabelText('Categoría')).map((opcion) => opcion.etiqueta);
 };
 
 async function desactivarComoAdmin(nombre) {
@@ -117,9 +116,9 @@ describe('Baja lógica de categoría (TC-026)', () => {
     const admin = render(<CategoriasPage />);
     await userEvent.click(await screen.findByRole('button', { name: 'Nueva categoría' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nueva categoría' }));
-    await dialogo.findByRole('option', { name: 'Infraestructura' });
+    await esperarOpcion(dialogo.getByLabelText('Área responsable'), 'Infraestructura');
     await userEvent.type(dialogo.getByLabelText('Nombre'), 'Pizarras Interactivas');
-    await userEvent.selectOptions(dialogo.getByLabelText('Área responsable'), '2');
+    await seleccionar(userEvent, dialogo.getByLabelText('Área responsable'), '2');
     await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '36');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('creada'));

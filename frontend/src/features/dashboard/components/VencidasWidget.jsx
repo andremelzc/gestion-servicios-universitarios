@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { dashboardApi } from '../../../services/dashboard.api.js';
 import VencidasTable from './VencidasTable.jsx';
+import WidgetEstado from './WidgetEstado.jsx';
 
 export default function VencidasWidget({ filtros }) {
   const [page, setPage] = useState(0);
@@ -19,6 +20,17 @@ export default function VencidasWidget({ filtros }) {
     return () => controller.abort();
   }, [filtros, page, intento]);
   const vigente = resultado?.page === page && resultado?.intento === intento;
+  if (!resultado || (vigente && resultado.error) || (!vigente && !resultado.datos)) {
+    // Mismo patrón de carga y error que el resto de widgets (AUD-10).
+    return (
+      <WidgetEstado
+        titulo="Solicitudes vencidas"
+        estado={vigente && resultado?.error ? 'error' : 'cargando'}
+        error={resultado?.error}
+        onReintentar={() => setIntento((n) => n + 1)}
+      />
+    );
+  }
   return (
     <section aria-labelledby="vencidas-titulo">
       <h2 id="vencidas-titulo">Solicitudes vencidas</h2>

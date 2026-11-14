@@ -5,11 +5,6 @@
   padding: var(--space-4, 16px);
 }
 
-.bandeja-tecnico h1 {
-  margin: 0;
-  font-size: var(--font-size-h2, 1.5rem);
-}
-
 .bandeja-tecnico .data-table__acciones button {
   width: 100%;
   min-width: 44px;

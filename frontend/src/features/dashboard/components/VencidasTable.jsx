@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 import DataTable from '../../../components/ui/DataTable.jsx';
+import EstadoBadge from '../../../components/ui/EstadoBadge.jsx';
+import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
 
 const fechaLimite = new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima' });
 
 function formatearFecha(valor) {
-  if (!valor) return '—';
+  if (!valor) return 'Sin fecha';
   const conZona = /(Z|[+-]\d{2}:?\d{2})$/.test(valor) ? valor : `${valor}Z`;
   const instante = new Date(conZona);
-  return Number.isNaN(instante.getTime()) ? '—' : fechaLimite.format(instante);
+  return Number.isNaN(instante.getTime()) ? 'Sin fecha' : fechaLimite.format(instante);
 }
 
 const columns = [
@@ -17,8 +19,23 @@ const columns = [
     render: (fila) => <Link to={`/solicitudes/${fila.id}`}>{fila.codigo}</Link>,
   },
   { key: 'titulo', header: 'Título' },
-  { key: 'prioridadNivel', header: 'Prioridad' },
-  { key: 'estadoNombre', header: 'Estado' },
+  {
+    key: 'prioridadNivel',
+    header: 'Prioridad',
+    render: (fila) => <PrioridadTag prioridad={fila.prioridadNivel} mostrarPrefijo={false} />,
+  },
+  {
+    key: 'estadoNombre',
+    header: 'Estado',
+    render: (fila) => (
+      <EstadoBadge
+        estado={fila.estadoCodigo ?? fila.estadoNombre}
+        nombre={fila.estadoNombre}
+        colorHex={fila.estadoColorHex}
+        mostrarPrefijo={false}
+      />
+    ),
+  },
   {
     key: 'fechaLimiteSla',
     header: 'Fecha límite',

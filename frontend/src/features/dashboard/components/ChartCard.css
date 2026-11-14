@@ -89,3 +89,14 @@
 .chart-card__tabla .chart-card__col-numerica {
   text-align: right;
 }
+
+/* "Ver datos" es una acción secundaria dentro de la tarjeta: enlace discreto, sin caja. */
+.chart-card__boton {
+  padding: 0 var(--space-2, 8px);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.chart-card__boton:hover {
+  background: var(--tinte-primary, rgb(29 78 216 / 0.12));
+}

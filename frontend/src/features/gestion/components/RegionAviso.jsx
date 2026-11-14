@@ -1,4 +1,4 @@
-import './RegionAviso.css';
+import Toast from '../../../components/ui/Toast.jsx';
 
 /**
  * Región `aria-live` de avisos de la bandeja ("SOL-… asignada a …"). Se renderiza SIEMPRE (vacía
@@ -8,9 +8,5 @@ import './RegionAviso.css';
  * del mensaje es lo que se lee.
  */
 export default function RegionAviso({ mensaje }) {
-  return (
-    <p role="status" className="region-aviso">
-      {mensaje}
-    </p>
-  );
+  return <Toast mensaje={mensaje} className="region-aviso" />;
 }

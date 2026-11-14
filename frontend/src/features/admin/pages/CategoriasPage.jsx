@@ -1,3 +1,6 @@
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import Toast from '../../../components/ui/Toast.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import { useAreas } from '../../dashboard/hooks/useAreas.js';
 import AccionesFila from '../components/AccionesFila.jsx';
@@ -44,20 +47,18 @@ export default function CategoriasPage() {
 
   return (
     <main className="admin-pagina">
-      <div className="admin-pagina__cabecera">
-        <h1>Administración de categorías</h1>
-        <button
-          type="button"
-          className="admin-boton admin-boton--primario"
-          onClick={() => abrir({ tipo: 'crear' })}
-        >
-          Nueva categoría
-        </button>
-      </div>
+      <PageHeader
+        titulo="Administración de categorías"
+        descripcion="Clasifica las solicitudes por tipo de servicio."
+        icono="tag"
+        acciones={
+          <Button icono="plus" onClick={() => abrir({ tipo: 'crear' })}>
+            Nueva categoría
+          </Button>
+        }
+      />
 
-      <p role="status" className="admin-exito">
-        {aviso}
-      </p>
+      <Toast mensaje={aviso} />
       {!dialogo && general && (
         <p role="alert" className="admin-error">
           {general}

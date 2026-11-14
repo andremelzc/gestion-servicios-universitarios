@@ -1,3 +1,6 @@
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import Toast from '../../../components/ui/Toast.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import AccionesFila from '../components/AccionesFila.jsx';
 import AreaFormModal from '../components/AreaFormModal.jsx';
@@ -40,20 +43,18 @@ export default function AreasPage() {
 
   return (
     <main className="admin-pagina">
-      <div className="admin-pagina__cabecera">
-        <h1>Administración de áreas</h1>
-        <button
-          type="button"
-          className="admin-boton admin-boton--primario"
-          onClick={() => abrir({ tipo: 'crear' })}
-        >
-          Nueva área
-        </button>
-      </div>
+      <PageHeader
+        titulo="Administración de áreas"
+        descripcion="Gestiona las áreas que atienden las solicitudes."
+        icono="building"
+        acciones={
+          <Button icono="plus" onClick={() => abrir({ tipo: 'crear' })}>
+            Nueva área
+          </Button>
+        }
+      />
 
-      <p role="status" className="admin-exito">
-        {aviso}
-      </p>
+      <Toast mensaje={aviso} />
       {!dialogo && general && (
         <p role="alert" className="admin-error">
           {general}

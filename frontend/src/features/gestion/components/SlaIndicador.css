@@ -23,3 +23,7 @@
 .sla-indicador[data-sla='sinSla'] svg {
   color: var(--color-text-muted, #4b5563);
 }
+
+.sla-indicador svg {
+  flex-shrink: 0;
+}

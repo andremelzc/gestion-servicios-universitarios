@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -39,7 +40,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
     renderizarUsuarios();
     await fila('Luis Gómez');
 
-    await userEvent.selectOptions(screen.getByLabelText('Rol'), 'ESTUDIANTE');
+    await seleccionar(userEvent, screen.getByLabelText('Rol'), 'ESTUDIANTE');
 
     await fila('Ana Rojas');
     expect(screen.queryByRole('row', { name: /Luis Gómez/ })).not.toBeInTheDocument();
@@ -49,7 +50,7 @@ describe('UsuariosPage: listado y filtros (US-17, US-34)', () => {
     renderizarUsuarios();
     await fila('Luis Gómez');
 
-    await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
+    await seleccionar(userEvent, await screen.findByLabelText('Área'), 'Infraestructura');
 
     await fila('Marta Díaz');
     expect(screen.queryByRole('row', { name: /Luis Gómez/ })).not.toBeInTheDocument();

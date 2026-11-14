@@ -27,7 +27,7 @@ describe('ConfirmacionSolicitudPage (REG-17 · US-07)', () => {
     const panel = screen.getByRole('status');
     expect(panel).toHaveTextContent('Registrada: SOL-2026-0150');
     expect(panel).toHaveTextContent(
-      'Tu solicitud SOL-2026-0150 fue registrada. Te avisaremos cuando cambie de estado.',
+      'Tu solicitud SOL-2026-0150 fue registrada. Puedes ver su estado en Mis solicitudes.',
     );
   });
 

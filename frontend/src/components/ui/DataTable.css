@@ -73,7 +73,7 @@
 
 .data-table select {
   padding: 0 12px;
-  border: 1px solid var(--dt-border);
+  border: 1px solid var(--color-border-control, #6b7280);
   border-radius: var(--dt-radius);
 }
 
@@ -88,6 +88,9 @@
 
 /* Tabla (≥ 768 px) */
 .data-table__scroll {
+  /* Contenedor de los textos ocultos (`position: absolute`) de la tabla: sin él escapan del scroll y
+     ensanchan la página entera. */
+  position: relative;
   overflow-x: auto;
 }
 
@@ -132,8 +135,9 @@
 
 .data-table__dato {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 12px;
   padding: 4px 0;
 }
 
@@ -143,8 +147,11 @@
 
 .data-table__dato dd {
   margin: 0;
+  max-width: 100%;
   text-align: right;
-  overflow-wrap: anywhere;
+  /* `break-word` (y no `anywhere`) conserva el ancho mínimo de la palabra: un correo largo pasa a su
+     propia línea en vez de partirse a media palabra; solo se corta si ni así cabe. */
+  overflow-wrap: break-word;
 }
 
 .data-table__tarjeta > .data-table__acciones {
@@ -169,17 +176,22 @@
 /* Cargando, vacío y error */
 .data-table__esqueleto {
   display: grid;
-  gap: 12px;
+  gap: 16px;
+  padding: 16px;
+  background: var(--dt-surface);
+  border: 1px solid var(--dt-border);
+  border-radius: var(--dt-radius);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06));
 }
 
 .data-table__esqueleto-fila {
-  height: 44px;
-  border-radius: var(--dt-radius);
+  height: 20px;
+  border-radius: 6px;
   background: linear-gradient(
     90deg,
-    var(--dt-border) 25%,
-    var(--dt-surface) 50%,
-    var(--dt-border) 75%
+    var(--tinte-neutro, rgb(107 114 128 / 0.14)) 25%,
+    rgb(107 114 128 / 0.05) 50%,
+    var(--tinte-neutro, rgb(107 114 128 / 0.14)) 75%
   );
   background-size: 200% 100%;
   animation: data-table-brillo 1.4s ease-in-out infinite;
@@ -198,10 +210,20 @@
 }
 
 .data-table__mensaje {
-  padding: 24px 16px;
-  border: 1px dashed var(--dt-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 16px;
+  background: var(--dt-surface);
+  border: 1px solid var(--dt-border);
   border-radius: var(--dt-radius);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06));
   text-align: center;
+}
+
+.data-table__mensaje p {
+  margin: 0;
 }
 
 .data-table__mensaje p {
@@ -248,7 +270,7 @@
 .data-table__control {
   min-height: 44px;
   padding: 0 12px;
-  border: 1px solid var(--dt-border);
+  border: 1px solid var(--color-border-control, #6b7280);
   border-radius: var(--dt-radius);
 }
 
@@ -293,4 +315,76 @@
   .data-table__paginacion p {
     order: 0;
   }
+}
+
+/* Celdas de tabla (AUD-23 y AUD-25): el código no se parte, el título admite cadenas largas y los
+   iconos no se encogen cuando falta ancho. */
+.data-table__celda--codigo {
+  white-space: nowrap;
+}
+
+.data-table__celda--titulo {
+  min-width: 12rem;
+  overflow-wrap: anywhere;
+}
+
+.data-table__celda--fechaLimiteSla {
+  white-space: nowrap;
+}
+
+.data-table__tabla svg {
+  flex-shrink: 0;
+}
+
+/* Pulido visual (UX): la tabla vive en una tarjeta, con cabecera sutil, filas con hover y
+   enlaces de código sobrios (peso en vez de subrayado permanente). */
+.data-table__scroll {
+  border: 1px solid var(--dt-border);
+  border-radius: var(--dt-radius);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06));
+  background: var(--dt-surface);
+}
+
+.data-table__tabla thead th {
+  background: var(--color-surface-alt, #f9fafb);
+  color: var(--color-text-muted, #4b5563);
+  font-size: var(--font-size-small, 0.875rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.data-table__tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table__tabla tbody tr:hover td {
+  background: var(--color-surface-alt, #f9fafb);
+}
+
+.data-table__tabla td a:not([class]) {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.data-table__tabla td a:not([class]):hover,
+.data-table__tabla td a:not([class]):focus-visible {
+  text-decoration: underline;
+}
+
+/* Barra de búsqueda y filtros: va en una tarjeta para separarla del fondo. */
+.data-table__barra {
+  padding: 16px;
+  background: var(--dt-surface);
+  border: 1px solid var(--dt-border);
+  border-radius: var(--dt-radius);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06));
+}
+
+/* Con tabla (≥ 768 px) las acciones de fila van una junto a otra y no alargan la fila. */
+.data-table__celda--acciones {
+  white-space: nowrap;
+}
+
+.data-table__celda--acciones .data-table__acciones {
+  flex-wrap: nowrap;
 }

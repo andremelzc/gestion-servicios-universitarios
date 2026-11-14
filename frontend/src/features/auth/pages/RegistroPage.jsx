@@ -7,10 +7,15 @@
 //   El microcopy de bienvenida (UX §9) viaja en el state de la navegación para la
 //   pantalla destino, igual que el aviso de sesión expirada de apiClient.
 import { useState } from 'react';
+import Alert from '../../../components/ui/Alert.jsx';
+import Button from '../../../components/ui/Button.jsx';
+import MarcaGisu from '../../../components/layout/MarcaGisu.jsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { interpretarError } from '../../../services/errores.js';
+import { useTituloPagina } from '../../../app/titulos.js';
 import { useAuth } from '../AuthContext.jsx';
 import { REQUISITOS_PASSWORD, RegisterSchema, requisitosPassword } from '../schemas.js';
+import './AuthLayout.css';
 import './RegistroPage.css';
 
 // Campos del contrato (RegistroRequest). El `errores` del backend que traiga claves
@@ -35,6 +40,7 @@ function aErroresPorCampo(errorZod) {
 }
 
 export default function RegistroPage() {
+  useTituloPagina('Crear cuenta');
   const { register } = useAuth();
   const navigate = useNavigate();
   const [valores, setValores] = useState(VALORES_INICIALES);
@@ -86,147 +92,158 @@ export default function RegistroPage() {
   }
 
   return (
-    <main className="registro">
-      <h1 className="registro__titulo">Crear cuenta</h1>
+    <main className="registro auth-pagina">
+      <aside className="auth-marca">
+        <MarcaGisu />
+        <p className="auth-marca__lema">
+          Registra tus solicitudes de servicio y sigue su atención desde un solo lugar.
+        </p>
+      </aside>
+      <div className="auth-tarjeta">
+        <h1 className="registro__titulo">Crear cuenta</h1>
 
-      {errorGeneral && (
-        <div className="registro__alerta" role="alert">
-          {errorGeneral}
-        </div>
-      )}
+        {errorGeneral && (
+          <Alert tipo="error" className="registro__alerta">
+            {errorGeneral}
+          </Alert>
+        )}
 
-      <form className="registro__form" noValidate onSubmit={alEnviar}>
-        <div className="registro__campo">
-          <label htmlFor="codigoInstitucional">Código institucional</label>
-          <input
-            id="codigoInstitucional"
-            name="codigoInstitucional"
-            type="text"
-            autoComplete="off"
-            value={valores.codigoInstitucional}
-            onChange={alCambiarCampo('codigoInstitucional')}
-            aria-invalid={Boolean(errores.codigoInstitucional)}
-            aria-describedby={errores.codigoInstitucional ? 'error-codigoInstitucional' : undefined}
-          />
-          {errores.codigoInstitucional && (
-            <p className="registro__error" id="error-codigoInstitucional" role="alert">
-              {errores.codigoInstitucional}
-            </p>
-          )}
-        </div>
-
-        <div className="registro__fila">
+        <form className="registro__form" noValidate onSubmit={alEnviar}>
           <div className="registro__campo">
-            <label htmlFor="nombre">Nombre</label>
+            <label htmlFor="codigoInstitucional">Código institucional</label>
             <input
-              id="nombre"
-              name="nombre"
+              id="codigoInstitucional"
+              name="codigoInstitucional"
               type="text"
-              autoComplete="given-name"
-              value={valores.nombre}
-              onChange={alCambiarCampo('nombre')}
-              aria-invalid={Boolean(errores.nombre)}
-              aria-describedby={errores.nombre ? 'error-nombre' : undefined}
+              autoComplete="off"
+              value={valores.codigoInstitucional}
+              onChange={alCambiarCampo('codigoInstitucional')}
+              aria-invalid={Boolean(errores.codigoInstitucional)}
+              aria-describedby={
+                errores.codigoInstitucional ? 'error-codigoInstitucional' : undefined
+              }
             />
-            {errores.nombre && (
-              <p className="registro__error" id="error-nombre" role="alert">
-                {errores.nombre}
+            {errores.codigoInstitucional && (
+              <p className="registro__error" id="error-codigoInstitucional" role="alert">
+                {errores.codigoInstitucional}
+              </p>
+            )}
+          </div>
+
+          <div className="registro__fila">
+            <div className="registro__campo">
+              <label htmlFor="nombre">Nombre</label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                autoComplete="given-name"
+                value={valores.nombre}
+                onChange={alCambiarCampo('nombre')}
+                aria-invalid={Boolean(errores.nombre)}
+                aria-describedby={errores.nombre ? 'error-nombre' : undefined}
+              />
+              {errores.nombre && (
+                <p className="registro__error" id="error-nombre" role="alert">
+                  {errores.nombre}
+                </p>
+              )}
+            </div>
+
+            <div className="registro__campo">
+              <label htmlFor="apellido">Apellido</label>
+              <input
+                id="apellido"
+                name="apellido"
+                type="text"
+                autoComplete="family-name"
+                value={valores.apellido}
+                onChange={alCambiarCampo('apellido')}
+                aria-invalid={Boolean(errores.apellido)}
+                aria-describedby={errores.apellido ? 'error-apellido' : undefined}
+              />
+              {errores.apellido && (
+                <p className="registro__error" id="error-apellido" role="alert">
+                  {errores.apellido}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="registro__campo">
+            <label htmlFor="correo">Correo institucional</label>
+            <input
+              id="correo"
+              name="correo"
+              type="email"
+              autoComplete="email"
+              value={valores.correo}
+              onChange={alCambiarCampo('correo')}
+              aria-invalid={Boolean(errores.correo)}
+              aria-describedby={errores.correo ? 'error-correo' : undefined}
+            />
+            {errores.correo && (
+              <p className="registro__error" id="error-correo" role="alert">
+                {errores.correo}
               </p>
             )}
           </div>
 
           <div className="registro__campo">
-            <label htmlFor="apellido">Apellido</label>
+            <label htmlFor="password">Contraseña</label>
             <input
-              id="apellido"
-              name="apellido"
-              type="text"
-              autoComplete="family-name"
-              value={valores.apellido}
-              onChange={alCambiarCampo('apellido')}
-              aria-invalid={Boolean(errores.apellido)}
-              aria-describedby={errores.apellido ? 'error-apellido' : undefined}
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              value={valores.password}
+              onChange={alCambiarCampo('password')}
+              aria-invalid={Boolean(errores.password)}
+              aria-describedby={
+                errores.password ? 'requisitos-password error-password' : 'requisitos-password'
+              }
             />
-            {errores.apellido && (
-              <p className="registro__error" id="error-apellido" role="alert">
-                {errores.apellido}
+            {errores.password && (
+              <p className="registro__error" id="error-password" role="alert">
+                {errores.password}
               </p>
             )}
+            <ul
+              className="registro__checklist"
+              data-vacia={valores.password === ''}
+              id="requisitos-password"
+              aria-label="Requisitos de la contraseña"
+              aria-live="polite"
+            >
+              {REQUISITOS_PASSWORD.map(({ id, etiqueta }) => {
+                const cumple = requisitos[id];
+                return (
+                  <li key={id} data-cumple={cumple}>
+                    <span aria-hidden="true" className="registro__checklist-icono">
+                      {cumple ? '✔' : '✖'}
+                    </span>
+                    <span>{etiqueta}</span>
+                    <span className="sr-only">{cumple ? ' (cumplido)' : ' (pendiente)'}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </div>
 
-        <div className="registro__campo">
-          <label htmlFor="correo">Correo institucional</label>
-          <input
-            id="correo"
-            name="correo"
-            type="email"
-            autoComplete="email"
-            value={valores.correo}
-            onChange={alCambiarCampo('correo')}
-            aria-invalid={Boolean(errores.correo)}
-            aria-describedby={errores.correo ? 'error-correo' : undefined}
-          />
-          {errores.correo && (
-            <p className="registro__error" id="error-correo" role="alert">
-              {errores.correo}
-            </p>
-          )}
-        </div>
-
-        <div className="registro__campo">
-          <label htmlFor="password">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={valores.password}
-            onChange={alCambiarCampo('password')}
-            aria-invalid={Boolean(errores.password)}
-            aria-describedby={
-              errores.password ? 'requisitos-password error-password' : 'requisitos-password'
-            }
-          />
-          {errores.password && (
-            <p className="registro__error" id="error-password" role="alert">
-              {errores.password}
-            </p>
-          )}
-          <ul
-            className="registro__checklist"
-            id="requisitos-password"
-            aria-label="Requisitos de la contraseña"
-            aria-live="polite"
+          <Button
+            type="submit"
+            cargando={enviando}
+            disabled={!puedeEnviar}
+            className="registro__enviar"
           >
-            {REQUISITOS_PASSWORD.map(({ id, etiqueta }) => {
-              const cumple = requisitos[id];
-              return (
-                <li key={id} data-cumple={cumple}>
-                  <span aria-hidden="true" className="registro__checklist-icono">
-                    {cumple ? '✔' : '✖'}
-                  </span>
-                  <span>{etiqueta}</span>
-                  <span className="sr-only">{cumple ? ' (cumplido)' : ' (pendiente)'}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+            {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
+          </Button>
+        </form>
 
-        <button
-          type="submit"
-          className="registro__enviar"
-          disabled={!puedeEnviar}
-          aria-busy={enviando}
-        >
-          {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
-        </button>
-      </form>
-
-      <p className="registro__pie">
-        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
-      </p>
+        <p className="registro__pie">
+          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+        </p>
+      </div>
     </main>
   );
 }

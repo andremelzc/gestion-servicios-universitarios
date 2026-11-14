@@ -11,7 +11,19 @@
   --color-text-muted: #4b5563;
   --color-surface: #ffffff;
   --color-bg: #f3f4f6;
+  --color-surface-alt: #f9fafb;
+
+  /* Tintes al 12 % de los colores de la paleta (mismo criterio que la insignia de estado, §2.1):
+     fondo suave para fichas de icono y avisos; el texto sigue en --color-text. */
+  --tinte-primary: rgb(29 78 216 / 0.12);
+  --tinte-success: rgb(4 120 87 / 0.12);
+  --tinte-warning: rgb(180 83 9 / 0.12);
+  --tinte-danger: rgb(185 28 28 / 0.1);
+  --tinte-violeta: rgb(124 58 237 / 0.12);
+  --tinte-neutro: rgb(107 114 128 / 0.14);
   --color-border: #d1d5db;
+  /* Borde de controles de formulario: 4,8:1 sobre blanco (WCAG 1.4.11 exige 3:1). */
+  --color-border-control: #6b7280;
   --color-success: #047857;
   --color-warning: #b45309;
   --color-danger: #b91c1c;
@@ -34,7 +46,8 @@
 
   /* Tipografía (§2.2). La familia Inter se usa cuando está disponible; el respaldo del
      sistema cubre el resto (cargar la webfont queda como decisión aparte). */
-  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family:
+    'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-size-small: 0.875rem;
   --font-size-body: 1rem;
   --font-size-h3: 1.25rem;

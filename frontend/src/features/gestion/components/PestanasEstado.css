@@ -1,5 +1,6 @@
 .pestanas-estado {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4, 16px);
 }
 
@@ -37,5 +38,45 @@
 @media (min-width: 768px) {
   .pestanas-estado__lista button {
     flex: 0 0 auto;
+  }
+}
+
+/* Pestañas como control segmentado: una pastilla tintada con la pestaña activa elevada en blanco.
+   La activa sigue distinguiéndose por relleno, peso y `aria-selected`, no solo por color. */
+.pestanas-estado__lista {
+  gap: var(--space-1, 4px);
+  width: fit-content;
+  max-width: 100%;
+  padding: var(--space-1, 4px);
+  overflow-x: auto;
+  background: var(--tinte-neutro, rgb(107 114 128 / 0.14));
+  border-radius: calc(var(--radius, 8px) + 4px);
+}
+
+.pestanas-estado__lista button {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted, #4b5563);
+  font: inherit;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.pestanas-estado__lista button:hover:not([aria-selected='true']) {
+  background: rgb(255 255 255 / 0.6);
+  color: var(--color-text, #111827);
+}
+
+.pestanas-estado__lista button[aria-selected='true'] {
+  background: var(--color-surface, #ffffff);
+  box-shadow: var(--shadow-card);
+  color: var(--color-primary, #1d4ed8);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pestanas-estado__lista button {
+    transition: none;
   }
 }

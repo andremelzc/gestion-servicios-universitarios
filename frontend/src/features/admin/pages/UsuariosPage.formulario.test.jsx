@@ -6,6 +6,7 @@ import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 // Valor de prueba derivado para no dejar la contraseña literal en el código.
 const VALOR_PRUEBA = 'Segura'.concat('123');
@@ -33,7 +34,7 @@ async function completarAlta(
   await userEvent.type(dialogo.getByLabelText('Apellido'), 'Pérez');
   await userEvent.type(dialogo.getByLabelText('Correo'), correo);
   await userEvent.type(dialogo.getByLabelText('Contraseña inicial'), VALOR_PRUEBA);
-  await userEvent.selectOptions(dialogo.getByLabelText('Rol'), rol);
+  await seleccionar(userEvent, dialogo.getByLabelText('Rol'), rol);
 }
 
 describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
@@ -50,7 +51,8 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     const dialogo = await abrirAlta();
 
     await completarAlta(dialogo, { rol: 'SUPERVISOR' });
-    await userEvent.selectOptions(
+    await seleccionar(
+      userEvent,
       await dialogo.findByLabelText('Área'),
       'Tecnología de la Información',
     );
@@ -68,9 +70,9 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     const dialogo = await abrirAlta();
 
     expect(dialogo.queryByLabelText('Área')).not.toBeInTheDocument();
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'TECNICO');
     expect(await dialogo.findByLabelText('Área')).toBeVisible();
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'ADMIN');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'ADMIN');
     expect(dialogo.queryByLabelText('Área')).not.toBeInTheDocument();
   });
 
@@ -84,7 +86,7 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     renderizarUsuarios();
     const dialogo = await abrirEdicion('Ana Rojas');
 
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'TECNICO');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
     const area = await dialogo.findByLabelText('Área');
@@ -98,8 +100,8 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
     renderizarUsuarios();
     const dialogo = await abrirEdicion('Ana Rojas');
 
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
-    await userEvent.selectOptions(await dialogo.findByLabelText('Área'), 'Infraestructura');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'TECNICO');
+    await seleccionar(userEvent, await dialogo.findByLabelText('Área'), 'Infraestructura');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
     expect(await screen.findByRole('status')).toHaveTextContent('Usuario «Ana Rojas» actualizado.');
@@ -201,13 +203,15 @@ describe('UsuariosPage: alta y edición (US-17, US-34)', () => {
       renderizarUsuarios();
       const dialogo = await abrirEdicion('Luis Gómez');
 
-      await userEvent.selectOptions(dialogo.getByLabelText('Rol'), rol);
+      await seleccionar(userEvent, dialogo.getByLabelText('Rol'), rol);
       expect(dialogo.queryByLabelText('Área')).not.toBeInTheDocument();
       await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
       await screen.findByRole('status');
       expect(cuerpo).toMatchObject({ rol, idArea: null });
-      expect(await (await fila('Luis Gómez')).findByRole('cell', { name: '—' })).toBeVisible();
+      expect(
+        await (await fila('Luis Gómez')).findByRole('cell', { name: 'Sin área' }),
+      ).toBeVisible();
     },
   );
 });

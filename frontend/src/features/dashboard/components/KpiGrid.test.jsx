@@ -34,7 +34,7 @@ describe('KpiGrid', () => {
     expect(screen.getByRole('region', { name: 'Resumen del área' })).toBeInTheDocument();
   });
 
-  it('[US-12 CA-13] la rejilla es mobile-first: 1 columna base, 2 en md (768px) y 5 en lg (1024px)', () => {
+  it('[US-12 CA-13] la rejilla es mobile-first: 1 columna base, 2 en md (768px) y 3 en lg (1024px)', () => {
     const base = css.split('@media')[0];
     expect(base).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)/);
 
@@ -42,7 +42,7 @@ describe('KpiGrid', () => {
       /@media \(min-width:\s*768px\)\s*{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/,
     );
     expect(css).toMatch(
-      /@media \(min-width:\s*1024px\)\s*{[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/,
+      /@media \(min-width:\s*1024px\)\s*{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/,
     );
   });
 

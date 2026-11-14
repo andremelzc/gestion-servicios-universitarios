@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
 import { interpretarError } from '../../../services/errores.js';
@@ -109,7 +111,11 @@ export default function BandejaTecnicoPage() {
   }
 
   const columnas = [
-    { key: 'codigo', header: 'Código' },
+    {
+      key: 'codigo',
+      header: 'Código',
+      render: (s) => <Link to={`/solicitudes/${s.id}`}>{s.codigo}</Link>,
+    },
     { key: 'titulo', header: 'Título' },
     {
       key: 'prioridadNivel',
@@ -134,12 +140,15 @@ export default function BandejaTecnicoPage() {
   return (
     // AppShell no aporta `<main>`: cada página declara su landmark principal.
     <main className="bandeja-tecnico" aria-labelledby="bandeja-tecnico-titulo">
-      <h1 id="bandeja-tecnico-titulo" ref={tituloRef} tabIndex={-1}>
-        Mis asignadas
-      </h1>
+      <PageHeader
+        titulo="Mis asignadas"
+        descripcion="Solicitudes asignadas a ti, por iniciar y en curso."
+        icono="inbox"
+        tituloProps={{ id: 'bandeja-tecnico-titulo', ref: tituloRef, tabIndex: -1 }}
+      />
       <RegionAviso mensaje={aviso.mensaje} />
       {alerta && (
-        <p role="alert" className="bandeja-tecnico__alerta">
+        <p role="alert" className="bandeja-tecnico__alerta aviso-error">
           {alerta}
         </p>
       )}

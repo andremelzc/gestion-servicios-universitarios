@@ -1,0 +1,9 @@
+.comentarios-form {
+  display: grid;
+  gap: var(--space-3, 12px);
+  max-width: 40rem;
+}
+
+.comentarios-form .admin-boton {
+  justify-self: start;
+}
