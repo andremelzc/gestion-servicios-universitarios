@@ -1,0 +1,2376 @@
+openapi: 3.1.0
+info:
+  title: API de Gestión de Servicios Universitarios
+  description: API REST para la gestión integral de servicios universitarios. Para
+    probar operaciones protegidas, ingrese el JWT en Authorize.
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Solicitudes
+  description: Endpoints para registro, ciclo de vida, transiciones y consulta de
+    solicitudes
+- name: Catálogos
+  description: Endpoints de consulta para catálogos maestros y activos
+- name: Autenticación
+  description: Endpoints para inicio de sesión, registro y gestión de credenciales
+- name: Dashboard
+  description: Indicadores operativos según el alcance del usuario autenticado
+- name: Usuarios
+  description: Endpoints de consulta de personal técnico y usuarios
+- name: Catálogos
+  description: Administración de catálogos
+paths:
+  /api/v1/solicitudes/{id}/resolver:
+    put:
+      tags:
+      - Solicitudes
+      summary: Resolver solicitud
+      description: Transiciona de EN_ATENCION a RESUELTA requiriendo informe técnico
+        explicativo (mínimo 20 caracteres) y entre 1 y 3 archivos de evidencia.
+      operationId: resolver
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                datos:
+                  $ref: '#/components/schemas/SolicitudResolverRequest'
+                archivos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+              - datos
+      responses:
+        '200':
+          description: Solicitud resuelta con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Informe menor a 20 caracteres o cantidad de evidencias no permitida
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '403':
+          description: Solo el técnico asignado o un administrador pueden resolver
+            la solicitud
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '409':
+          description: La solicitud no se encuentra en estado EN_ATENCION
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '413':
+          description: Un archivo adjunto excede los 5 MB
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '415':
+          description: Formato de archivo no permitido
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/iniciar-atencion:
+    put:
+      tags:
+      - Solicitudes
+      summary: Iniciar atención operativa
+      description: Transiciona la solicitud de ASIGNADA a EN_ATENCION y registra la
+        fecha de inicio de intervención técnica.
+      operationId: iniciarAtencion
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      responses:
+        '200':
+          description: Atención iniciada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '403':
+          description: Solo el técnico asignado o un administrador pueden iniciar
+            atención
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '409':
+          description: La solicitud no se encuentra en estado ASIGNADA
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/evaluar:
+    put:
+      tags:
+      - Solicitudes
+      summary: Evaluar solicitud
+      description: Permite al supervisor del área o administrador evaluar una solicitud
+        en estado REGISTRADA, pasando a EN_EVALUACION con ajuste opcional de prioridad
+        y recálculo de SLA.
+      operationId: evaluar
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudEvaluarRequest'
+      responses:
+        '200':
+          description: Solicitud evaluada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Parámetros inválidos (ej. prioridad no válida o nota con HTML)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado o credenciales inválidas
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '403':
+          description: No autorizado (no pertenece al área de la solicitud ni es admin)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '409':
+          description: Transición inválida (la solicitud no está en estado REGISTRADA)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/cerrar:
+    put:
+      tags:
+      - Solicitudes
+      summary: Cerrar solicitud
+      description: Cierra formalmente una solicitud en estado RESUELTA pasando a CERRADA
+        y registrando la fecha de cierre. Puede ser ejecutado por el usuario solicitante,
+        el supervisor del área o el administrador.
+      operationId: cerrar
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudCerrarRequest'
+      responses:
+        '200':
+          description: Solicitud cerrada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Nota de cierre inválida o con HTML
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado o credenciales inválidas
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '403':
+          description: No autorizado (no es el solicitante, supervisor del área ni
+            admin)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '409':
+          description: Transición inválida (la solicitud no se encuentra en estado
+            RESUELTA)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/asignar:
+    put:
+      tags:
+      - Solicitudes
+      summary: Asignar o reasignar técnico
+      description: Asigna o reasigna un técnico del área responsable a la solicitud,
+        transicionando a ASIGNADA y registrando la nota en el historial.
+      operationId: asignar
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudAsignarRequest'
+        required: true
+      responses:
+        '200':
+          description: Técnico asignado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Técnico inactivo o perteneciente a otra área
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '403':
+          description: No autorizado (no es supervisor del área ni admin)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud o técnico no encontrado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '409':
+          description: Estado actual no permite asignación
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/prioridades/{id}:
+    put:
+      tags:
+      - Catálogos
+      summary: Actualizar prioridad
+      operationId: actualizarPrioridad
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrioridadRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PrioridadResponse'
+    delete:
+      tags:
+      - Catálogos
+      summary: Desactivar prioridad
+      operationId: desactivarPrioridad
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+  /api/v1/prioridades/{id}/reactivar:
+    put:
+      tags:
+      - Catálogos
+      summary: Reactivar prioridad
+      operationId: reactivarPrioridad
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PrioridadResponse'
+  /api/v1/estados/{codigo}:
+    put:
+      tags:
+      - Catálogos
+      summary: Actualizar presentación de estado
+      operationId: actualizarEstado
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstadoRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EstadoResponse'
+  /api/v1/categorias/{id}:
+    get:
+      tags:
+      - Catálogos
+      summary: Consultar categoría
+      operationId: categoria
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: incluirInactivos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+    put:
+      tags:
+      - Catálogos
+      summary: Actualizar categoría
+      operationId: actualizarCategoria
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+    delete:
+      tags:
+      - Catálogos
+      summary: Desactivar categoría
+      operationId: desactivarCategoria
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+  /api/v1/categorias/{id}/reactivar:
+    put:
+      tags:
+      - Catálogos
+      summary: Reactivar categoría
+      operationId: reactivarCategoria
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+  /api/v1/auth/cambiar-password:
+    put:
+      tags:
+      - Autenticación
+      summary: Cambiar contraseña
+      description: Permite al usuario autenticado actualizar su contraseña actual
+        por una nueva que cumpla las políticas de seguridad.
+      operationId: cambiarPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarPasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: Contraseña cambiada exitosamente
+        '400':
+          description: La contraseña actual es incorrecta o la nueva contraseña no
+            cumple los requisitos
+        '401':
+          description: No autenticado o token vencido
+      security:
+      - bearerAuth: []
+  /api/v1/areas/{id}:
+    get:
+      tags:
+      - Catálogos
+      summary: Consultar área
+      operationId: area
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: incluirInactivos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AreaResponse'
+    put:
+      tags:
+      - Catálogos
+      summary: Actualizar área
+      operationId: actualizarArea
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AreaRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AreaResponse'
+    delete:
+      tags:
+      - Catálogos
+      summary: Desactivar área
+      operationId: desactivarArea
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+  /api/v1/areas/{id}/reactivar:
+    put:
+      tags:
+      - Catálogos
+      summary: Reactivar área
+      operationId: reactivarArea
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AreaResponse'
+  /api/v1/admin/usuarios/{id}:
+    get:
+      tags:
+      - admin-usuarios-controller
+      operationId: obtener
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminResponse'
+    put:
+      tags:
+      - admin-usuarios-controller
+      operationId: actualizar
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioActualizarRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminResponse'
+    delete:
+      tags:
+      - admin-usuarios-controller
+      operationId: desactivar
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '204':
+          description: No Content
+  /api/v1/admin/usuarios/{id}/reactivar:
+    put:
+      tags:
+      - admin-usuarios-controller
+      operationId: reactivar
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminResponse'
+  /api/v1/solicitudes:
+    get:
+      tags:
+      - Solicitudes
+      summary: Listar bandeja operativa de solicitudes
+      description: Consulta la bandeja general con filtros por estado, prioridad,
+        categoría, técnico, rango de fechas y vencimiento SLA. El alcance se restringe
+        automáticamente según el rol del usuario.
+      operationId: listarBandeja
+      parameters:
+      - name: estado
+        in: query
+        description: Lista de códigos de estado a filtrar
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: idPrioridad
+        in: query
+        description: ID de prioridad
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: idCategoria
+        in: query
+        description: ID de categoría
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: idTecnico
+        in: query
+        description: ID de técnico asignado
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: q
+        in: query
+        description: Texto a buscar en código o título
+        required: false
+        schema:
+          type: string
+      - name: desde
+        in: query
+        description: Fecha inicial de registro (ISO DATE_TIME)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: hasta
+        in: query
+        description: Fecha final de registro (ISO DATE_TIME)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: vencidas
+        in: query
+        description: Filtrar únicamente solicitudes con SLA vencido
+        required: false
+        schema:
+          type: boolean
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Página de solicitudes en bandeja operativa
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+        '400':
+          description: Parámetros de filtrado o paginación inválidos
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+        '403':
+          description: Acceso denegado (estudiantes no tienen acceso a la bandeja
+            operativa)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Solicitudes
+      summary: Registrar solicitud
+      description: Registra una nueva solicitud de servicio institucional adjuntando
+        opcionalmente entre 0 y 3 archivos de evidencia (JPG, PNG o PDF de hasta 5
+        MB).
+      operationId: crear
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                solicitud:
+                  $ref: '#/components/schemas/SolicitudCrearRequest'
+                archivos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+              - solicitud
+      responses:
+        '201':
+          description: Solicitud creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudCreadaResponse'
+        '400':
+          description: Datos de solicitud inválidos o categoría/prioridad inexistente
+            o inactiva
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudCreadaResponse'
+        '401':
+          description: No autenticado o token vencido
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudCreadaResponse'
+        '413':
+          description: El tamaño de un archivo adjunto excede los 5 MB
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudCreadaResponse'
+        '415':
+          description: Tipo de archivo no permitido (solo JPG, PNG y PDF)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudCreadaResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/comentarios:
+    get:
+      tags:
+      - comentario-controller
+      operationId: listar
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComentarioResponse'
+    post:
+      tags:
+      - comentario-controller
+      operationId: crear_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComentarioCrearRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ComentarioResponse'
+  /api/v1/prioridades:
+    get:
+      tags:
+      - Catálogos
+      summary: Listar prioridades activas
+      description: Retorna el catálogo de prioridades activas ordenadas por ponderador
+        ascendente con su tiempo máximo SLA.
+      operationId: listarPrioridades
+      parameters:
+      - name: incluirInactivos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Listado de prioridades obtenido exitosamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrioridadResponse'
+    post:
+      tags:
+      - Catálogos
+      summary: Crear prioridad
+      operationId: crearPrioridad
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrioridadRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PrioridadResponse'
+  /api/v1/categorias:
+    get:
+      tags:
+      - Catálogos
+      summary: Listar categorías activas
+      description: Retorna el listado de categorías activas para el registro de solicitudes,
+        con filtro opcional por área.
+      operationId: listarCategorias
+      parameters:
+      - name: idArea
+        in: query
+        description: ID del área para filtrar categorías
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: incluirInactivos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Listado de categorías obtenido exitosamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoriaResponse'
+    post:
+      tags:
+      - Catálogos
+      summary: Crear categoría
+      operationId: crearCategoria
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+  /api/v1/auth/restablecer-password:
+    post:
+      tags:
+      - Autenticación
+      operationId: restablecerPassword
+      responses:
+        '200':
+          description: OK
+  /api/v1/auth/registro:
+    post:
+      tags:
+      - Autenticación
+      summary: Registro público de estudiante
+      description: Permite registrar un nuevo estudiante en el sistema con asignación
+        forzada de ROLE_ESTUDIANTE y login automático.
+      operationId: registro
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+        required: true
+      responses:
+        '201':
+          description: Usuario registrado exitosamente con auto-login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Datos de registro inválidos o campo no permitido
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: El correo o código institucional ya está registrado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /api/v1/auth/recuperar-password:
+    post:
+      tags:
+      - Autenticación
+      operationId: recuperarPassword
+      responses:
+        '200':
+          description: OK
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Autenticación
+      summary: Iniciar sesión
+      description: Autentica al usuario con correo y contraseña, retornando token
+        JWT y perfil básico.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Credenciales con formato incorrecto
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Correo o contraseña incorrectos
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /api/v1/areas:
+    get:
+      tags:
+      - Catálogos
+      summary: Listar áreas
+      operationId: areas
+      parameters:
+      - name: incluirInactivos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AreaResponse'
+    post:
+      tags:
+      - Catálogos
+      summary: Crear área
+      operationId: crearArea
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AreaRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AreaResponse'
+  /api/v1/admin/usuarios:
+    get:
+      tags:
+      - admin-usuarios-controller
+      operationId: listar_1
+      parameters:
+      - name: rol
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: activo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaginaUsuarioAdminResponse'
+    post:
+      tags:
+      - admin-usuarios-controller
+      operationId: crear_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioCrearRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UsuarioAdminResponse'
+  /api/v1/usuarios/tecnicos:
+    get:
+      tags:
+      - Usuarios
+      summary: Listar técnicos operativos
+      description: Consulta la lista de técnicos activos con su carga de trabajo actual
+        (solicitudes pendientes asignadas). Para supervisores, restringe automáticamente
+        al área del supervisor.
+      operationId: listarTecnicos
+      parameters:
+      - name: idArea
+        in: query
+        description: ID del área (opcional para ADMIN)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Listado de técnicos obtenido con éxito
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TecnicoResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TecnicoResponse'
+        '403':
+          description: No autorizado (solo supervisores y administradores)
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TecnicoResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}:
+    get:
+      tags:
+      - Solicitudes
+      summary: Obtener detalle de solicitud
+      description: Consulta la información detallada de una solicitud, sus evidencias
+        adjuntas y las acciones permitidas según el alcance del usuario.
+      operationId: obtenerDetalle
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      responses:
+        '200':
+          description: Detalle de la solicitud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance del usuario
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/historial:
+    get:
+      tags:
+      - Solicitudes
+      summary: Obtener historial de solicitud
+      description: Retorna la bitácora inmutable de cambios de estado y notas de auditoría
+        de la solicitud.
+      operationId: obtenerHistorial
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      responses:
+        '200':
+          description: Lista ordenada cronológicamente de transiciones
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistorialItemResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistorialItemResponse'
+        '404':
+          description: Solicitud no encontrada o fuera del alcance del usuario
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistorialItemResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/{id}/evidencias/{idEvidencia}:
+    get:
+      tags:
+      - Solicitudes
+      summary: Descargar archivo de evidencia
+      description: Descarga el archivo binario de una evidencia adjunta tras validar
+        que la solicitud pertenece al alcance del usuario autenticado.
+      operationId: descargarEvidencia
+      parameters:
+      - name: id
+        in: path
+        description: ID único de la solicitud
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 150
+      - name: idEvidencia
+        in: path
+        description: ID de la evidencia adjunta
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1
+      responses:
+        '200':
+          description: Contenido binario del archivo
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: byte
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: byte
+        '404':
+          description: Evidencia o solicitud no encontrada / fuera de alcance
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: byte
+      security:
+      - bearerAuth: []
+  /api/v1/solicitudes/mis-solicitudes:
+    get:
+      tags:
+      - Solicitudes
+      summary: Listar mis solicitudes
+      description: Retorna el listado paginado de solicitudes registradas por el usuario
+        solicitante autenticado con filtros opcionales por estado y búsqueda textual.
+      operationId: misSolicitudes
+      parameters:
+      - name: estado
+        in: query
+        description: 'Código de estado opcional (ej: REGISTRADA, CERRADA)'
+        required: false
+        schema:
+          type: string
+      - name: q
+        in: query
+        description: Texto a buscar en código, título o descripción
+        required: false
+        schema:
+          type: string
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Página de solicitudes del usuario
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+        '400':
+          description: Parámetros de paginación u ordenamiento inválidos
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+        '401':
+          description: No autenticado
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/roles:
+    get:
+      tags:
+      - rol-controller
+      operationId: listar_2
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolResponse'
+  /api/v1/estados:
+    get:
+      tags:
+      - Catálogos
+      summary: Listar estados
+      operationId: estados
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EstadoResponse'
+  /api/v1/dashboard/vencidas:
+    get:
+      tags:
+      - Dashboard
+      summary: Listar solicitudes con SLA vencido por mayor retraso
+      operationId: vencidas
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
+      security:
+      - bearerAuth: []
+  /api/v1/dashboard/por-responsable:
+    get:
+      tags:
+      - Dashboard
+      summary: Distribución de solicitudes por técnico asignado
+      operationId: porResponsable
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SerieItem'
+      security:
+      - bearerAuth: []
+  /api/v1/dashboard/por-prioridad:
+    get:
+      tags:
+      - Dashboard
+      summary: Distribución de solicitudes por prioridad, incluyendo prioridades sin
+        solicitudes
+      operationId: porPrioridad
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SerieItem'
+      security:
+      - bearerAuth: []
+  /api/v1/dashboard/por-estado:
+    get:
+      tags:
+      - Dashboard
+      summary: Distribución de solicitudes por estado y color
+      operationId: porEstado
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SerieEstadoItem'
+      security:
+      - bearerAuth: []
+  /api/v1/dashboard/por-categoria:
+    get:
+      tags:
+      - Dashboard
+      summary: Distribución de solicitudes por categoría
+      operationId: porCategoria
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SerieItem'
+      security:
+      - bearerAuth: []
+  /api/v1/dashboard/kpis:
+    get:
+      tags:
+      - Dashboard
+      summary: Obtener indicadores de solicitudes y tiempo promedio de atención
+      operationId: kpis
+      parameters:
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: idArea
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/KpisResponse'
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    SolicitudResolverRequest:
+      type: object
+      properties:
+        informe:
+          type: string
+          maxLength: 2000
+          minLength: 20
+      required:
+      - informe
+    EvidenciaItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        tipo:
+          type: string
+        nombre:
+          type: string
+        mimeType:
+          type: string
+        tamanoBytes:
+          type: integer
+          format: int64
+    SolicitudDetalleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        codigo:
+          type: string
+        titulo:
+          type: string
+        descripcion:
+          type: string
+        ubicacionCampus:
+          type: string
+        ubicacionAmbiente:
+          type: string
+        categoriaId:
+          type: integer
+          format: int32
+        categoriaNombre:
+          type: string
+        areaId:
+          type: integer
+          format: int32
+        areaNombre:
+          type: string
+        prioridadId:
+          type: integer
+          format: int32
+        prioridadNivel:
+          type: string
+        estadoCodigo:
+          type: string
+        estadoNombre:
+          type: string
+        estadoColorHex:
+          type: string
+        solicitanteId:
+          type: integer
+          format: int64
+        solicitanteNombreCompleto:
+          type: string
+        tecnicoId:
+          type: integer
+          format: int64
+        tecnicoNombreCompleto:
+          type: string
+        informeResolucion:
+          type: string
+        fechaRegistro:
+          type: string
+          format: date-time
+        fechaLimiteSla:
+          type: string
+          format: date-time
+        fechaAsignacion:
+          type: string
+          format: date-time
+        fechaInicioAtencion:
+          type: string
+          format: date-time
+        fechaResolucion:
+          type: string
+          format: date-time
+        fechaCierre:
+          type: string
+          format: date-time
+        evidencias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenciaItemResponse'
+        accionesPermitidas:
+          type: array
+          items:
+            type: string
+    SolicitudEvaluarRequest:
+      type: object
+      description: Datos para la evaluación de una solicitud (GES-11 / US-23 / CA-6)
+      properties:
+        idPrioridad:
+          type: integer
+          format: int32
+          description: Identificador de la nueva prioridad asignada (opcional)
+          example: 3
+          exclusiveMinimum: 0
+        nota:
+          type: string
+          description: Nota u observación de pertinencia técnica (opcional)
+          example: Prioridad ajustada debido al impacto en horario lectivo
+          maxLength: 255
+          minLength: 0
+    SolicitudCerrarRequest:
+      type: object
+      description: Datos para el cierre formal de una solicitud (GES-13 / US-25 /
+        CA-14)
+      properties:
+        nota:
+          type: string
+          description: Nota u observación de cierre y conformidad (opcional)
+          example: Conforme con la solución brindada.
+          maxLength: 255
+          minLength: 0
+    SolicitudAsignarRequest:
+      type: object
+      properties:
+        idTecnico:
+          type: integer
+          format: int64
+        nota:
+          type: string
+          maxLength: 255
+          minLength: 0
+      required:
+      - idTecnico
+    PrioridadRequest:
+      type: object
+      properties:
+        nivel:
+          type: string
+        ponderador:
+          type: integer
+          format: int32
+        slaMaxHoras:
+          type: integer
+          format: int32
+    PrioridadResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nivel:
+          type: string
+        ponderador:
+          type: integer
+          format: int32
+        slaMaxHoras:
+          type: integer
+          format: int32
+        activo:
+          type: boolean
+    EstadoRequest:
+      type: object
+      properties:
+        nombreVisible:
+          type: string
+        descripcion:
+          type: string
+        colorHex:
+          type: string
+    EstadoResponse:
+      type: object
+      properties:
+        codigo:
+          type: string
+        nombreVisible:
+          type: string
+        descripcion:
+          type: string
+        colorHex:
+          type: string
+        orden:
+          type: string
+          format: byte
+        esFinal:
+          type: boolean
+    CategoriaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+        tiempoSlaHoras:
+          type: integer
+          format: int32
+    CategoriaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+        area:
+          type: string
+        tiempoSlaHoras:
+          type: integer
+          format: int32
+        activo:
+          type: boolean
+    CambiarPasswordRequest:
+      type: object
+      properties:
+        passwordActual:
+          type: string
+          minLength: 1
+        nuevaPassword:
+          type: string
+          minLength: 1
+      required:
+      - nuevaPassword
+      - passwordActual
+    AreaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        correoContacto:
+          type: string
+    AreaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nombre:
+          type: string
+        correoContacto:
+          type: string
+        activo:
+          type: boolean
+    UsuarioActualizarRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          maxLength: 50
+          minLength: 2
+        apellido:
+          type: string
+          maxLength: 50
+          minLength: 2
+        telefono:
+          type: string
+          maxLength: 20
+          minLength: 0
+        rol:
+          type: string
+          minLength: 1
+          pattern: ESTUDIANTE|TECNICO|SUPERVISOR|ADMIN
+        idArea:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+      required:
+      - apellido
+      - nombre
+      - rol
+    UsuarioAdminResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        codigoInstitucional:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        correo:
+          type: string
+        telefono:
+          type: string
+        rol:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+        activo:
+          type: boolean
+    SolicitudCrearRequest:
+      type: object
+      properties:
+        titulo:
+          type: string
+          maxLength: 150
+          minLength: 5
+        descripcion:
+          type: string
+          maxLength: 2000
+          minLength: 10
+        ubicacionCampus:
+          type: string
+          maxLength: 100
+          minLength: 0
+        ubicacionAmbiente:
+          type: string
+          maxLength: 100
+          minLength: 0
+        idCategoria:
+          type: integer
+          format: int32
+        idPrioridad:
+          type: integer
+          format: int32
+      required:
+      - descripcion
+      - idCategoria
+      - idPrioridad
+      - titulo
+      - ubicacionAmbiente
+      - ubicacionCampus
+    SolicitudCreadaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        codigo:
+          type: string
+        titulo:
+          type: string
+        estado:
+          type: string
+        fechaRegistro:
+          type: string
+          format: date-time
+        fechaLimiteSla:
+          type: string
+          format: date-time
+        mensaje:
+          type: string
+    ComentarioCrearRequest:
+      type: object
+      properties:
+        comentario:
+          type: string
+          maxLength: 500
+          minLength: 1
+        privado:
+          type: boolean
+      required:
+      - comentario
+    ComentarioResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        comentario:
+          type: string
+        privado:
+          type: boolean
+        usuario:
+          type: string
+        fechaComentario:
+          type: string
+          format: date-time
+    RegistroRequest:
+      type: object
+      properties:
+        codigoInstitucional:
+          type: string
+          minLength: 1
+          pattern: ^[A-Za-z0-9]{6,20}$
+        nombre:
+          type: string
+          maxLength: 50
+          minLength: 2
+        apellido:
+          type: string
+          maxLength: 50
+          minLength: 2
+        correo:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - apellido
+      - codigoInstitucional
+      - correo
+      - nombre
+      - password
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        tipo:
+          type: string
+        correo:
+          type: string
+        rol:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+        usuario:
+          $ref: '#/components/schemas/UsuarioSesion'
+    UsuarioSesion:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        apellido:
+          type: string
+        correo:
+          type: string
+        rol:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+    LoginRequest:
+      type: object
+      properties:
+        correo:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - correo
+      - password
+    UsuarioCrearRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          maxLength: 50
+          minLength: 2
+        apellido:
+          type: string
+          maxLength: 50
+          minLength: 2
+        telefono:
+          type: string
+          maxLength: 20
+          minLength: 0
+        rol:
+          type: string
+          minLength: 1
+          pattern: ESTUDIANTE|TECNICO|SUPERVISOR|ADMIN
+        idArea:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+        codigoInstitucional:
+          type: string
+          minLength: 1
+          pattern: '[A-Za-z0-9]{6,20}'
+        correo:
+          type: string
+          format: email
+          maxLength: 100
+          minLength: 0
+        password:
+          type: string
+          maxLength: 72
+          minLength: 0
+      required:
+      - apellido
+      - codigoInstitucional
+      - correo
+      - nombre
+      - password
+      - rol
+    TecnicoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        codigoInstitucional:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        correo:
+          type: string
+        telefono:
+          type: string
+        idArea:
+          type: integer
+          format: int32
+        nombreArea:
+          type: string
+        activo:
+          type: boolean
+        cargaActual:
+          type: integer
+          format: int64
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageSolicitudResumenResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/SolicitudResumenResponse'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        unpaged:
+          type: boolean
+    SolicitudResumenResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        codigo:
+          type: string
+        titulo:
+          type: string
+        categoriaNombre:
+          type: string
+        prioridadNivel:
+          type: string
+        estadoCodigo:
+          type: string
+        estadoNombre:
+          type: string
+        estadoColorHex:
+          type: string
+        tecnicoNombreCompleto:
+          type: string
+        fechaRegistro:
+          type: string
+          format: date-time
+        fechaLimiteSla:
+          type: string
+          format: date-time
+        vencida:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    HistorialItemResponse:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date-time
+        usuario:
+          type: string
+        estadoAnterior:
+          type: string
+        estadoNuevo:
+          type: string
+        nota:
+          type: string
+    RolResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nombre:
+          type: string
+        descripcion:
+          type: string
+    SerieItem:
+      type: object
+      properties:
+        nombre:
+          type: string
+        valor:
+          type: integer
+          format: int64
+    SerieEstadoItem:
+      type: object
+      properties:
+        nombre:
+          type: string
+        valor:
+          type: integer
+          format: int64
+        colorHex:
+          type: string
+    KpisResponse:
+      type: object
+      properties:
+        desde:
+          type: string
+          format: date-time
+        hasta:
+          type: string
+          format: date-time
+        registradas:
+          type: integer
+          format: int64
+        pendientes:
+          type: integer
+          format: int64
+        atendidas:
+          type: integer
+          format: int64
+        porcentajeResueltas:
+          type: number
+          format: double
+        mttrHoras:
+          type: number
+          format: double
+        vencidas:
+          type: integer
+          format: int64
+    PaginaUsuarioAdminResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuarioAdminResponse'
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

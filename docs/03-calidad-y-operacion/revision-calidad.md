@@ -20,5 +20,5 @@
 
 ## 3. Pendiente y riesgo aceptado
 - Hallazgos de interfaz AUD-01 a AUD-25: seguimiento en `auditoria-ui.md`; se tratan en la rama `fix/auditoria-ui`.
-- Backend de staging (`backend-servicios-staging.onrender.com`) devuelve 500 en todas las rutas: pendiente de revisar sus logs en Render.
+- En Render, `/actuator/health` responde 500 (producción y staging) porque Actuator escucha en el puerto 8081, que no se publica. La API funciona. Solución: definir `MANAGEMENT_PORT` igual al puerto de la aplicación en ambos servicios.
 - Funciones diferidas (recuperación de contraseña, bloqueo por intentos): fuera del alcance del MVP.

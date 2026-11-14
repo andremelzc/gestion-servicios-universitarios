@@ -151,7 +151,7 @@ El enunciado evalúa **Especificar → Diseñar → Construir → Integrar → P
 | **Construir** | Backend y frontend por HU: PR fusionados en [GitHub](https://github.com/andremelzc/gestion-servicios-universitarios/pulls?q=is%3Apr+is%3Amerged) | 7–8 |
 | **Integrar** | [E2E del MVP](../03-calidad-y-operacion/evidencia-e2e-mvp.md); [CI](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/40566834644) | 8 |
 | **Probar** | [Informe de pruebas](../INFORME_PRUEBAS.md), [UAT-09/10](../03-calidad-y-operacion/evidencia-uat-09-10.md) | 8–12 |
-| **Asegurar** | [Seguridad OWASP](../03-calidad-y-operacion/seguridad-owasp.md); [run de seguridad](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/43363285839); [estado del hardening](../03-calidad-y-operacion/evidencias/fase-3.md#estado-del-checklist-de-hardening-103) | 9–12 |
+| **Asegurar** | [Seguridad OWASP](../03-calidad-y-operacion/seguridad-owasp.md); [run de seguridad](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/43363285839); [estado del hardening](../03-calidad-y-operacion/evidencias/fase-3/README.md#estado-del-checklist-de-hardening-103) | 9–12 |
 | **Desplegar** | [DevOps](../03-calidad-y-operacion/devops-despliegue.md); [CD staging](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/43363285861); [CD prod](https://github.com/andremelzc/gestion-servicios-universitarios/actions/runs/40592126003) | 9–11 |
 | **Monitorear** | [Observabilidad](../03-calidad-y-operacion/observabilidad.md); [simulacro INC-20261106-01](../incidentes/INC-20261106-01-simulacro-caida-bd-y-backend.md) | 11–12 |
 | **Mejorar** | Retrospectivas, post-mortem, informe final (acciones de mejora) | 11–12 |
