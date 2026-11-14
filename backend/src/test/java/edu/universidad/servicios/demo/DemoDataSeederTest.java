@@ -10,10 +10,12 @@ import static org.mockito.Mockito.when;
 
 import edu.universidad.servicios.solicitud.domain.Categoria;
 import edu.universidad.servicios.solicitud.domain.EstadoSolicitud;
+import edu.universidad.servicios.solicitud.domain.HistorialSolicitud;
 import edu.universidad.servicios.solicitud.domain.Prioridad;
 import edu.universidad.servicios.solicitud.domain.Solicitud;
 import edu.universidad.servicios.solicitud.repository.CategoriaRepository;
 import edu.universidad.servicios.solicitud.repository.EstadoSolicitudRepository;
+import edu.universidad.servicios.solicitud.repository.HistorialSolicitudRepository;
 import edu.universidad.servicios.solicitud.repository.PrioridadRepository;
 import edu.universidad.servicios.solicitud.repository.SolicitudRepository;
 import edu.universidad.servicios.usuario.domain.Area;
@@ -37,6 +39,7 @@ class DemoDataSeederTest {
     private final PrioridadRepository prioridades = mock(PrioridadRepository.class);
     private final EstadoSolicitudRepository estados = mock(EstadoSolicitudRepository.class);
     private final SolicitudRepository solicitudes = mock(SolicitudRepository.class);
+    private final HistorialSolicitudRepository historial = mock(HistorialSolicitudRepository.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);
     private DemoDataSeeder seeder;
 
@@ -71,6 +74,7 @@ class DemoDataSeederTest {
     void creaSolicitudesDeDemostracionYOmiteCodigosExistentes() {
         prepararCatalogos();
         prepararUsuariosExistentes();
+        when(solicitudes.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(solicitudes.existsByCodigo(any(String.class))).thenReturn(false);
         when(solicitudes.existsByCodigo(org.mockito.ArgumentMatchers.contains("0002"))).thenReturn(true);
 
@@ -79,6 +83,38 @@ class DemoDataSeederTest {
         verify(solicitudes, org.mockito.Mockito.times(5)).save(any(Solicitud.class));
         verify(usuarios, never()).save(any(Usuario.class));
         assertThat(encoder.encode("clave-demo")).isNull();
+    }
+
+    @Test
+    void historialNormalEsCronologicoYNoSeAlteraAlRepetirElSeed() {
+        prepararCatalogos();
+        prepararUsuariosExistentes();
+        when(solicitudes.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(solicitudes.existsByCodigo(any(String.class))).thenReturn(false, false, false, false, false, false)
+                .thenReturn(true);
+
+        seeder.run();
+        seeder.run();
+
+        var captor = org.mockito.ArgumentCaptor.forClass(HistorialSolicitud.class);
+        verify(historial, org.mockito.Mockito.times(21)).save(captor.capture());
+        var entradas = captor.getAllValues();
+        for (int i = 0, inicio = 0; i < 6; i++) {
+            var cadena = entradas.subList(inicio, inicio + i + 1);
+            Solicitud solicitud = cadena.get(0).getSolicitud();
+            assertThat(cadena.get(0).getEstadoAnterior()).isNull();
+            assertThat(cadena.get(0).getUsuario()).isSameAs(solicitud.getSolicitante());
+            assertThat(cadena.get(0).getFechaCambio()).isEqualTo(solicitud.getFechaRegistro());
+            for (int j = 1; j < cadena.size(); j++) {
+                assertThat(cadena.get(j).getSolicitud()).isSameAs(solicitud);
+                assertThat(cadena.get(j).getEstadoAnterior()).isSameAs(cadena.get(j - 1).getEstadoNuevo());
+                assertThat(cadena.get(j).getFechaCambio()).isAfter(cadena.get(j - 1).getFechaCambio());
+                assertThat(cadena.get(j).getFechaCambio()).isBeforeOrEqualTo(java.time.LocalDateTime.now());
+                assertThat(cadena.get(j).getUsuario()).isNotNull();
+            }
+            assertThat(cadena.get(i).getEstadoNuevo()).isSameAs(solicitud.getEstado());
+            inicio += i + 1;
+        }
     }
 
     @Test
@@ -137,12 +173,13 @@ class DemoDataSeederTest {
     void sincronizaSecuenciaAlTerminarCreacionDeSolicitudes() {
         prepararCatalogos();
         prepararUsuariosExistentes();
+        when(solicitudes.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(solicitudes.existsByCodigo(any(String.class))).thenReturn(false);
         org.springframework.jdbc.core.JdbcTemplate jdbcMock = mock(org.springframework.jdbc.core.JdbcTemplate.class);
 
         DemoDataSeeder seederConJdbc = new DemoDataSeeder(
             usuarios, roles, areas, categorias, prioridades, estados,
-            solicitudes, encoder, jdbcMock, "clave-demo", 6, "normal"
+            solicitudes, historial, encoder, jdbcMock, "clave-demo", 6, "normal"
         );
 
         seederConJdbc.run();
@@ -152,7 +189,7 @@ class DemoDataSeederTest {
 
     private DemoDataSeeder crearSeeder(String password, int cantidad) {
         return new DemoDataSeeder(usuarios, roles, areas, categorias, prioridades, estados,
-                solicitudes, encoder, password, cantidad);
+                solicitudes, historial, encoder, password, cantidad);
     }
 
     private void prepararCatalogos() {
