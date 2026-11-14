@@ -178,6 +178,41 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 - [ ] Grafana con datos recientes; una alerta de simulacro lista para disparar.
 - [ ] Un *script* de reinicio de datos de demo por si hay que repetir el flujo.
 
+### 5.4 Recreación local aislada (issue #191)
+
+Este procedimiento es un **ensayo local**, no el despliegue público exigido arriba. Usa exclusivamente `docker-compose.demo.yml`, sin `container_name`, con un proyecto Compose explícito y volúmenes propios de MySQL y evidencias. El frontend escucha solo en `127.0.0.1`; MySQL y backend no publican puertos. No combine este archivo con los Compose existentes ni use `docker compose down -v` sin seleccionar archivo y proyecto. No use datos reales.
+
+**Requisitos:** Docker y Docker Compose v2 con `up --wait`, conexión para obtener imágenes y dependencias durante la primera construcción, puerto local libre y espacio en disco. Desde la raíz del repositorio, cargue en el entorno, desde un gestor de secretos o un archivo privado **fuera del repositorio**, `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `JWT_SECRET` y `DEMO_USER_PASSWORD`; expórtelas sin escribirlas en comandos ni en archivos versionados. Use contraseñas fuertes distintas, un secreto JWT suficientemente largo (al menos 32 bytes aleatorios) y una contraseña de demo compatible con la política de autenticación. Todos los usuarios demo comparten esa contraseña. Compose y Docker pueden exponer variables a usuarios con acceso al daemon; proteja ese acceso. Opcionalmente exporte `DEMO_PORT` si el puerto 8088 está ocupado.
+
+1. Elija un nombre exclusivo `demo191-` seguido de letras minúsculas, números o guiones, por ejemplo `demo191-ensayo1`. Con los secretos ya exportados, ejecute:
+
+    ```sh
+    sh ops/demo-local.sh crear demo191-ensayo1
+    sh ops/demo-local.sh estado demo191-ensayo1
+    ```
+
+    El comando rechaza un proyecto con contenedores, redes o volúmenes Compose existentes; no borra nada al crear. Si falla la construcción o arranque puede dejar recursos parciales: inspecciónelos y, si corresponde, elimine **solo ese proyecto** como se indica abajo antes de reintentar. El puerto ocupado también impide arrancar; no detenga otros servicios para liberarlo sin autorización.
+
+2. Abra `http://127.0.0.1:8088/` (ajuste el puerto si cambió `DEMO_PORT`) y compruebe `curl -fsS http://127.0.0.1:8088/actuator/health`: debe devolver `UP`. Verifique el inicio de sesión y el ciclo de solicitud con `admin.demo@universidad.edu`, `supervisor.demo@universidad.edu`, `tecnico.ti.demo@universidad.edu` y `estudiante1.demo@universidad.edu`, usando la contraseña externa. Compruebe dashboard y permisos de cada rol; health por sí solo no valida el flujo.
+3. Para inspeccionar el seed sin publicar MySQL, con las mismas variables exportadas y el nombre elegido:
+
+    ```sh
+    docker compose -p demo191-ensayo1 -f docker-compose.demo.yml exec db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root gestion_servicios_db -e "SELECT estado, COUNT(*) FROM solicitudes GROUP BY estado; SELECT r.nombre, COUNT(*) FROM usuarios u JOIN roles r ON r.id=u.id_rol GROUP BY r.nombre; SELECT COUNT(*) AS historial FROM historial_solicitudes;"'
+    ```
+
+    En una BD nueva se esperan 30 solicitudes distribuidas entre seis estados y usuarios de cuatro roles. El seeder usa fechas relativas y el año actual: la distribución es reproducible, no los valores exactos. El seed normal genera para cada solicitud una cadena de historial desde su registro hasta su estado actual. Verifique esas transiciones y, tras ejecutar el ciclo, compruebe también las nuevas entradas; las evidencias deben prepararse y comprobarse manualmente. El vencimiento depende del SLA y del momento de ejecución.
+
+4. Para volver a cero, **respalde antes cualquier dato que quiera conservar**. La eliminación destruye definitivamente la BD y las evidencias de ese proyecto; requiere terminal interactiva y escribir exactamente su nombre en la confirmación:
+
+    ```sh
+    sh ops/demo-local.sh eliminar demo191-ensayo1
+    sh ops/demo-local.sh crear demo191-ensayo1
+    ```
+
+    Una confirmación incorrecta o entrada no interactiva cancela la eliminación. No seleccione un nombre perteneciente a otro ensayo; el nombre del proyecto es el límite de destrucción, no una protección frente a otros usuarios con acceso al daemon. Mantenga los secretos disponibles también para `estado` y `eliminar`. Los volúmenes de otros proyectos no se eliminan; las imágenes construidas permanecen.
+
+**Alcance de release y TLS:** se construye el código del árbol de trabajo actual, con perfil `demo` y HTTP local; no demuestra que exista ni que se haya desplegado `v1.0.0`, no instala TLS, dominio público, Grafana ni alertas. Para la sustentación, verifique por separado el tag y artefactos de release, el despliegue público y la validez del certificado TLS, además de la observabilidad requerida en el checklist. Nunca exponga este perfil ni sus credenciales a producción.
+
 ---
 
 ## 6. Preguntas que el equipo debe saber responder

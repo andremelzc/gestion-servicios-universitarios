@@ -2,10 +2,12 @@ package edu.universidad.servicios.demo;
 
 import edu.universidad.servicios.solicitud.domain.Categoria;
 import edu.universidad.servicios.solicitud.domain.EstadoSolicitud;
+import edu.universidad.servicios.solicitud.domain.HistorialSolicitud;
 import edu.universidad.servicios.solicitud.domain.Prioridad;
 import edu.universidad.servicios.solicitud.domain.Solicitud;
 import edu.universidad.servicios.solicitud.repository.CategoriaRepository;
 import edu.universidad.servicios.solicitud.repository.EstadoSolicitudRepository;
+import edu.universidad.servicios.solicitud.repository.HistorialSolicitudRepository;
 import edu.universidad.servicios.solicitud.repository.PrioridadRepository;
 import edu.universidad.servicios.solicitud.repository.SolicitudRepository;
 import edu.universidad.servicios.usuario.domain.Rol;
@@ -112,6 +114,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 	private final PrioridadRepository prioridadRepository;
 	private final EstadoSolicitudRepository estadoRepository;
 	private final SolicitudRepository solicitudRepository;
+	private final HistorialSolicitudRepository historialRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JdbcTemplate jdbcTemplate;
 	private final String password;
@@ -127,6 +130,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 		PrioridadRepository prioridadRepository,
 		EstadoSolicitudRepository estadoRepository,
 		SolicitudRepository solicitudRepository,
+		HistorialSolicitudRepository historialRepository,
 		PasswordEncoder passwordEncoder,
 		@Autowired(required = false) JdbcTemplate jdbcTemplate,
 		@Value("${app.demo.user-password}") String password,
@@ -140,6 +144,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 		this.prioridadRepository = prioridadRepository;
 		this.estadoRepository = estadoRepository;
 		this.solicitudRepository = solicitudRepository;
+		this.historialRepository = historialRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jdbcTemplate = jdbcTemplate;
 		this.password = password;
@@ -155,6 +160,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 		PrioridadRepository prioridadRepository,
 		EstadoSolicitudRepository estadoRepository,
 		SolicitudRepository solicitudRepository,
+		HistorialSolicitudRepository historialRepository,
 		PasswordEncoder passwordEncoder,
 		String password,
 		int cantidadSolicitudes
@@ -167,6 +173,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 			prioridadRepository,
 			estadoRepository,
 			solicitudRepository,
+			historialRepository,
 			passwordEncoder,
 			null,
 			password,
@@ -314,7 +321,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 				)
 				.findFirst()
 				.orElse(null);
-			LocalDateTime registro = ahora.minusDays(i % 90).minusHours(i % 24);
+			LocalDateTime registro = ahora.minusDays(1 + i % 90).minusHours(i % 24);
 
 			Solicitud solicitud = new Solicitud();
 			solicitud.setCodigo(codigo);
@@ -345,10 +352,28 @@ public class DemoDataSeeder implements CommandLineRunner {
 			solicitud.setFechaLimiteSla(
 				registro.plusHours(prioridad.getSlaMaxHoras())
 			);
-			solicitudRepository.save(solicitud);
+			solicitud = solicitudRepository.save(solicitud);
+			if ("normal".equals(modo)) {
+				crearHistorial(solicitud, estados, supervisor, tecnico);
+			}
 		}
 		if ("normal".equals(modo)) {
 			sincronizarSecuencia(anio);
+		}
+	}
+
+	private void crearHistorial(Solicitud solicitud, List<EstadoSolicitud> estados,
+		Usuario supervisor, Usuario tecnico) {
+		int ultimo = ESTADOS_EJEMPLO.indexOf(solicitud.getEstado().getCodigo());
+		for (int paso = 0; paso <= ultimo; paso++) {
+			HistorialSolicitud historial = new HistorialSolicitud();
+			historial.setSolicitud(solicitud);
+			historial.setUsuario(paso == 0 ? solicitud.getSolicitante()
+				: (paso == 3 || paso == 4) && tecnico != null ? tecnico : supervisor);
+			historial.setEstadoAnterior(paso == 0 ? null : estados.get(paso - 1));
+			historial.setEstadoNuevo(estados.get(paso));
+			historial.setFechaCambio(solicitud.getFechaRegistro().plusMinutes(paso));
+			historialRepository.save(historial);
 		}
 	}
 
