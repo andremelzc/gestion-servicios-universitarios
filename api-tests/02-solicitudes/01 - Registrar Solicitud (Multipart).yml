@@ -11,16 +11,16 @@ http:
     data:
       - name: solicitud
         type: text
-        contentType: application/json
         value: |
           {
             "titulo": "Falla en proyector de aula magna",
-            "descripcion": "El proyector no enciende al conectar la toma de corriente principal.",
+            "descripcion": "Falla en proyector",
             "ubicacionCampus": "Campus Central",
             "ubicacionAmbiente": "Pabellón A - Laboratorio 201",
             "idCategoria": 1,
             "idPrioridad": 2
           }
+        contentType: application/json
       - name: archivos
         type: file
         value:
