@@ -13,15 +13,22 @@ http:
         "correo": "estudiante1.demo@universidad.edu",
         "password": "contraseña123_"
       }
-  auth: none
 
 
 runtime:
   scripts:
+    - type: after-response
+      code: |
+        const data = typeof res.getBody === "function" ? res.getBody() : res.body;
+        if (data && data.token) {
+          bru.setVar("token", data.token);
+          bru.setEnvVar("token", data.token);
+        }
     - type: post-response
       code: |
         const data = typeof res.getBody === "function" ? res.getBody() : res.body;
         if (data && data.token) {
+          bru.setVar("token", data.token);
           bru.setEnvVar("token", data.token);
         }
 

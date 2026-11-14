@@ -100,6 +100,31 @@ jobs:
             echo "Smoke Test de despliegue ejecutado (hook de Render disparado y build de Vercel completado)."
           fi
 
+      - name: Checkout del repositorio
+        if: vars.STAGING_BACKEND_URL != ''
+        uses: actions/checkout@v7
+
+      - name: Configurar Node.js 22
+        if: vars.STAGING_BACKEND_URL != ''
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Ejecutar Smoke Tests de API con Bruno CLI (QA-12)
+        if: vars.STAGING_BACKEND_URL != ''
+        working-directory: api-tests
+        run: |
+          mkdir -p reports
+          npx -y @usebruno/cli run 01-auth --env staging --env-var baseUrl="${{ vars.STAGING_BACKEND_URL }}" --output reports/bruno-staging-smoke-report.json --format json --reporter-skip-headers "Authorization"
+
+      - name: Publicar Reporte Smoke Test Bruno (Staging)
+        if: always() && vars.STAGING_BACKEND_URL != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: bruno-staging-smoke-report
+          path: api-tests/reports/
+          if-no-files-found: ignore
+
   zap-baseline:
     name: DAST - OWASP ZAP Baseline (Staging)
     needs: [smoke-test]

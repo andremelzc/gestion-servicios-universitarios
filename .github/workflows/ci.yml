@@ -94,3 +94,66 @@ jobs:
       - name: Validar build Docker Frontend
         if: hashFiles('frontend/Dockerfile') != ''
         run: docker build -t frontend:ci frontend/
+
+  api-collection-test:
+    name: API Collection Tests (Bruno CLI & Compose)
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v7
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Levantar stack Docker Compose
+        env:
+          JWT_SECRET: dev-only-secret-change-me-012345678901234567890123456789
+        run: |
+          cp .env.example .env 2>/dev/null || true
+          cat << 'EOF' > docker-compose.ci-override.yml
+          services:
+            backend:
+              environment:
+                SPRING_PROFILES_ACTIVE: demo
+                DEMO_USER_PASSWORD: contraseña123_
+          EOF
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.ci-override.yml up -d db backend
+          echo "Esperando que el backend responda UP..."
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/actuator/health 2>/dev/null | grep -q '"UP"'; then
+              echo "Backend listo y saludable."
+              break
+            fi
+            echo "Esperando backend... ($i/30)"
+            sleep 2
+          done
+
+      - name: Ejecutar Colección de API Completa con Bruno CLI (QA-12 / CA-11)
+        working-directory: api-tests
+        run: |
+          npx -y @usebruno/cli run "01-auth/04 - Iniciar Sesion (Estudiante 1).yml" 02-solicitudes "01-auth/02 - Iniciar Sesion (Supervisor TI).yml" "03-gestion/01 - Listar Bandeja Operativa General.yml" "03-gestion/02 - Evaluar Solicitud (Supervisor o Admin).yml" "03-gestion/03 - Asignar Tecnico a Solicitud.yml" "03-gestion/07 - Listar Tecnicos con Carga de Trabajo.yml" "01-auth/03 - Iniciar Sesion (Tecnico TI).yml" "03-gestion/04 - Iniciar Atencion de Solicitud.yml" "01-auth/01 - Iniciar Sesion (Admin).yml" "03-gestion/05 - Resolver Solicitud (Multipart con Informe).yml" "03-gestion/06 - Cerrar Solicitud con Conformidad.yml" 04-dashboard 05-catalogos --env ci
+
+      - name: Generar Reporte de Ejecución de Colección
+        if: always()
+        working-directory: api-tests
+        run: |
+          mkdir -p reports
+          npx -y @usebruno/cli run "01-auth/04 - Iniciar Sesion (Estudiante 1).yml" 02-solicitudes "01-auth/02 - Iniciar Sesion (Supervisor TI).yml" "03-gestion/01 - Listar Bandeja Operativa General.yml" "03-gestion/02 - Evaluar Solicitud (Supervisor o Admin).yml" "03-gestion/03 - Asignar Tecnico a Solicitud.yml" "03-gestion/07 - Listar Tecnicos con Carga de Trabajo.yml" "01-auth/03 - Iniciar Sesion (Tecnico TI).yml" "03-gestion/04 - Iniciar Atencion de Solicitud.yml" "01-auth/01 - Iniciar Sesion (Admin).yml" "03-gestion/05 - Resolver Solicitud (Multipart con Informe).yml" "03-gestion/06 - Cerrar Solicitud con Conformidad.yml" 04-dashboard 05-catalogos --env ci --output reports/bruno-report.json --format json --reporter-skip-headers "Authorization" || true
+
+      - name: Publicar Reporte de Pruebas de API Bruno
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bruno-api-collection-report
+          path: api-tests/reports/
+          if-no-files-found: ignore
+
+      - name: Apagar stack Docker Compose
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.ci-override.yml down -v 2>/dev/null || true
+          rm -f docker-compose.ci-override.yml
+
