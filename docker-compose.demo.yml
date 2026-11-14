@@ -1,0 +1,78 @@
+services:
+    db:
+        image: mysql:8.0
+        command:
+            [
+                "--character-set-server=utf8mb4",
+                "--collation-server=utf8mb4_unicode_ci",
+                "--log-bin-trust-function-creators=1",
+            ]
+        environment:
+            MYSQL_DATABASE: gestion_servicios_db
+            MYSQL_USER: app_servicios
+            MYSQL_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Configure DB_ROOT_PASSWORD}
+            TZ: UTC
+        volumes:
+            - mysql_data:/var/lib/mysql
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    'mysqladmin ping -h localhost -u root -p"$${MYSQL_ROOT_PASSWORD}" --silent',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 12
+            start_period: 30s
+
+    backend:
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            SPRING_PROFILES_ACTIVE: demo
+            DB_HOST: db
+            DB_PORT: 3306
+            DB_NAME: gestion_servicios_db
+            DB_USER: app_servicios
+            DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+            JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET}
+            DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:?Configure DEMO_USER_PASSWORD}
+            DEMO_MODO: normal
+            DEMO_SOLICITUDES: 30
+            ALLOWED_ORIGINS: http://localhost:${DEMO_PORT:-8088},http://127.0.0.1:${DEMO_PORT:-8088}
+            STORAGE_PATH: /var/app/evidencias
+            TZ: UTC
+        volumes:
+            - evidencias:/var/app/evidencias
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+            interval: 15s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
+
+    frontend:
+        build:
+            context: ./frontend
+            args:
+                VITE_API_URL: /api/v1
+        depends_on:
+            backend:
+                condition: service_healthy
+        ports:
+            - "127.0.0.1:${DEMO_PORT:-8088}:80"
+        healthcheck:
+            test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+
+volumes:
+    mysql_data:
+    evidencias:
