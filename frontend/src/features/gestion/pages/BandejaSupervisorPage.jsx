@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import EstadoBadge from '../../../components/ui/EstadoBadge.jsx';
 import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
@@ -11,6 +13,7 @@ import useAhora from '../hooks/useAhora.js';
 import useAviso from '../hooks/useAviso.js';
 import useBandeja from '../hooks/useBandeja.js';
 import useCatalogosBandeja from '../hooks/useCatalogosBandeja.js';
+import Select from '../../../components/ui/Select.jsx';
 import './BandejaSupervisorPage.css';
 
 const PESTANAS = [
@@ -38,7 +41,7 @@ function Selector({ etiqueta, valor, onChange, opciones }) {
   return (
     <label className="data-table__campo">
       {etiqueta}
-      <select
+      <Select
         className="data-table__control"
         value={valor}
         onChange={(e) => onChange(e.target.value)}
@@ -49,7 +52,7 @@ function Selector({ etiqueta, valor, onChange, opciones }) {
             {nombre}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }
@@ -145,7 +148,11 @@ export default function BandejaSupervisorPage() {
   }
 
   const columnas = [
-    { key: 'codigo', header: 'Código' },
+    {
+      key: 'codigo',
+      header: 'Código',
+      render: (s) => <Link to={`/solicitudes/${s.id}`}>{s.codigo}</Link>,
+    },
     { key: 'titulo', header: 'Título' },
     {
       key: 'prioridadNivel',
@@ -180,7 +187,7 @@ export default function BandejaSupervisorPage() {
     {
       key: 'tecnicoNombreCompleto',
       header: 'Técnico',
-      render: (s) => s.tecnicoNombreCompleto ?? '—',
+      render: (s) => s.tecnicoNombreCompleto ?? 'Sin asignar',
     },
   ];
 
@@ -221,9 +228,12 @@ export default function BandejaSupervisorPage() {
   return (
     // AppShell no aporta `<main>`: cada página declara su landmark principal.
     <main className="bandeja-supervisor" aria-labelledby="bandeja-supervisor-titulo">
-      <h1 id="bandeja-supervisor-titulo" ref={tituloRef} tabIndex={-1}>
-        Bandeja de solicitudes
-      </h1>
+      <PageHeader
+        titulo="Bandeja de solicitudes"
+        descripcion="Evalúa, asigna y da seguimiento a las solicitudes de tu área."
+        icono="inbox"
+        tituloProps={{ id: 'bandeja-supervisor-titulo', ref: tituloRef, tabIndex: -1 }}
+      />
       <RegionAviso mensaje={aviso.mensaje} />
 
       <PestanasEstado

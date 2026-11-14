@@ -6,6 +6,7 @@ import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { paginaDe } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -42,8 +43,8 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
     renderizarUsuarios();
     await screen.findByRole('row', { name: /Luis Gómez/ });
 
-    await userEvent.selectOptions(screen.getByLabelText('Rol'), 'TECNICO');
-    await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
+    await seleccionar(userEvent, screen.getByLabelText('Rol'), 'TECNICO');
+    await seleccionar(userEvent, await screen.findByLabelText('Área'), 'Infraestructura');
 
     await waitFor(() => expect(ultima(consultas).get('idArea')).toBe('2'));
     expect(ultima(consultas).get('rol')).toBe('TECNICO');
@@ -100,7 +101,7 @@ describe('UsuariosPage: consulta enviada a /admin/usuarios (api-rest §3.6)', ()
     await screen.findByRole('row', { name: /Persona2/ });
     expect(ultima(consultas).get('page')).toBe('1');
 
-    await userEvent.selectOptions(screen.getByLabelText('Rol'), 'ESTUDIANTE');
+    await seleccionar(userEvent, screen.getByLabelText('Rol'), 'ESTUDIANTE');
 
     await screen.findByRole('row', { name: /Persona1/ });
     expect(ultima(consultas).get('page')).toBe('0');

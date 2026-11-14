@@ -13,9 +13,12 @@
 .modal {
   width: 100%;
   max-width: 480px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   max-height: 100%;
-  overflow-y: auto;
-  padding: 24px;
+  overflow: hidden;
+  padding: 0;
   border-radius: var(--radius, 8px);
   background: var(--color-surface, #ffffff);
   color: var(--color-text, #111827);
@@ -28,10 +31,72 @@
 
 .modal__titulo {
   margin: 0 0 16px;
+  padding: 24px 64px 0 24px;
   font-size: 1.25rem;
 }
 
 .modal__descripcion {
   margin: 0 0 16px;
+  padding: 0 24px;
   color: var(--color-text-muted, #4b5563);
+}
+
+/* Cuerpo con scroll propio: el título y el botón de cerrar quedan fijos y, en los formularios, las
+   acciones se quedan pegadas al borde inferior en vez de esconderse bajo el scroll. */
+.modal__cuerpo {
+  flex: 1;
+  min-height: 0;
+  padding: 0 24px;
+  overflow-y: auto;
+}
+
+.modal__cuerpo::after {
+  content: '';
+  display: block;
+  height: 24px;
+}
+
+.modal__cuerpo .admin-acciones,
+.modal__cuerpo .modal-asignacion__acciones,
+.modal__cuerpo .modal-resolucion__acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 16px -24px 0;
+  padding: 12px 24px;
+  background: var(--color-surface, #ffffff);
+  border-top: 1px solid var(--color-border, #d1d5db);
+}
+
+.modal__cerrar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target, 44px);
+  height: var(--touch-target, 44px);
+  margin: -6px -6px 0 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius, 8px);
+  color: var(--color-text-muted, #4b5563);
+  cursor: pointer;
+}
+
+.modal__cerrar:hover:not(:disabled) {
+  background: var(--tinte-neutro, rgb(107 114 128 / 0.14));
+  color: var(--color-text, #111827);
+}
+
+.modal__cerrar:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.modal__cerrar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

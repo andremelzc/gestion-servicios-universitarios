@@ -17,7 +17,7 @@
   min-height: var(--touch-target, 44px);
   padding: 0 var(--space-3, 12px);
   background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #d1d5db);
+  border: 1px solid var(--color-border-control, #6b7280);
   border-radius: var(--radius, 8px);
   color: var(--color-text, #111827);
   font: inherit;
@@ -29,26 +29,6 @@
 
 .filtros-dashboard__campo input:focus-visible,
 .filtros-dashboard__campo select:focus-visible,
-.filtros-dashboard__boton:focus-visible {
-  outline: 3px solid var(--color-focus, #2563eb);
-  outline-offset: 2px;
-}
-
-.filtros-dashboard__boton {
-  min-height: var(--touch-target, 44px);
-  padding: 0 var(--space-5, 24px);
-  background: var(--color-primary, #1d4ed8);
-  border: 1px solid var(--color-primary, #1d4ed8);
-  border-radius: var(--radius, 8px);
-  color: #ffffff;
-  cursor: pointer;
-  font: inherit;
-}
-
-.filtros-dashboard__boton:hover {
-  background: var(--color-primary-hover, #1e40af);
-}
-
 .filtros-dashboard__pista,
 .filtros-dashboard__error {
   margin: 0;
@@ -69,4 +49,18 @@
     flex-wrap: wrap;
     align-items: flex-end;
   }
+}
+
+/* Los filtros van en una tarjeta, igual que la barra de las tablas. */
+.filtros-dashboard {
+  padding: var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: var(--shadow-card);
+}
+
+/* La pista del rango es ayuda, no contenido principal: más pequeña y tenue. */
+.filtros-dashboard__pista {
+  font-size: 0.8125rem;
 }

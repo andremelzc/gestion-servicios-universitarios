@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import Toast from '../../../components/ui/Toast.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { useAreas } from '../../dashboard/hooks/useAreas.js';
@@ -6,6 +9,7 @@ import ConfirmarDesactivacion from '../components/ConfirmarDesactivacion.jsx';
 import UsuarioFormModal from '../components/UsuarioFormModal.jsx';
 import useCrud from '../hooks/useCrud.js';
 import { ROLES, etiquetaRol } from '../roles.js';
+import Select from '../../../components/ui/Select.jsx';
 import '../components/adminUi.css';
 
 // `/admin/usuarios` filtra por `activo` (api-rest §3.6), no por `incluirInactivos`. Como la API no
@@ -76,7 +80,8 @@ export default function UsuariosPage() {
     {
       key: 'idArea',
       header: 'Área',
-      render: (u) => (u.idArea == null ? '—' : (nombreArea.get(u.idArea) ?? `Área ${u.idArea}`)),
+      render: (u) =>
+        u.idArea == null ? 'Sin área' : (nombreArea.get(u.idArea) ?? `Área ${u.idArea}`),
     },
     { key: 'activo', header: 'Estado', tipo: 'activo' },
   ];
@@ -85,7 +90,7 @@ export default function UsuariosPage() {
     <>
       <label className="data-table__campo">
         Rol
-        <select
+        <Select
           className="data-table__control"
           value={rol}
           onChange={(e) => setRol(e.target.value)}
@@ -96,12 +101,12 @@ export default function UsuariosPage() {
               {r.etiqueta}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       {areas.length > 0 && (
         <label className="data-table__campo">
           Área
-          <select
+          <Select
             className="data-table__control"
             value={idArea}
             onChange={(e) => setIdArea(e.target.value)}
@@ -112,7 +117,7 @@ export default function UsuariosPage() {
                 {a.nombre}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
     </>
@@ -120,20 +125,18 @@ export default function UsuariosPage() {
 
   return (
     <main className="admin-pagina">
-      <div className="admin-pagina__cabecera">
-        <h1>Administración de usuarios</h1>
-        <button
-          type="button"
-          className="admin-boton admin-boton--primario"
-          onClick={() => abrir({ tipo: 'crear' })}
-        >
-          Nuevo usuario
-        </button>
-      </div>
+      <PageHeader
+        titulo="Administración de usuarios"
+        descripcion="Gestiona las cuentas, los roles y las áreas de los usuarios."
+        icono="users"
+        acciones={
+          <Button icono="plus" onClick={() => abrir({ tipo: 'crear' })}>
+            Nuevo usuario
+          </Button>
+        }
+      />
 
-      <p role="status" className="admin-exito">
-        {aviso}
-      </p>
+      <Toast mensaje={aviso} />
       {!dialogo && general && (
         <p role="alert" className="admin-error">
           {general}
@@ -187,6 +190,7 @@ export default function UsuariosPage() {
                     aria-label={`Desactivar ${nombreDe(fila)}`}
                     aria-disabled="true"
                     aria-describedby={`propia-${fila.id}`}
+                    title="No puedes desactivar tu propia cuenta."
                   >
                     Desactivar
                   </button>

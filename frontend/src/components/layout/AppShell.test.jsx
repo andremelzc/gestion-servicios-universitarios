@@ -32,14 +32,22 @@ const rutas = [
       </AppShell>
     ),
   },
+  {
+    path: '/admin/areas',
+    element: (
+      <AppShell>
+        <p>Contenido de la página</p>
+      </AppShell>
+    ),
+  },
 ];
 
 function conSesion(usuario = USUARIO) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: tokenVigente(), usuario }));
 }
 
-function renderShell() {
-  const router = createMemoryRouter(rutas, { initialEntries: ['/perfil'] });
+function renderShell(ruta = '/perfil') {
+  const router = createMemoryRouter(rutas, { initialEntries: [ruta] });
   render(
     <AuthProvider>
       <RouterProvider router={router} />
@@ -67,7 +75,7 @@ describe('AppShell (AUTH-19 · menú de usuario y cierre de sesión)', () => {
     conSesion();
     renderShell();
 
-    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByText('GISU')).toBeInTheDocument();
     const boton = await botonUsuario();
     expect(boton).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByText('Estudiante')).toBeInTheDocument();
@@ -149,5 +157,124 @@ describe('AppShell (AUTH-19 · menú de usuario y cierre de sesión)', () => {
     renderShell();
 
     expect(await botonUsuario()).toHaveTextContent('PASANTE');
+  });
+});
+
+describe('AppShell (menú lateral por rol)', () => {
+  it('fija el título de la pestaña según la ruta', async () => {
+    conSesion({ ...USUARIO, rol: 'ADMIN' });
+    renderShell('/admin/areas');
+    await botonUsuario();
+
+    expect(document.title).toBe('Áreas · GISU');
+  });
+
+  const enlaces = (nav) => Array.from(nav.querySelectorAll('a')).map((a) => a.textContent);
+  const principal = () => screen.getByRole('navigation', { name: 'Principal' });
+
+  it('el estudiante ve solo Mis solicitudes, Nueva solicitud y Perfil', async () => {
+    conSesion();
+    renderShell();
+    await botonUsuario();
+
+    expect(enlaces(principal())).toEqual(['Mis solicitudes', 'Nueva solicitud', 'Perfil']);
+  });
+
+  it('el supervisor suma Bandeja y Dashboard, pero no Administración', async () => {
+    conSesion({ ...USUARIO, rol: 'SUPERVISOR', idArea: 1 });
+    renderShell();
+    await botonUsuario();
+
+    expect(enlaces(principal())).toEqual([
+      'Mis solicitudes',
+      'Nueva solicitud',
+      'Bandeja',
+      'Dashboard',
+      'Perfil',
+    ]);
+  });
+
+  it('el administrador ve además el grupo Administración, con sus 5 secciones, en cualquier pantalla', async () => {
+    conSesion({ ...USUARIO, rol: 'ADMIN' });
+    renderShell('/perfil');
+    await botonUsuario();
+
+    expect(enlaces(principal())).toEqual([
+      'Mis solicitudes',
+      'Nueva solicitud',
+      'Bandeja',
+      'Dashboard',
+      'Usuarios',
+      'Áreas',
+      'Categorías',
+      'Prioridades',
+      'Estados',
+      'Perfil',
+    ]);
+  });
+
+  it('marca con aria-current la sección de Administración en la que está, y solo esa', async () => {
+    conSesion({ ...USUARIO, rol: 'ADMIN' });
+    renderShell('/admin/areas');
+    await botonUsuario();
+
+    expect(screen.getByRole('link', { name: 'Áreas' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getAllByRole('link', { current: 'page' })).toHaveLength(1);
+  });
+
+  it('contraer el menú lo pliega, cambia la etiqueta del botón y recuerda la preferencia', async () => {
+    conSesion();
+    const user = userEvent.setup();
+    renderShell();
+    await botonUsuario();
+    const contenedor = document.querySelector('.app-shell');
+    expect(contenedor).not.toHaveClass('app-shell--colapsado');
+
+    await user.click(screen.getByRole('button', { name: 'Contraer menú' }));
+
+    expect(contenedor).toHaveClass('app-shell--colapsado');
+    expect(screen.getByRole('button', { name: 'Expandir menú' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(localStorage.getItem('gisu_menu_colapsado')).toBe('1');
+    // Plegado, cada enlace sigue teniendo su nombre accesible.
+    expect(screen.getByRole('link', { name: 'Mis solicitudes' })).toBeInTheDocument();
+  });
+
+  it('abre el cajón con el botón de menú, mueve el foco adentro y vuelve con Esc', async () => {
+    conSesion();
+    const user = userEvent.setup();
+    renderShell();
+    const abrir = await screen.findByRole('button', { name: 'Abrir menú' });
+    expect(abrir).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(abrir);
+
+    expect(abrir).toHaveAttribute('aria-expanded', 'true');
+    expect(document.querySelector('.app-shell')).toHaveClass('app-shell--cajon');
+    expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveFocus();
+    // Con el cajón abierto el resto de la página no es alcanzable.
+    expect(document.querySelector('.app-shell__principal')).toHaveAttribute('inert');
+
+    await user.keyboard('{Escape}');
+
+    expect(abrir).toHaveAttribute('aria-expanded', 'false');
+    expect(document.querySelector('.app-shell__principal')).not.toHaveAttribute('inert');
+    expect(abrir).toHaveFocus();
+  });
+
+  it('el botón Cerrar menú y un clic en el fondo cierran el cajón', async () => {
+    conSesion();
+    const user = userEvent.setup();
+    renderShell();
+    await user.click(await screen.findByRole('button', { name: 'Abrir menú' }));
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar menú' }));
+    expect(document.querySelector('.app-shell')).not.toHaveClass('app-shell--cajon');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    await user.click(document.querySelector('.app-shell__velo'));
+    expect(document.querySelector('.app-shell')).not.toHaveClass('app-shell--cajon');
   });
 });

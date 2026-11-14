@@ -1,4 +1,6 @@
+import Button from '../../../components/ui/Button.jsx';
 import { useId, useRef, useState } from 'react';
+import Select from '../../../components/ui/Select.jsx';
 import './FiltrosDashboard.css';
 
 const RANGO_INVALIDO = 'La fecha inicial no puede ser posterior a la fecha final.';
@@ -88,19 +90,19 @@ export default function FiltrosDashboard({ onAplicar, areas, errorAreas }) {
       {areas?.length > 0 ? (
         <div className="filtros-dashboard__campo">
           <label htmlFor={`${id}-area`}>Área</label>
-          <select id={`${id}-area`} value={idArea} onChange={(e) => setIdArea(e.target.value)}>
+          <Select id={`${id}-area`} value={idArea} onChange={(e) => setIdArea(e.target.value)}>
             <option value="">Todas las áreas</option>
             {areas.map((area) => (
               <option key={area.id} value={area.id}>
                 {area.nombre}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       ) : null}
-      <button type="submit" className="filtros-dashboard__boton">
+      <Button type="submit" icono="search">
         Aplicar
-      </button>
+      </Button>
       <p id={pistaId} className="filtros-dashboard__pista">
         {PISTA}
       </p>

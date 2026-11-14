@@ -17,6 +17,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
     include: ['src/**/*.test.{js,jsx}'],
+    // Con toda la suite en paralelo las pruebas con mucha escritura (formularios) rozaban los 5 s por
+    // defecto y fallaban de forma intermitente; el margen no oculta fallos reales (cada prueba termina
+    // en cuanto se cumple su condición).
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

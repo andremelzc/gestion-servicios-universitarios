@@ -9,12 +9,17 @@
 //   TECNICO/SUPERVISOR → /bandeja · ADMIN → /dashboard.
 // - `consumirAvisoSesion()` (AUTH-15) muestra una sola vez el aviso de sesión expirada.
 import { useEffect, useState } from 'react';
+import Alert from '../../../components/ui/Alert.jsx';
+import Button from '../../../components/ui/Button.jsx';
+import MarcaGisu from '../../../components/layout/MarcaGisu.jsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { rolPuedeAcceder } from '../../../app/rutasAcceso.js';
 import { consumirAvisoSesion } from '../../../services/apiClient.js';
 import { interpretarError } from '../../../services/errores.js';
+import { useTituloPagina } from '../../../app/titulos.js';
 import { useAuth } from '../AuthContext.jsx';
 import { LoginSchema } from '../schemas.js';
+import './AuthLayout.css';
 import './LoginPage.css';
 
 const CAMPOS = ['correo', 'password'];
@@ -60,6 +65,7 @@ function aErroresPorCampo(errorZod) {
 }
 
 export default function LoginPage() {
+  useTituloPagina('Iniciar sesión');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -124,74 +130,81 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="login">
-      <h1 className="login__titulo">Iniciar sesión</h1>
+    <main className="login auth-pagina">
+      <aside className="auth-marca">
+        <MarcaGisu />
+        <p className="auth-marca__lema">
+          Registra tus solicitudes de servicio y sigue su atención desde un solo lugar.
+        </p>
+      </aside>
+      <div className="auth-tarjeta">
+        <h1 className="login__titulo">Iniciar sesión</h1>
 
-      {errorGeneral && (
-        <div className="login__alerta" role="alert">
-          {errorGeneral}
-        </div>
-      )}
+        {errorGeneral && (
+          <Alert tipo="error" className="login__alerta">
+            {errorGeneral}
+          </Alert>
+        )}
 
-      <form className="login__form" noValidate onSubmit={alEnviar}>
-        <div className="login__campo">
-          <label htmlFor="correo">Correo institucional</label>
-          <input
-            id="correo"
-            name="correo"
-            type="email"
-            autoComplete="email"
-            placeholder="nombre@universidad.edu"
-            value={valores.correo}
-            onChange={alCambiarCampo('correo')}
-            aria-invalid={Boolean(errores.correo)}
-            aria-describedby={errores.correo ? 'error-correo' : undefined}
-          />
-          {errores.correo && (
-            <p className="login__error" id="error-correo" role="alert">
-              {errores.correo}
-            </p>
-          )}
-        </div>
-
-        <div className="login__campo">
-          <label htmlFor="password">Contraseña</label>
-          <div className="login__password">
+        <form className="login__form" noValidate onSubmit={alEnviar}>
+          <div className="login__campo">
+            <label htmlFor="correo">Correo institucional</label>
             <input
-              id="password"
-              name="password"
-              type={verPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={valores.password}
-              onChange={alCambiarCampo('password')}
-              aria-invalid={Boolean(errores.password)}
-              aria-describedby={errores.password ? 'error-password' : undefined}
+              id="correo"
+              name="correo"
+              type="email"
+              autoComplete="email"
+              placeholder="nombre@universidad.edu"
+              value={valores.correo}
+              onChange={alCambiarCampo('correo')}
+              aria-invalid={Boolean(errores.correo)}
+              aria-describedby={errores.correo ? 'error-correo' : undefined}
             />
-            <button
-              type="button"
-              className="login__ver"
-              aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              onClick={() => setVerPassword((visible) => !visible)}
-            >
-              {verPassword ? 'Ocultar' : 'Mostrar'}
-            </button>
+            {errores.correo && (
+              <p className="login__error" id="error-correo" role="alert">
+                {errores.correo}
+              </p>
+            )}
           </div>
-          {errores.password && (
-            <p className="login__error" id="error-password" role="alert">
-              {errores.password}
-            </p>
-          )}
-        </div>
 
-        <button type="submit" className="login__enviar" disabled={enviando} aria-busy={enviando}>
-          {enviando && <span className="login__spinner" aria-hidden="true" />}
-          {enviando ? 'Iniciando sesión…' : 'Iniciar sesión'}
-        </button>
-      </form>
+          <div className="login__campo">
+            <label htmlFor="password">Contraseña</label>
+            <div className="login__password">
+              <input
+                id="password"
+                name="password"
+                type={verPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={valores.password}
+                onChange={alCambiarCampo('password')}
+                aria-invalid={Boolean(errores.password)}
+                aria-describedby={errores.password ? 'error-password' : undefined}
+              />
+              <button
+                type="button"
+                className="login__ver"
+                aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                onClick={() => setVerPassword((visible) => !visible)}
+              >
+                {verPassword ? 'Ocultar' : 'Mostrar'}
+              </button>
+            </div>
+            {errores.password && (
+              <p className="login__error" id="error-password" role="alert">
+                {errores.password}
+              </p>
+            )}
+          </div>
 
-      <p className="login__pie">
-        ¿Primera vez? <Link to="/registro">Crear cuenta</Link>
-      </p>
+          <Button type="submit" cargando={enviando} className="login__enviar">
+            {enviando ? 'Iniciando sesión…' : 'Iniciar sesión'}
+          </Button>
+        </form>
+
+        <p className="login__pie">
+          ¿Primera vez? <Link to="/registro">Crear cuenta</Link>
+        </p>
+      </div>
     </main>
   );
 }

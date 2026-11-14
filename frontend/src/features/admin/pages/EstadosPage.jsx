@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import Toast from '../../../components/ui/Toast.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import EstadoFormModal, { MuestraColor } from '../components/EstadoFormModal.jsx';
 import useCrud from '../hooks/useCrud.js';
@@ -55,12 +57,12 @@ export default function EstadosPage() {
 
   return (
     <main className="admin-pagina">
-      <div className="admin-pagina__cabecera">
-        <h1>Administración de estados</h1>
-      </div>
-      <p role="status" className="admin-exito">
-        {aviso}
-      </p>
+      <PageHeader
+        titulo="Administración de estados"
+        descripcion="Personaliza el nombre, la descripción y el color de cada estado."
+        icono="layers"
+      />
+      <Toast mensaje={aviso} />
 
       <DataTable
         caption="Estados"

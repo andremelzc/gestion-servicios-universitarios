@@ -4,11 +4,14 @@
 // (api-rest §3.2): el backend responde ordenado por fecha descendente y con el sobre de §2.3.
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import EstadoBadge from '../../../components/ui/EstadoBadge.jsx';
 import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
 import { etiquetaEstado } from '../../../components/ui/catalogos.js';
 import useCrud from '../../admin/hooks/useCrud.js';
+import Select from '../../../components/ui/Select.jsx';
 import './MisSolicitudesPage.css';
 
 const RUTA_MIS_SOLICITUDES = '/solicitudes/mis-solicitudes';
@@ -29,7 +32,7 @@ const FORMATO_FECHA = new Intl.DateTimeFormat('es-PE', {
 });
 
 function formatearFecha(iso) {
-  if (!iso) return '—';
+  if (!iso) return 'Sin fecha';
   const conZona = /(Z|[+-]\d{2}:?\d{2})$/.test(iso) ? iso : `${iso}Z`;
   return FORMATO_FECHA.format(new Date(conZona));
 }
@@ -69,6 +72,7 @@ const COLUMNAS = [
 ];
 
 const MENSAJE_VACIO = 'Aún no tienes solicitudes. Crea la primera para empezar.';
+const MENSAJE_SIN_COINCIDENCIAS = 'No hay solicitudes en este estado.';
 
 export default function MisSolicitudesPage() {
   const [estado, setEstado] = useState('');
@@ -77,7 +81,7 @@ export default function MisSolicitudesPage() {
   const filtroEstado = (
     <label className="data-table__campo">
       Estado
-      <select
+      <Select
         className="data-table__control"
         value={estado}
         onChange={(evento) => setEstado(evento.currentTarget.value)}
@@ -88,18 +92,22 @@ export default function MisSolicitudesPage() {
             {etiquetaEstado(codigo)}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 
   return (
     <main className="mis-solicitudes">
-      <header className="mis-solicitudes__cabecera">
-        <h1 className="mis-solicitudes__titulo">Mis solicitudes</h1>
-        <Link className="mis-solicitudes__nueva" to="/solicitudes/nueva">
-          Nueva solicitud
-        </Link>
-      </header>
+      <PageHeader
+        titulo="Mis solicitudes"
+        descripcion="Consulta el estado de tus solicitudes de servicio."
+        icono="clipboard"
+        acciones={
+          <Button como={Link} to="/solicitudes/nueva" icono="plus">
+            Nueva solicitud
+          </Button>
+        }
+      />
 
       <DataTable
         caption="Mis solicitudes"
@@ -114,11 +122,13 @@ export default function MisSolicitudesPage() {
         filters={filtroEstado}
         page={lista.page}
         onPageChange={lista.onPageChange}
-        emptyMessage={MENSAJE_VACIO}
+        emptyMessage={estado ? MENSAJE_SIN_COINCIDENCIAS : MENSAJE_VACIO}
         emptyAction={
-          <Link className="mis-solicitudes__nueva" to="/solicitudes/nueva">
-            Crear una
-          </Link>
+          estado ? null : (
+            <Button como={Link} to="/solicitudes/nueva" icono="plus">
+              Crear una
+            </Button>
+          )
         }
       />
     </main>

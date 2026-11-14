@@ -44,7 +44,9 @@ export default function useBandeja(filtros) {
     page: mostrado.page,
     error: mostrado.error,
     consultadoEn: mostrado.consultadoEn,
-    isLoading: !mismaConsulta,
+    // Error más recarga en vuelo ("Reintentar"): se trata como carga para que el aviso no quede
+    // congelado mientras llega la respuesta (AUD-07).
+    isLoading: !mismaConsulta || (mostrado.error !== null && vigente === null),
     isRefreshing: mismaConsulta && vigente === null,
     refetch,
   };

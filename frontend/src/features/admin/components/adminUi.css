@@ -14,7 +14,7 @@
   width: 100%;
   min-height: var(--touch-target);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-control);
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-text);
@@ -56,7 +56,12 @@
   gap: var(--space-2);
 }
 
+/* Botones de administración: misma apariencia que Button (components/ui/ui.css). */
 .admin-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-width: var(--touch-target);
   min-height: var(--touch-target);
   padding: 0 var(--space-4);
@@ -64,12 +69,24 @@
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.admin-boton:hover {
+  background: var(--tinte-primary);
 }
 
 .admin-boton--primario {
   background: var(--color-primary);
   color: var(--color-surface);
+  box-shadow: 0 1px 2px rgb(29 78 216 / 0.35);
+}
+
+.admin-boton--primario:hover {
+  background: var(--color-primary-hover);
 }
 
 .admin-boton--peligro {
@@ -78,10 +95,15 @@
   color: var(--color-surface);
 }
 
+.admin-boton--peligro:hover {
+  background: #991b1b;
+}
+
 .admin-boton:disabled,
 .admin-boton[aria-disabled='true'] {
-  border-color: var(--color-border);
+  border-color: transparent;
   background: var(--color-disabled-bg);
+  box-shadow: none;
   color: var(--color-disabled-text);
   cursor: not-allowed;
 }
@@ -96,33 +118,6 @@
   display: grid;
   gap: var(--space-4);
   padding: var(--space-4);
-}
-
-.admin-pagina__cabecera {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.admin-pagina__cabecera h1 {
-  margin: 0;
-  font-size: var(--font-size-h2);
-}
-
-.admin-exito {
-  margin: 0;
-  color: var(--color-success);
-  font-weight: 600;
-}
-
-.admin-exito:empty {
-  display: none;
-}
-
-.admin-exito::before {
-  content: '✓ ';
 }
 
 /* Muestra de color: círculo y texto (el color nunca es el único indicador). */

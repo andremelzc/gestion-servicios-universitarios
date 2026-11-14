@@ -24,6 +24,7 @@ springdoc:
     enabled: false # Desactivar interfaz UI de Swagger en prod
 
 server:
+  port: 8080
   error:
     include-message: never # No filtrar mensajes de excepción internos al cliente
     include-stacktrace: never # Ocultar trazas de pila (Stacktraces)

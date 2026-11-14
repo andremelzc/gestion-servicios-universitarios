@@ -52,7 +52,13 @@ export default function BarrasChart({ items, horizontal = false, etiquetaValor }
           cursor={{ fill: 'rgba(17, 24, 39, 0.06)' }}
           formatter={(valor) => [formatValor(valor), etiquetaValor]}
         />
-        <Bar dataKey="valor" name={etiquetaValor} shape={BarraColor} isAnimationActive={false}>
+        <Bar
+          dataKey="valor"
+          maxBarSize={56}
+          name={etiquetaValor}
+          shape={BarraColor}
+          isAnimationActive={false}
+        >
           <LabelList
             dataKey="valor"
             position={horizontal ? 'right' : 'top'}

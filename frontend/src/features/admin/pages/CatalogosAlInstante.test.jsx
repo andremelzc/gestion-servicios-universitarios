@@ -1,3 +1,4 @@
+import { esperarOpcion } from '../../../test/seleccionar.js';
 import { renderHook, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -46,7 +47,7 @@ describe('Catálogos al instante tras un cambio del administrador (CA-1)', () =>
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole('option', { name: 'Pizarras Interactivas' })).toBeVisible();
+    await esperarOpcion(screen.getByLabelText('Categoría'), 'Pizarras Interactivas');
   });
 
   it('[ADM-20 CA-1] una categoría desactivada desaparece de los filtros de la bandeja', async () => {

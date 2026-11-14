@@ -1,90 +1,469 @@
-/* Shell de la aplicación autenticada (UX §3). Tokens con respaldo de UX §2.1/§2.2. */
-.app-shell__cabecera {
+/* Shell de la aplicación autenticada (UX §3).
+   Escritorio (≥ 1024 px): menú lateral fijo en azul primario (§2.1, texto blanco con contraste 6,7:1),
+   plegable a una columna de iconos, y barra superior blanca con el menú de usuario.
+   Móvil: el menú lateral es un cajón que se abre desde la barra superior. */
+.app-shell {
+  --lateral-ancho: 256px;
+  display: grid;
+  grid-template-columns: var(--lateral-ancho) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-shell--colapsado {
+  --lateral-ancho: 76px;
+}
+
+.app-shell__principal {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---------- Menú lateral ---------- */
+.app-shell__lateral {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100vh;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  overflow: hidden;
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.app-shell__lateral-cabecera {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-2, 8px);
-  padding: var(--space-3, 12px) var(--space-4, 16px);
-  background: var(--color-surface, #ffffff);
-  border-bottom: 1px solid var(--color-border, #d1d5db);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-3);
+  border-bottom: 1px solid rgb(255 255 255 / 0.2);
 }
 
-.app-shell__marca {
+.app-shell__lateral .marca-gisu {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.app-shell__lateral .marca-gisu__sigla {
+  font-size: 1.75rem;
+  color: var(--color-surface);
+}
+
+.app-shell__lateral .marca-gisu__nombre {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--color-surface);
+  opacity: 0.85;
+}
+
+.app-shell__nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  margin-right: -6px;
+  padding-right: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+  scrollbar-width: thin;
+}
+
+/* Cuenta va anclada al pie del menú y siempre visible; el resto de grupos se agrupa arriba y hace
+   scroll por debajo de ella si no caben. */
+.app-shell__grupo:last-child {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  background: var(--color-primary);
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.app-shell__grupo-titulo {
+  margin: 0 0 var(--space-2);
+  padding: 0 var(--space-3);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text, #111827);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
 }
 
+.app-shell__nav-lista {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell__enlace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius);
+  color: var(--color-surface);
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.app-shell__enlace:hover {
+  background: rgb(255 255 255 / 0.16);
+  color: var(--color-surface);
+}
+
+.app-shell__enlace[aria-current='page'] {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.app-shell__enlace:focus-visible,
+.app-shell__cerrar-cajon:focus-visible {
+  outline: 3px solid var(--color-surface);
+  outline-offset: 2px;
+}
+
+.app-shell__cerrar-cajon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin: -6px -6px 0 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--color-surface);
+  cursor: pointer;
+}
+
+.app-shell__velo {
+  display: none;
+}
+
+/* ---------- Barra superior ---------- */
+.app-shell__cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.app-shell__icono-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.app-shell__icono-boton:hover {
+  background: var(--tinte-neutro);
+  color: var(--color-text);
+}
+
+.app-shell__icono-boton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.app-shell__hamburguesa,
+.app-shell__marca-movil {
+  display: none;
+}
+
+.app-shell__marca-movil::before {
+  content: 'GISU';
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- Menú de usuario ---------- */
 .app-shell__usuario {
   position: relative;
+  margin-left: auto;
 }
 
 .app-shell__boton {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  min-height: var(--touch-target, 44px);
-  padding: var(--space-1, 4px) var(--space-3, 12px);
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #d1d5db);
-  border-radius: var(--radius, 8px);
-  color: var(--color-text, #111827);
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-target);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  text-align: left;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .app-shell__boton:hover {
-  border-color: var(--color-primary, #1d4ed8);
+  background: var(--color-bg);
 }
 
 .app-shell__boton:focus-visible {
-  outline: 3px solid var(--color-focus, #2563eb);
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 
+.app-shell__avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--tinte-primary);
+  border-radius: 50%;
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.app-shell__datos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
 .app-shell__nombre {
-  font-size: var(--font-size-small, 0.875rem);
+  font-size: var(--font-size-small);
   font-weight: 600;
 }
 
 .app-shell__rol {
-  font-size: var(--font-size-small, 0.875rem);
-  color: var(--color-text-muted, #4b5563);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.app-shell__flecha {
+  color: var(--color-text-muted);
 }
 
 .app-shell__menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   right: 0;
   z-index: 10;
-  min-width: 180px;
-  padding: var(--space-1, 4px);
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #d1d5db);
-  border-radius: var(--radius, 8px);
-  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06), 0 1px 3px rgb(17 24 39 / 0.1));
+  min-width: 200px;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
+  color: var(--color-text);
 }
 
 .app-shell__menu-opcion {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   width: 100%;
-  min-height: var(--touch-target, 44px);
-  padding: var(--space-2, 8px) var(--space-3, 12px);
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: 0;
-  border-radius: calc(var(--radius, 8px) - 2px);
-  color: var(--color-text, #111827);
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--color-text);
   text-align: left;
   cursor: pointer;
 }
 
 .app-shell__menu-opcion:hover,
 .app-shell__menu-opcion:focus-visible {
-  background: var(--color-bg, #f3f4f6);
+  background: var(--color-bg);
 }
 
 .app-shell__menu-opcion:focus-visible {
-  outline: 3px solid var(--color-focus, #2563eb);
+  outline: 3px solid var(--color-focus);
   outline-offset: -3px;
+}
+
+/* AUD-11: enlace de salto, visible solo al recibir foco. */
+.app-shell__salto {
+  position: absolute;
+  left: var(--space-2);
+  top: -100px;
+  z-index: 50;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-focus);
+  border-radius: var(--radius);
+}
+
+.app-shell__salto:focus {
+  top: var(--space-2);
+}
+
+.app-shell__contenido {
+  flex: 1;
+}
+
+.app-shell__contenido:focus {
+  outline: none;
+}
+
+/* Ancho común del contenido (AUD-20). `:where` deja la especificidad en cero: una página con su
+   propio max-width (formulario, confirmación) lo conserva. */
+:where(.app-shell__contenido > main) {
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+/* Las páginas en rejilla no se encogen por debajo de su contenido por defecto: sin esto una tabla
+   ancha ensancha la página en vez de usar su propio scroll horizontal. */
+.admin-pagina,
+.bandeja-supervisor,
+.bandeja-tecnico {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- Escritorio: menú plegado a iconos ---------- */
+@media (min-width: 1024px) {
+  .app-shell--colapsado .app-shell__lateral {
+    padding-inline: var(--space-2);
+  }
+
+  .app-shell--colapsado .app-shell__lateral-cabecera {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .app-shell--colapsado .marca-gisu__nombre,
+  .app-shell--colapsado .app-shell__grupo-titulo {
+    display: none;
+  }
+
+  /* Sin títulos, una línea fina separa los grupos en la columna de iconos. */
+  .app-shell--colapsado .app-shell__grupo + .app-shell__grupo {
+    padding-top: var(--space-3);
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+  }
+
+  .app-shell--colapsado .marca-gisu__sigla {
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .app-shell--colapsado .app-shell__enlace {
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Solo ocultación visual: el enlace conserva su nombre accesible. */
+  .app-shell--colapsado .app-shell__etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* ---------- Móvil y tablet: el menú lateral es un cajón ---------- */
+@media (max-width: 1023px) {
+  .app-shell {
+    display: block;
+  }
+
+  .app-shell__lateral {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: min(288px, 86vw);
+    height: 100dvh;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
+    box-shadow: var(--shadow-modal);
+  }
+
+  .app-shell--cajon .app-shell__lateral {
+    visibility: visible;
+    transform: none;
+  }
+
+  /* En pantalla táctil los enlaces del cajón mantienen el mínimo de 44 px (UX §2.2). */
+  .app-shell__enlace {
+    min-height: var(--touch-target);
+  }
+
+  .app-shell__velo {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    background: var(--color-overlay);
+  }
+
+  .app-shell__cerrar-cajon {
+    display: inline-flex;
+  }
+
+  .app-shell__hamburguesa {
+    display: inline-flex;
+  }
+
+  .app-shell__marca-movil {
+    display: block;
+  }
+
+  .app-shell__colapsar {
+    display: none;
+  }
+
+  /* Solo ocultación visual: el botón conserva su nombre accesible. */
+  .app-shell__datos {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .app-shell__flecha {
+    display: none;
+  }
+
+  .app-shell__boton {
+    padding: var(--space-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell__enlace,
+  .app-shell__boton,
+  .app-shell__lateral {
+    transition: none;
+  }
 }

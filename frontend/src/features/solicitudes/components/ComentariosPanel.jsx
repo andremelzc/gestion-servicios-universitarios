@@ -1,6 +1,11 @@
 import { useEffect, useId, useState } from 'react';
+import { LineasCarga } from '../../../components/ui/Skeleton.jsx';
+import EmptyState from '../../../components/ui/EmptyState.jsx';
+import Card from '../../../components/ui/Card.jsx';
 import { apiClient } from '../../../services/apiClient.js';
 import { contieneHtml } from '../../auth/schemas.js';
+import '../../admin/components/adminUi.css';
+import './ComentariosPanel.css';
 
 const INTERNOS = ['TECNICO', 'SUPERVISOR', 'ADMIN'];
 
@@ -25,6 +30,7 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
   const [error, setError] = useState(null);
   const [errorCarga, setErrorCarga] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
   const [intento, setIntento] = useState(0);
   const ruta = `/solicitudes/${encodeURIComponent(solicitudId)}/comentarios`;
 
@@ -55,6 +61,7 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
     }
     setGuardando(true);
     setError(null);
+    setEnviado(false);
     try {
       await apiClient.post(ruta, {
         comentario: texto.trim(),
@@ -62,6 +69,7 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
       });
       setTexto('');
       setPrivado(false);
+      setEnviado(true);
       setIntento((valor) => valor + 1);
     } catch (fallo) {
       setError(
@@ -75,8 +83,7 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
   }
 
   return (
-    <section aria-labelledby={`${id}-titulo`}>
-      <h2 id={`${id}-titulo`}>Comentarios</h2>
+    <Card titulo="Comentarios" icono="message" tono="exito">
       {errorCarga && (
         <p role="alert">
           {errorCarga}{' '}
@@ -85,9 +92,20 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
           </button>
         </p>
       )}
-      {error && <p role="alert">{error}</p>}
-      {comentarios === null && !errorCarga && <p role="status">Cargando comentarios…</p>}
-      {comentarios?.length === 0 && <p>No hay comentarios.</p>}
+      {error && (
+        <p role="alert" id={`${id}-error`} className="admin-error">
+          {error}
+        </p>
+      )}
+      {comentarios === null && !errorCarga && (
+        <div role="status" aria-busy="true">
+          <span className="sr-only">Cargando comentarios…</span>
+          <LineasCarga cantidad={2} />
+        </div>
+      )}
+      {comentarios?.length === 0 && (
+        <EmptyState compacto icono="message" titulo="No hay comentarios." />
+      )}
       {comentarios?.length > 0 && (
         <ul>
           {comentarios.map((item) => {
@@ -104,15 +122,26 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
         </ul>
       )}
       {puedeComentar && (
-        <form onSubmit={enviar}>
-          <label htmlFor={`${id}-comentario`}>Comentario</label>
-          <textarea
-            id={`${id}-comentario`}
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            maxLength={500}
-            required
-          />
+        <form onSubmit={enviar} className="comentarios-form" noValidate>
+          <div className="admin-campo">
+            <label htmlFor={`${id}-comentario`}>Comentario</label>
+            <textarea
+              id={`${id}-comentario`}
+              value={texto}
+              onChange={(e) => {
+                setTexto(e.target.value);
+                setEnviado(false);
+              }}
+              maxLength={500}
+              rows={4}
+              aria-required="true"
+              aria-invalid={error ? 'true' : undefined}
+              aria-describedby={error ? `${id}-error ${id}-contador` : `${id}-contador`}
+            />
+            <p id={`${id}-contador`} className="admin-ayuda">
+              {texto.length} / 500
+            </p>
+          </div>
           {INTERNOS.includes(rol) && (
             <label>
               <input
@@ -123,11 +152,18 @@ export default function ComentariosPanel({ solicitudId, rol, puedeComentar = tru
               Privado para el equipo
             </label>
           )}
-          <button type="submit" disabled={guardando || !texto.trim()}>
+          <p role="status" className="admin-ayuda">
+            {enviado ? 'Comentario enviado.' : ''}
+          </p>
+          <button
+            type="submit"
+            className="admin-boton admin-boton--primario"
+            disabled={guardando || !texto.trim()}
+          >
             {guardando ? 'Enviando…' : 'Enviar comentario'}
           </button>
         </form>
       )}
-    </section>
+    </Card>
   );
 }

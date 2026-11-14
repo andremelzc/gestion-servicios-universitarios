@@ -124,7 +124,9 @@ export default function useCrud(ruta, opciones = {}) {
       .then((respuesta) => {
         if (controlador.signal.aborted) return;
         const sobre = normalizarSobre(respuesta);
-        const { page, size: tamano, totalElements, totalPages } = sobre;
+        // Spring devuelve `number`; el sobre de api-rest §2.3 usa `page`.
+        const page = sobre.page ?? sobre.number ?? 0;
+        const { size: tamano, totalElements, totalPages } = sobre;
         const data = sobre.content ?? [];
         // Página vacía tras borrar o filtrar: se retrocede a la última con datos (o a la 0).
         const destino = Math.max(totalPages - 1, 0);

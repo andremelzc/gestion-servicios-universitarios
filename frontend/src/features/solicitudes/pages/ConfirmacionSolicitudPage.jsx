@@ -30,8 +30,8 @@ export default function ConfirmacionSolicitudPage() {
           {etiquetaEstado('REGISTRADA')}: <strong>{codigo}</strong>
         </p>
         <p className="confirmacion__aviso">
-          Tu solicitud <strong>{codigo}</strong> fue registrada. Te avisaremos cuando cambie de
-          estado.
+          Tu solicitud <strong>{codigo}</strong> fue registrada. Puedes ver su estado en Mis
+          solicitudes.
         </p>
       </div>
 

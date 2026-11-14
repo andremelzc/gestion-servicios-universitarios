@@ -18,19 +18,27 @@ export default function KpiResumen({ datos }) {
         Indicadores clave
       </h2>
       <KpiGrid etiqueta="Cifras del período">
-        <KpiCard titulo="Registradas" valor={kpis.registradas} />
-        <KpiCard titulo="Pendientes" valor={kpis.pendientes} />
-        <KpiCard titulo="Atendidas" valor={kpis.atendidas} />
-        <KpiCard titulo="% Resueltas" valor={kpis.porcentajeResueltas} unidad="%" />
+        <KpiCard titulo="Registradas" valor={kpis.registradas} icono="inbox" tono="primario" />
+        <KpiCard titulo="Pendientes" valor={kpis.pendientes} icono="clock" tono="advertencia" />
+        <KpiCard titulo="Atendidas" valor={kpis.atendidas} icono="check" tono="violeta" />
         <KpiCard
-          titulo="MTTR"
+          titulo="% Resueltas"
+          valor={kpis.porcentajeResueltas}
+          unidad="%"
+          icono="percent"
+          tono="exito"
+        />
+        <KpiCard
+          titulo="Tiempo medio de resolución"
           valor={kpis.mttrHoras}
           unidad="h"
+          icono="clock"
+          tono="neutro"
           descripcion={
             esNumero(kpis.mttrHoras) ? undefined : 'Aún no hay solicitudes resueltas en el período.'
           }
         />
-        <KpiCard titulo="Vencidas" valor={kpis.vencidas} />
+        <KpiCard titulo="Vencidas" valor={kpis.vencidas} icono="alert" tono="peligro" destacada />
       </KpiGrid>
     </section>
   );

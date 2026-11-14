@@ -8,6 +8,7 @@ import { server } from '../../../test/server.js';
 import { MSG_ARCHIVO_GRANDE, TAMANO_MAXIMO_BYTES } from '../evidencias.js';
 import { DESCRIPCION_MAX, DESCRIPCION_MIN, mensajeDescripcionCorta } from '../schemas.js';
 import NuevaSolicitudPage, { CLAVE_BORRADOR } from './NuevaSolicitudPage.jsx';
+import { seleccionar, esperarOpcion, opcionesDe } from '../../../test/seleccionar.js';
 
 const CAMPOS_FORMULARIO = [
   'Título',
@@ -51,10 +52,10 @@ function problema(status, detail, { errores, tipo = 'validacion' } = {}) {
 }
 
 async function llenarValido(user) {
-  await screen.findByRole('option', { name: 'Equipos de Cómputo' });
+  await esperarOpcion(screen.getByLabelText('Categoría'), 'Equipos de Cómputo');
   await user.type(screen.getByLabelText('Título'), 'Proyector sin imagen');
-  await user.selectOptions(screen.getByLabelText('Categoría'), '2');
-  await user.selectOptions(screen.getByLabelText('Prioridad'), '3');
+  await seleccionar(user, screen.getByLabelText('Categoría'), '2');
+  await seleccionar(user, screen.getByLabelText('Prioridad'), '3');
   await user.type(screen.getByLabelText('Campus'), 'Campus Central');
   await user.type(screen.getByLabelText('Ubicación (aula/laboratorio)'), 'Pabellón B - Aula 402');
   await user.type(
@@ -118,9 +119,11 @@ describe('NuevaSolicitudPage (REG-15 · US-05/US-06)', () => {
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeEnabled();
 
     // Catálogos de solo activos (RN-14) con la prioridad en etiqueta legible.
-    expect(await screen.findByRole('option', { name: 'Equipos de Cómputo' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Mobiliario' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Alta' })).toBeInTheDocument();
+    await esperarOpcion(screen.getByLabelText('Categoría'), 'Equipos de Cómputo');
+    expect(opcionesDe(screen.getByLabelText('Categoría')).map((o) => o.etiqueta)).toContain(
+      'Mobiliario',
+    );
+    expect(opcionesDe(screen.getByLabelText('Prioridad')).map((o) => o.etiqueta)).toContain('Alta');
   });
 
   it('[REG-15] CA-3: bloquea el envío y marca los campos obligatorios', async () => {
@@ -175,8 +178,8 @@ describe('NuevaSolicitudPage (REG-15 · US-05/US-06)', () => {
     const { unmount } = renderPagina();
 
     await user.type(screen.getByLabelText('Título'), 'Proyector sin imagen');
-    await screen.findByRole('option', { name: 'Alta' });
-    await user.selectOptions(screen.getByLabelText('Prioridad'), '3');
+    await esperarOpcion(screen.getByLabelText('Prioridad'), 'Alta');
+    await seleccionar(user, screen.getByLabelText('Prioridad'), '3');
 
     expect(JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR))).toMatchObject({
       titulo: 'Proyector sin imagen',
@@ -187,8 +190,8 @@ describe('NuevaSolicitudPage (REG-15 · US-05/US-06)', () => {
     renderPagina();
 
     expect(screen.getByLabelText('Título')).toHaveValue('Proyector sin imagen');
-    await screen.findByRole('option', { name: 'Alta' });
-    expect(screen.getByLabelText('Prioridad')).toHaveValue('3');
+    await esperarOpcion(screen.getByLabelText('Prioridad'), 'Alta');
+    expect(screen.getByLabelText('Prioridad')).toHaveAttribute('data-valor', '3');
   });
 
   it('[REG-15] CA-1/UAT-02: envía multipart y navega a la confirmación con el código', async () => {
@@ -299,7 +302,7 @@ describe('NuevaSolicitudPage (REG-15 · US-05/US-06)', () => {
     expect(await screen.findByText('Ocurrió un error inesperado.')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Reintentar' }));
-    expect(await screen.findByRole('option', { name: 'Alta' })).toBeInTheDocument();
+    await esperarOpcion(screen.getByLabelText('Prioridad'), 'Alta');
     expect(screen.queryByText('Ocurrió un error inesperado.')).not.toBeInTheDocument();
   });
 });

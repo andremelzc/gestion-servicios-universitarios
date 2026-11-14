@@ -62,6 +62,7 @@ export async function listarPrioridades(opciones) {
 // El backend aún no expone `/evaluar` (la fachada va con MSW hasta que exista).
 export const evaluar = (id, cuerpo) => apiClient.put(`/solicitudes/${id}/evaluar`, cuerpo);
 export const asignar = (id, cuerpo) => apiClient.put(`/solicitudes/${id}/asignar`, cuerpo);
+export const cerrar = (id, cuerpo) => apiClient.put(`/solicitudes/${id}/cerrar`, cuerpo);
 export const iniciarAtencion = (id) => apiClient.put(`/solicitudes/${id}/iniciar-atencion`);
 
 /**

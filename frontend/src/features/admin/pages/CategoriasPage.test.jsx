@@ -6,6 +6,7 @@ import { apiClient } from '../../../services/apiClient.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import CategoriasPage from './CategoriasPage.jsx';
+import { esperarOpcion, seleccionar } from '../../../test/seleccionar.js';
 
 const fila = async (nombre) => within(await screen.findByRole('row', { name: new RegExp(nombre) }));
 
@@ -18,7 +19,7 @@ async function abrirAlta() {
   await userEvent.click(await screen.findByRole('button', { name: 'Nueva categoría' }));
   const dialogo = within(screen.getByRole('dialog', { name: 'Nueva categoría' }));
   // El selector de área se llena con `GET /areas`: se espera a que esté la opción.
-  await dialogo.findByRole('option', { name: 'Infraestructura' });
+  await esperarOpcion(dialogo.getByLabelText('Área responsable'), 'Infraestructura');
   return dialogo;
 }
 
@@ -39,7 +40,7 @@ describe('CategoriasPage (US-15)', () => {
     render(<CategoriasPage />);
     const dialogo = await abrirAlta();
     await userEvent.type(dialogo.getByLabelText('Nombre'), 'Pizarras Interactivas');
-    await userEvent.selectOptions(dialogo.getByLabelText('Área responsable'), '2');
+    await seleccionar(userEvent, dialogo.getByLabelText('Área responsable'), '2');
     await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '36');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
@@ -54,7 +55,7 @@ describe('CategoriasPage (US-15)', () => {
   it('[US-15] editar actualiza la fila y precarga los valores', async () => {
     render(<CategoriasPage />);
     const dialogo = within(await abrirEdicion('Mobiliario'));
-    await dialogo.findByRole('option', { name: 'Infraestructura' });
+    await esperarOpcion(dialogo.getByLabelText('Área responsable'), 'Infraestructura');
 
     expect(dialogo.getByLabelText('Nombre')).toHaveValue('Mobiliario');
     const sla = dialogo.getByLabelText('SLA estándar (horas)');
@@ -92,7 +93,7 @@ describe('CategoriasPage (US-15)', () => {
     render(<CategoriasPage />);
     const dialogo = await abrirAlta();
     await userEvent.type(dialogo.getByLabelText('Nombre'), 'Mobiliario');
-    await userEvent.selectOptions(dialogo.getByLabelText('Área responsable'), '2');
+    await seleccionar(userEvent, dialogo.getByLabelText('Área responsable'), '2');
     await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '10');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
@@ -106,7 +107,7 @@ describe('CategoriasPage (US-15)', () => {
   it('[US-15] un 409 al editar también se asocia al campo Nombre', async () => {
     render(<CategoriasPage />);
     const dialogo = within(await abrirEdicion('Mobiliario'));
-    await dialogo.findByRole('option', { name: 'Infraestructura' });
+    await esperarOpcion(dialogo.getByLabelText('Área responsable'), 'Infraestructura');
     const nombre = dialogo.getByLabelText('Nombre');
     await userEvent.clear(nombre);
     await userEvent.type(nombre, 'Equipos de Cómputo');
@@ -138,7 +139,7 @@ describe('CategoriasPage (US-15)', () => {
     render(<CategoriasPage />);
     const dialogo = await abrirAlta();
     await userEvent.type(dialogo.getByLabelText('Nombre'), 'Otra');
-    await userEvent.selectOptions(dialogo.getByLabelText('Área responsable'), '1');
+    await seleccionar(userEvent, dialogo.getByLabelText('Área responsable'), '1');
     await userEvent.type(dialogo.getByLabelText('SLA estándar (horas)'), '10');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 

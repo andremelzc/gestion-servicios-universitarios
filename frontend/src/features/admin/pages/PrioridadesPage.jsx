@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import Toast from '../../../components/ui/Toast.jsx';
 import DataTable from '../../../components/ui/DataTable.jsx';
 import ConfirmarDesactivacion from '../components/ConfirmarDesactivacion.jsx';
 import PrioridadFormModal from '../components/PrioridadFormModal.jsx';
@@ -75,20 +78,18 @@ export default function PrioridadesPage() {
 
   return (
     <main className="admin-pagina">
-      <div className="admin-pagina__cabecera">
-        <h1>Administración de prioridades</h1>
-        <button
-          type="button"
-          className="admin-boton admin-boton--primario"
-          onClick={() => abrir({ tipo: 'crear' })}
-        >
-          Nueva prioridad
-        </button>
-      </div>
+      <PageHeader
+        titulo="Administración de prioridades"
+        descripcion="Define los niveles de prioridad de las solicitudes."
+        icono="flag"
+        acciones={
+          <Button icono="plus" onClick={() => abrir({ tipo: 'crear' })}>
+            Nueva prioridad
+          </Button>
+        }
+      />
 
-      <p role="status" className="admin-exito">
-        {aviso}
-      </p>
+      <Toast mensaje={aviso} />
       {!dialogo && general && (
         <p role="alert" className="admin-error">
           {general}

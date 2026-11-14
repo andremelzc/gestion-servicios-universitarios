@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -44,7 +45,11 @@ afterEach(restaurarAncho);
 describe('BandejaTecnicoPage', () => {
   it('muestra "Por iniciar" como tarjetas con prioridad, SLA y la acción de iniciar', async () => {
     const { consultas } = bandejaConEstado();
-    render(<BandejaTecnicoPage />);
+    render(
+      <MemoryRouter>
+        <BandejaTecnicoPage />
+      </MemoryRouter>,
+    );
 
     const lista = await screen.findByRole('list', { name: 'Solicitudes asignadas' });
     const tarjeta = within(lista).getByText('SOL-2026-0150').closest('li');
@@ -63,7 +68,11 @@ describe('BandejaTecnicoPage', () => {
 
   it('el contenido va en un landmark <main> con el título como encabezado', async () => {
     bandejaConEstado();
-    render(<BandejaTecnicoPage />);
+    render(
+      <MemoryRouter>
+        <BandejaTecnicoPage />
+      </MemoryRouter>,
+    );
     const principal = await screen.findByRole('main');
     expect(
       within(principal).getByRole('heading', { level: 1, name: 'Mis asignadas' }),
@@ -72,7 +81,11 @@ describe('BandejaTecnicoPage', () => {
 
   it('en "En curso" no ofrece iniciar la atención', async () => {
     const { consultas } = bandejaConEstado();
-    render(<BandejaTecnicoPage />);
+    render(
+      <MemoryRouter>
+        <BandejaTecnicoPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0150');
 
     await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
@@ -101,7 +114,11 @@ describe('BandejaTecnicoPage', () => {
     it('inicia, quita la fila de "Por iniciar", anuncia y mueve el foco al título', async () => {
       const { estado, consultas } = bandejaConEstado();
       const llamadas = iniciarEn(estado);
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       await userEvent.click(await botonIniciar());
 
       expect(await screen.findByText('No tienes solicitudes por iniciar.')).toBeInTheDocument();
@@ -121,7 +138,11 @@ describe('BandejaTecnicoPage', () => {
 
     it('la región de avisos existe desde el inicio, vacía y sin aria-label', async () => {
       bandejaConEstado();
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       expect(regionAviso()).toBeEmptyDOMElement();
       expect(regionAviso()).not.toHaveAttribute('aria-label');
       await screen.findByText('SOL-2026-0150');
@@ -136,7 +157,11 @@ describe('BandejaTecnicoPage', () => {
           return HttpResponse.json({ id: Number(params.id) });
         },
       });
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       const boton = await botonIniciar();
 
       await userEvent.dblClick(boton);
@@ -155,7 +180,11 @@ describe('BandejaTecnicoPage', () => {
           return problema(409, 'transicion-invalida', 'Conflicto', 'Ya cambió.', '/x');
         },
       });
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       await userEvent.click(await botonIniciar());
 
       expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -169,7 +198,11 @@ describe('BandejaTecnicoPage', () => {
       const filas = [asignada, { ...asignada, id: 152, codigo: 'SOL-2026-0152' }];
       const { estado } = bandejaConEstado(filas);
       iniciarEn(estado);
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       await userEvent.click(await botonIniciar());
       await waitFor(() =>
         expect(regionAviso()).toHaveTextContent('SOL-2026-0150 está en atención'),
@@ -188,7 +221,11 @@ describe('BandejaTecnicoPage', () => {
 
   describe('resolución', () => {
     async function abrirResolver(estado) {
-      render(<BandejaTecnicoPage />);
+      render(
+        <MemoryRouter>
+          <BandejaTecnicoPage />
+        </MemoryRouter>,
+      );
       await screen.findByText('SOL-2026-0150');
       await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
       await userEvent.click(await screen.findByRole('button', { name: 'Resolver SOL-2026-0151' }));
@@ -198,7 +235,7 @@ describe('BandejaTecnicoPage', () => {
 
     async function completar(dialogo) {
       await userEvent.type(
-        within(dialogo).getByLabelText('Informe técnico *'),
+        within(dialogo).getByLabelText('Informe técnico'),
         'Se reemplazó el cable de video y se probó.',
       );
       await userEvent.upload(
@@ -255,7 +292,11 @@ describe('BandejaTecnicoPage', () => {
 
   it('muestra el vacío y el error de la consulta', async () => {
     server.use(http.get('*/api/v1/solicitudes', () => HttpResponse.json(paginaDe([]))));
-    render(<BandejaTecnicoPage />);
+    render(
+      <MemoryRouter>
+        <BandejaTecnicoPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findByText('No tienes solicitudes por iniciar.')).toBeInTheDocument();
 
     server.use(http.get('*/api/v1/solicitudes', () => problema(403, 'prohibido', 'No', 'x', '/x')));
@@ -275,7 +316,11 @@ describe('BandejaTecnicoPage', () => {
           : HttpResponse.json(paginaDe([fila(0)], { page: 0, totalPages: 2, totalElements: 21 }));
       }),
     );
-    render(<BandejaTecnicoPage />);
+    render(
+      <MemoryRouter>
+        <BandejaTecnicoPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0300');
 
     await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));

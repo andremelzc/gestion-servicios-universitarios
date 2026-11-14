@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import LeyendaObligatorios from '../../../components/ui/LeyendaObligatorios.jsx';
 import Modal from '../../../components/ui/Modal.jsx';
 import { interpretarError } from '../../../services/errores.js';
 import FileUploader from '../../solicitudes/components/FileUploader.jsx';
@@ -77,9 +78,10 @@ function FormularioResolucion({ solicitud, informeRef, onClose, onSubmit, isSubm
   return (
     <form className="modal-resolucion" onSubmit={enviar} noValidate>
       <p className="modal-resolucion__resumen">{solicitud.titulo}</p>
+      <LeyendaObligatorios />
 
       <div className="modal-resolucion__campo">
-        <label htmlFor={idInforme}>Informe técnico *</label>
+        <label htmlFor={idInforme}>Informe técnico</label>
         <textarea
           id={idInforme}
           ref={informeRef}
@@ -109,7 +111,7 @@ function FormularioResolucion({ solicitud, informeRef, onClose, onSubmit, isSubm
       <div ref={archivosRef}>
         <FileUploader
           id={idArchivos}
-          etiqueta="Evidencia de la solución *"
+          etiqueta="Evidencia de la solución"
           archivos={archivos}
           maxArchivos={MAX_ARCHIVOS}
           deshabilitado={isSubmitting}

@@ -1,4 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import Icon from './Icon.jsx';
 import { createPortal } from 'react-dom';
 import './Modal.css';
 
@@ -41,10 +42,14 @@ function destinoSeguro(disparador) {
  * Props:
  * - isOpen: si es false no renderiza nada.
  * - titulo: texto del título (`aria-labelledby`).
- * - onClose: se invoca con Esc (si `closeOnEsc`); cerrar de verdad es decisión del llamador.
+ * - onClose: se invoca con Esc (si `closeOnEsc`) o con un clic en el fondo (si `closeOnOverlay`);
+ *   cerrar de verdad es decisión del llamador.
  * - role: `dialog` (por defecto) o `alertdialog` para confirmaciones.
  * - descripcion: texto visible asociado con `aria-describedby`.
  * - closeOnEsc: `true` por defecto; con `false` Esc se ignora (p. ej. mientras se envía).
+ * - closeOnOverlay: por defecto igual que `closeOnEsc` (así un modal que bloquea Esc mientras envía
+ *   tampoco se cierra con el fondo). El clic debe empezar y terminar en el fondo: arrastrar una
+ *   selección de texto hacia fuera del cuadro no lo cierra.
  * - initialFocusRef: ref del control con el foco inicial; si falta, el primer tabulable. Un hijo
  *   que ya tomó el foco al montarse lo conserva.
  * - returnFocusRef: ref del elemento que recibe el foco al cerrar; si falta se usa el disparador
@@ -59,6 +64,7 @@ export default function Modal({
   role = 'dialog',
   descripcion,
   closeOnEsc = true,
+  closeOnOverlay = closeOnEsc,
   initialFocusRef,
   returnFocusRef,
 }) {
@@ -66,6 +72,7 @@ export default function Modal({
   const dialogoRef = useRef(null);
   const opcionesRef = useRef({});
   const disparadorRef = useRef(null);
+  const pulsoEnFondoRef = useRef(false);
 
   // Antes de cualquier efecto de los hijos (que pueden mover el foco): quién abrió el modal.
   useLayoutEffect(() => {
@@ -85,6 +92,8 @@ export default function Modal({
     if (pila.length === 0) {
       overflowPrevio = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      // AUD-20: el contenido de fondo deja de ser alcanzable por teclado y lectores de pantalla.
+      document.getElementById('root')?.setAttribute('inert', '');
     }
     pila.push(turno);
     // Un hijo que ya tomó el foco al montarse (p. ej. el primer campo inválido) lo conserva.
@@ -127,7 +136,10 @@ export default function Modal({
     return () => {
       document.removeEventListener('keydown', alPulsarTecla);
       pila.splice(pila.indexOf(turno), 1);
-      if (pila.length === 0) document.body.style.overflow = overflowPrevio;
+      if (pila.length === 0) {
+        document.body.style.overflow = overflowPrevio;
+        document.getElementById('root')?.removeAttribute('inert');
+      }
       (opcionesRef.current.returnFocusRef?.current ?? destinoSeguro(disparador))?.focus();
     };
   }, [isOpen]);
@@ -135,7 +147,17 @@ export default function Modal({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="modal__fondo">
+    <div
+      className="modal__fondo"
+      onMouseDown={(evento) => {
+        pulsoEnFondoRef.current = evento.target === evento.currentTarget;
+      }}
+      onClick={(evento) => {
+        const enFondo = evento.target === evento.currentTarget && pulsoEnFondoRef.current;
+        pulsoEnFondoRef.current = false;
+        if (enFondo && closeOnOverlay) onClose();
+      }}
+    >
       <div
         ref={dialogoRef}
         className="modal"
@@ -153,7 +175,20 @@ export default function Modal({
             {descripcion}
           </p>
         )}
-        {children}
+        <div className="modal__cuerpo">{children}</div>
+        {/* Al final del DOM (se ve arriba a la derecha): el foco inicial sigue en el primer campo.
+            Las confirmaciones (`alertdialog`) no lo llevan: obligan a elegir una opción. */}
+        {role !== 'alertdialog' && (
+          <button
+            type="button"
+            className="modal__cerrar"
+            aria-label="Cerrar ventana"
+            disabled={!closeOnEsc}
+            onClick={onClose}
+          >
+            <Icon nombre="cerrar" tamano={20} />
+          </button>
+        )}
       </div>
     </div>,
     document.body,

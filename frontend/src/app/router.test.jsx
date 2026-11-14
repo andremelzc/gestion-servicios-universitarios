@@ -89,8 +89,12 @@ describe('router', () => {
       iniciarSesionComo('ADMIN');
       renderAt(path);
 
-      expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+      // Dashboard y /admin se cargan bajo demanda (AUD-12): el primer import tarda más que 1 s.
+      expect(
+        await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 25000 }),
+      ).toBeInTheDocument();
     },
+    30000,
   );
 
   it('[ADM-13 CA-13] el ADMIN ve el menú de administración en las rutas /admin/*', async () => {
@@ -98,7 +102,6 @@ describe('router', () => {
     renderAt('/admin/areas');
 
     await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
-    expect(screen.getByRole('navigation', { name: 'Administración' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Áreas' })).toHaveAttribute('aria-current', 'page');
   });
 
@@ -107,9 +110,11 @@ describe('router', () => {
     renderAt('/admin/areas');
 
     await screen.findByRole('heading', { level: 1, name: 'Administración de áreas' });
-    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByText('GISU')).toBeInTheDocument();
     expect(screen.getAllByRole('main')).toHaveLength(1);
+    // Una sola navegación: el grupo Administración vive dentro del menú principal del shell.
     expect(screen.getAllByRole('navigation')).toHaveLength(1);
+    expect(screen.getByRole('navigation', { name: 'Principal' })).toBeInTheDocument();
   });
 
   it('[ADM-13 CA-13] un rol sin acceso recibe 403 y no ve el menú de administración', async () => {
@@ -117,15 +122,15 @@ describe('router', () => {
     renderAt('/admin/areas');
 
     await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
-    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Usuarios' })).not.toBeInTheDocument();
   });
 
-  it('[ADM-13] fuera de /admin no aparece el menú de administración', async () => {
+  it('[ADM-13] el grupo Administración está disponible para el ADMIN también fuera de /admin', async () => {
     iniciarSesionComo('ADMIN');
     renderAt('/bandeja');
 
     await screen.findByRole('heading', { level: 1, name: 'Bandeja de solicitudes' });
-    expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Usuarios' })).toBeInTheDocument();
   });
 
   // `/bandeja` elige la vista según el rol de la sesión, así que no es un marcador fijo.
@@ -169,7 +174,7 @@ describe('router', () => {
     iniciarSesionComo('ESTUDIANTE');
     renderAt('/perfil');
 
-    expect(await screen.findByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(await screen.findByText('GISU')).toBeInTheDocument();
   });
 
   it('[AUTH-19] las rutas /admin/* con rol ADMIN también van dentro del AppShell', async () => {
@@ -177,13 +182,13 @@ describe('router', () => {
     renderAt('/admin/usuarios');
 
     await screen.findByRole('heading', { level: 1, name: 'Administración de usuarios' });
-    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByText('GISU')).toBeInTheDocument();
   });
 
   it('[AUTH-19] la ruta pública /login no usa el AppShell', () => {
     renderAt('/login');
 
-    expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Principal' })).not.toBeInTheDocument();
   });
 
   it('[AUTH-18] la 403 de un rol sin acceso se pinta dentro del AppShell (cabecera y sesión)', async () => {
@@ -191,7 +196,7 @@ describe('router', () => {
     renderAt('/admin/usuarios');
 
     await screen.findByRole('heading', { level: 1, name: 'Acceso no permitido' });
-    expect(screen.getByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(screen.getByText('GISU')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ana/i })).toBeInTheDocument();
   });
 
@@ -199,7 +204,7 @@ describe('router', () => {
     renderAt('/admin/usuarios');
 
     await screen.findByRole('heading', { level: 1, name: 'Iniciar sesión' });
-    expect(screen.queryByText('Gestión de Servicios Universitarios')).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Principal' })).not.toBeInTheDocument();
   });
 
   it('[AUTH-19] con sesión, el AppShell muestra el nombre y el rol del usuario', async () => {
@@ -217,7 +222,7 @@ describe('router', () => {
       state: { id: 150, codigo: 'SOL-2026-0150' },
     });
 
-    expect(await screen.findByText('Gestión de Servicios Universitarios')).toBeInTheDocument();
+    expect(await screen.findByText('GISU')).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/solicitudes/confirmacion');
     expect(screen.getByRole('status')).toHaveTextContent('Registrada: SOL-2026-0150');
   });

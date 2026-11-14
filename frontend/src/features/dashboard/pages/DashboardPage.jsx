@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { dashboardApi } from '../../../services/dashboard.api.js';
+import { PaginaCargando } from '../../../components/ui/Skeleton.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
 import CategoriaPieChart from '../components/CategoriaPieChart.jsx';
 import EstadoBarChart from '../components/EstadoBarChart.jsx';
 import FiltrosDashboard from '../components/FiltrosDashboard.jsx';
@@ -31,11 +33,7 @@ export default function DashboardPage() {
   const { isLoading, usuario } = useAuth();
 
   if (isLoading) {
-    return (
-      <main className="dashboard-page">
-        <p role="status">Cargando…</p>
-      </main>
-    );
+    return <PaginaCargando />;
   }
   if (!ROLES_CON_DASHBOARD.includes(usuario?.rol)) return <AccesoNoPermitido />;
   return <DashboardContenido esAdmin={usuario.rol === 'ADMIN'} />;
@@ -69,7 +67,11 @@ function DashboardContenido({ esAdmin }) {
 
   return (
     <main className="dashboard-page">
-      <h1>Dashboard</h1>
+      <PageHeader
+        titulo="Dashboard"
+        descripcion="Indicadores y gráficos de las solicitudes del período."
+        icono="chart"
+      />
       <FiltrosDashboard
         onAplicar={setFiltros}
         areas={esAdmin ? areas : undefined}
@@ -87,8 +89,6 @@ function DashboardContenido({ esAdmin }) {
       >
         {(datos) => <KpiResumen datos={datos} />}
       </WidgetDashboard>
-
-      <VencidasWidget key={JSON.stringify(filtros)} filtros={filtros} />
 
       <div className="dashboard-page__graficos">
         <WidgetDashboard
@@ -120,6 +120,8 @@ function DashboardContenido({ esAdmin }) {
           {(datos) => <EstadoBarChart datos={datos} nivelTitulo={2} />}
         </WidgetDashboard>
       </div>
+
+      <VencidasWidget key={JSON.stringify(filtros)} filtros={filtros} />
     </main>
   );
 }

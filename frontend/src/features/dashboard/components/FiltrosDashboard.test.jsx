@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import FiltrosDashboard from './FiltrosDashboard.jsx';
+import { seleccionar, opcionesDe } from '../../../test/seleccionar.js';
 
 function llenar(desde, hasta) {
   if (desde !== undefined)
@@ -146,8 +147,8 @@ describe('FiltrosDashboard · filtro Área (RN-16, solo ADMIN)', () => {
     render(<FiltrosDashboard onAplicar={() => {}} areas={AREAS} />);
 
     const selector = screen.getByLabelText('Área');
-    expect(selector).toHaveValue('');
-    expect(Array.from(selector.options).map((o) => o.textContent)).toEqual([
+    expect(selector).toHaveAttribute('data-valor', '');
+    expect(opcionesDe(selector).map((o) => o.etiqueta)).toEqual([
       'Todas las áreas',
       'Tecnología',
       'Infraestructura',
@@ -158,11 +159,11 @@ describe('FiltrosDashboard · filtro Área (RN-16, solo ADMIN)', () => {
     const alAplicar = vi.fn();
     render(<FiltrosDashboard onAplicar={alAplicar} areas={AREAS} />);
 
-    await userEvent.selectOptions(screen.getByLabelText('Área'), 'Infraestructura');
+    await seleccionar(userEvent, screen.getByLabelText('Área'), 'Infraestructura');
     await aplicar();
     expect(alAplicar).toHaveBeenLastCalledWith({ desde: '', hasta: '', idArea: 2 });
 
-    await userEvent.selectOptions(screen.getByLabelText('Área'), 'Todas las áreas');
+    await seleccionar(userEvent, screen.getByLabelText('Área'), 'Todas las áreas');
     await aplicar();
     expect(alAplicar).toHaveBeenLastCalledWith({ desde: '', hasta: '', idArea: '' });
   });

@@ -21,7 +21,7 @@ const aInstanteUtc = (iso) => (/(Z|[+-]\d{2}:?\d{2})$/.test(iso) ? iso : `${iso}
 
 function formatearFecha(iso) {
   const fecha = new Date(aInstanteUtc(iso));
-  return Number.isNaN(fecha.getTime()) ? '—' : FORMATO_FECHA.format(fecha);
+  return Number.isNaN(fecha.getTime()) ? 'Sin fecha' : FORMATO_FECHA.format(fecha);
 }
 
 /** Más antiguo primero. `sort` es estable: con el mismo instante se respeta el orden del API. */
