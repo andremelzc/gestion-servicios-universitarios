@@ -22,13 +22,14 @@ const res = {};
 const foto = (page, nombre) =>
   page.screenshot({ path: join(OUT, `${nombre}.png`), fullPage: true });
 
-// HALLAZGO (ver evidencia-uat-09-10.md, BUG-01): el backend responde a POST /auth/login con un
+// HISTÓRICO (ver evidencia-uat-09-10.md §2, BUG-01, resuelto en #396): el backend responde a POST /auth/login con un
 // cuerpo plano `{token, tipo, correo, rol: "ROLE_X", idArea}` y el frontend exige el contrato de
 // api-rest §3.1 `{token, usuario: {id, nombre, apellido, correo, rol: "X", idArea}}`. Sin él la
 // sesión no se establece y la UI vuelve a /login. Para poder ejecutar los UAT por la UI, el
 // guion adapta ÚNICAMENTE esa respuesta (la autenticación, el JWT y todos los demás endpoints
-// son los reales). Con ADAPTAR_LOGIN=0 se reproduce el fallo sin adaptación.
-const ADAPTAR = process.env.ADAPTAR_LOGIN !== '0';
+// son los reales). Desde #396 la adaptación ya no hace falta y está desactivada por defecto; con ADAPTAR_LOGIN=1
+// se reactiva (solo útil contra versiones anteriores a #396).
+const ADAPTAR = process.env.ADAPTAR_LOGIN === '1';
 async function adaptarLogin(ctx) {
   if (!ADAPTAR) return;
   await ctx.route('**/api/v1/auth/login', async (route) => {
@@ -65,7 +66,7 @@ async function login(browser, correo) {
   await page.waitForTimeout(2500);
   if (page.url().includes('/login')) {
     await foto(page, '00-bug01-login-sin-sesion');
-    throw new Error('Login sin sesión: el backend no cumple el contrato de api-rest §3.1 (BUG-01).');
+    throw new Error('Login sin sesión: la UI no estableció sesión (¿CORS/ALLOWED_ORIGINS, 429 o contrato de api-rest §3.1?).');
   }
   return { ctx, page };
 }
