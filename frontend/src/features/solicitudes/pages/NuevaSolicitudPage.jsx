@@ -10,10 +10,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { etiquetaPrioridad } from '../../../components/ui/catalogos.js';
+import Alert from '../../../components/ui/Alert.jsx';
+import Button from '../../../components/ui/Button.jsx';
+import PageHeader from '../../../components/ui/PageHeader.jsx';
+import LeyendaObligatorios from '../../../components/ui/LeyendaObligatorios.jsx';
 import { apiClient } from '../../../services/apiClient.js';
 import { interpretarError } from '../../../services/errores.js';
 import FileUploader from '../components/FileUploader.jsx';
 import { validarArchivos } from '../evidencias.js';
+import Select from '../../../components/ui/Select.jsx';
 import {
   DESCRIPCION_MAX,
   DESCRIPCION_MIN,
@@ -92,6 +97,10 @@ function limpiarBorrador() {
 export default function NuevaSolicitudPage() {
   const navigate = useNavigate();
   const [valores, setValores] = useState(leerBorrador);
+  // AUD-08: si el formulario reaparece lleno por un borrador previo, se avisa y se puede descartar.
+  const [borradorRecuperado, setBorradorRecuperado] = useState(() =>
+    Object.values(valores).some((valor) => valor.trim() !== ''),
+  );
   const [archivos, setArchivos] = useState([]);
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState(null);
@@ -180,185 +189,214 @@ export default function NuevaSolicitudPage() {
 
   return (
     <main className="nueva-solicitud">
-      <h1 className="nueva-solicitud__titulo">Nueva solicitud</h1>
+      <PageHeader
+        titulo="Nueva solicitud"
+        descripcion="Describe el problema y te indicaremos su estado en Mis solicitudes."
+        icono="filePlus"
+      />
 
       {errorGeneral && (
-        <div className="nueva-solicitud__alerta" role="alert">
+        <Alert tipo="error" className="nueva-solicitud__alerta">
           {errorGeneral}
-        </div>
+        </Alert>
       )}
 
       {avisoCatalogos && (
-        <div className="nueva-solicitud__alerta" role="alert">
+        <Alert tipo="error" className="nueva-solicitud__alerta">
           <p className="nueva-solicitud__alerta-texto">{avisoCatalogos}</p>
+          <Button variante="secundario" onClick={reintentarCatalogos}>
+            Reintentar
+          </Button>
+        </Alert>
+      )}
+
+      {borradorRecuperado && (
+        <div className="nueva-solicitud__borrador" role="status">
+          <p>Recuperamos tu borrador anterior.</p>
           <button
             type="button"
-            className="nueva-solicitud__reintentar"
-            onClick={reintentarCatalogos}
+            className="nueva-solicitud__descartar"
+            onClick={() => {
+              setValores(VALORES_INICIALES);
+              setErrores({});
+              limpiarBorrador();
+              setBorradorRecuperado(false);
+            }}
           >
-            Reintentar
+            Descartar borrador
           </button>
         </div>
       )}
 
       <form className="nueva-solicitud__form" noValidate onSubmit={alEnviar}>
-        <div className="nueva-solicitud__columna">
-          <div className="nueva-solicitud__campo">
-            <label htmlFor="titulo">Título</label>
-            <input
-              id="titulo"
-              name="titulo"
-              type="text"
-              maxLength={TITULO_MAX}
-              placeholder="Proyector sin imagen"
-              value={valores.titulo}
-              onChange={alCambiarCampo('titulo')}
-              aria-invalid={Boolean(errores.titulo)}
-              aria-describedby={errores.titulo ? 'error-titulo' : undefined}
-            />
-            {errores.titulo && (
-              <p className="nueva-solicitud__error" id="error-titulo" role="alert">
-                {errores.titulo}
-              </p>
-            )}
+        <fieldset className="nueva-solicitud__bloque" disabled={enviando}>
+          <div className="nueva-solicitud__leyenda">
+            <LeyendaObligatorios />
           </div>
-
-          <div className="nueva-solicitud__fila">
+          <div className="nueva-solicitud__columna">
             <div className="nueva-solicitud__campo">
-              <label htmlFor="idCategoria">Categoría</label>
-              <select
-                id="idCategoria"
-                name="idCategoria"
-                value={valores.idCategoria}
-                disabled={catalogos.cargando}
-                onChange={alCambiarCampo('idCategoria')}
-                aria-invalid={Boolean(errores.idCategoria)}
-                aria-describedby={errores.idCategoria ? 'error-idCategoria' : undefined}
-              >
-                <option value="">
-                  {catalogos.cargando ? 'Cargando…' : 'Selecciona una categoría'}
-                </option>
-                {catalogos.categorias.map((categoria) => (
-                  <option key={categoria.id} value={categoria.id}>
-                    {categoria.nombre}
+              <label htmlFor="titulo">Título</label>
+              <input
+                id="titulo"
+                name="titulo"
+                type="text"
+                maxLength={TITULO_MAX}
+                placeholder="Proyector sin imagen"
+                value={valores.titulo}
+                onChange={alCambiarCampo('titulo')}
+                aria-invalid={Boolean(errores.titulo)}
+                aria-describedby={errores.titulo ? 'error-titulo' : undefined}
+              />
+              {errores.titulo && (
+                <p className="nueva-solicitud__error" id="error-titulo" role="alert">
+                  {errores.titulo}
+                </p>
+              )}
+            </div>
+
+            <div className="nueva-solicitud__fila">
+              <div className="nueva-solicitud__campo">
+                <label htmlFor="idCategoria">Categoría</label>
+                <Select
+                  id="idCategoria"
+                  name="idCategoria"
+                  value={valores.idCategoria}
+                  disabled={catalogos.cargando}
+                  onChange={alCambiarCampo('idCategoria')}
+                  aria-invalid={Boolean(errores.idCategoria)}
+                  aria-describedby={errores.idCategoria ? 'error-idCategoria' : undefined}
+                >
+                  <option value="">
+                    {catalogos.cargando ? 'Cargando…' : 'Selecciona una categoría'}
                   </option>
-                ))}
-              </select>
-              {errores.idCategoria && (
-                <p className="nueva-solicitud__error" id="error-idCategoria" role="alert">
-                  {errores.idCategoria}
+                  {catalogos.categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                </Select>
+                {errores.idCategoria && (
+                  <p className="nueva-solicitud__error" id="error-idCategoria" role="alert">
+                    {errores.idCategoria}
+                  </p>
+                )}
+              </div>
+
+              <div className="nueva-solicitud__campo">
+                <label htmlFor="idPrioridad">Prioridad</label>
+                <Select
+                  id="idPrioridad"
+                  name="idPrioridad"
+                  value={valores.idPrioridad}
+                  disabled={catalogos.cargando}
+                  onChange={alCambiarCampo('idPrioridad')}
+                  aria-invalid={Boolean(errores.idPrioridad)}
+                  aria-describedby={errores.idPrioridad ? 'error-idPrioridad' : undefined}
+                >
+                  <option value="">
+                    {catalogos.cargando ? 'Cargando…' : 'Selecciona una prioridad'}
+                  </option>
+                  {catalogos.prioridades.map((prioridad) => (
+                    <option key={prioridad.id} value={prioridad.id}>
+                      {etiquetaPrioridad(prioridad.nivel)}
+                    </option>
+                  ))}
+                </Select>
+                {errores.idPrioridad && (
+                  <p className="nueva-solicitud__error" id="error-idPrioridad" role="alert">
+                    {errores.idPrioridad}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="nueva-solicitud__campo">
+              <label htmlFor="ubicacionCampus">Campus</label>
+              <input
+                id="ubicacionCampus"
+                name="ubicacionCampus"
+                type="text"
+                maxLength={UBICACION_MAX}
+                placeholder="Campus Central"
+                value={valores.ubicacionCampus}
+                onChange={alCambiarCampo('ubicacionCampus')}
+                aria-invalid={Boolean(errores.ubicacionCampus)}
+                aria-describedby={errores.ubicacionCampus ? 'error-ubicacionCampus' : undefined}
+              />
+              {errores.ubicacionCampus && (
+                <p className="nueva-solicitud__error" id="error-ubicacionCampus" role="alert">
+                  {errores.ubicacionCampus}
                 </p>
               )}
             </div>
 
             <div className="nueva-solicitud__campo">
-              <label htmlFor="idPrioridad">Prioridad</label>
-              <select
-                id="idPrioridad"
-                name="idPrioridad"
-                value={valores.idPrioridad}
-                disabled={catalogos.cargando}
-                onChange={alCambiarCampo('idPrioridad')}
-                aria-invalid={Boolean(errores.idPrioridad)}
-                aria-describedby={errores.idPrioridad ? 'error-idPrioridad' : undefined}
-              >
-                <option value="">
-                  {catalogos.cargando ? 'Cargando…' : 'Selecciona una prioridad'}
-                </option>
-                {catalogos.prioridades.map((prioridad) => (
-                  <option key={prioridad.id} value={prioridad.id}>
-                    {etiquetaPrioridad(prioridad.nivel)}
-                  </option>
-                ))}
-              </select>
-              {errores.idPrioridad && (
-                <p className="nueva-solicitud__error" id="error-idPrioridad" role="alert">
-                  {errores.idPrioridad}
+              <label htmlFor="ubicacionAmbiente">Ubicación (aula/laboratorio)</label>
+              <input
+                id="ubicacionAmbiente"
+                name="ubicacionAmbiente"
+                type="text"
+                maxLength={UBICACION_MAX}
+                placeholder="Pabellón B - Aula 402"
+                value={valores.ubicacionAmbiente}
+                onChange={alCambiarCampo('ubicacionAmbiente')}
+                aria-invalid={Boolean(errores.ubicacionAmbiente)}
+                aria-describedby={errores.ubicacionAmbiente ? 'error-ubicacionAmbiente' : undefined}
+              />
+              {errores.ubicacionAmbiente && (
+                <p className="nueva-solicitud__error" id="error-ubicacionAmbiente" role="alert">
+                  {errores.ubicacionAmbiente}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="nueva-solicitud__campo">
-            <label htmlFor="ubicacionCampus">Campus</label>
-            <input
-              id="ubicacionCampus"
-              name="ubicacionCampus"
-              type="text"
-              maxLength={UBICACION_MAX}
-              placeholder="Campus Central"
-              value={valores.ubicacionCampus}
-              onChange={alCambiarCampo('ubicacionCampus')}
-              aria-invalid={Boolean(errores.ubicacionCampus)}
-              aria-describedby={errores.ubicacionCampus ? 'error-ubicacionCampus' : undefined}
-            />
-            {errores.ubicacionCampus && (
-              <p className="nueva-solicitud__error" id="error-ubicacionCampus" role="alert">
-                {errores.ubicacionCampus}
+          <div className="nueva-solicitud__columna">
+            <div className="nueva-solicitud__campo">
+              <label htmlFor="descripcion">Descripción</label>
+              <textarea
+                id="descripcion"
+                name="descripcion"
+                rows={6}
+                maxLength={DESCRIPCION_MAX}
+                value={valores.descripcion}
+                onChange={alCambiarCampo('descripcion')}
+                aria-invalid={Boolean(errores.descripcion)}
+                aria-describedby={[
+                  'contador-descripcion',
+                  errores.descripcion ? 'error-descripcion' : null,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              />
+              <p className="nueva-solicitud__contador" id="contador-descripcion">
+                {valores.descripcion.length} / {DESCRIPCION_MAX} · mín. {DESCRIPCION_MIN}
               </p>
-            )}
+              {errores.descripcion && (
+                <p className="nueva-solicitud__error" id="error-descripcion" role="alert">
+                  {errores.descripcion}
+                </p>
+              )}
+            </div>
+
+            <FileUploader archivos={archivos} onChange={setArchivos} />
           </div>
 
-          <div className="nueva-solicitud__campo">
-            <label htmlFor="ubicacionAmbiente">Ubicación (aula/laboratorio)</label>
-            <input
-              id="ubicacionAmbiente"
-              name="ubicacionAmbiente"
-              type="text"
-              maxLength={UBICACION_MAX}
-              placeholder="Pabellón B - Aula 402"
-              value={valores.ubicacionAmbiente}
-              onChange={alCambiarCampo('ubicacionAmbiente')}
-              aria-invalid={Boolean(errores.ubicacionAmbiente)}
-              aria-describedby={errores.ubicacionAmbiente ? 'error-ubicacionAmbiente' : undefined}
-            />
-            {errores.ubicacionAmbiente && (
-              <p className="nueva-solicitud__error" id="error-ubicacionAmbiente" role="alert">
-                {errores.ubicacionAmbiente}
-              </p>
-            )}
+          <div className="nueva-solicitud__acciones">
+            <Button
+              como={Link}
+              variante="secundario"
+              to="/mis-solicitudes"
+              aria-disabled={enviando ? 'true' : undefined}
+              onClick={(evento) => enviando && evento.preventDefault()}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" icono="check" cargando={enviando} disabled={!puedeEnviar}>
+              {enviando ? 'Enviando…' : 'Enviar'}
+            </Button>
           </div>
-        </div>
-
-        <div className="nueva-solicitud__columna">
-          <div className="nueva-solicitud__campo">
-            <label htmlFor="descripcion">Descripción</label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              rows={6}
-              maxLength={DESCRIPCION_MAX}
-              value={valores.descripcion}
-              onChange={alCambiarCampo('descripcion')}
-              aria-invalid={Boolean(errores.descripcion)}
-              aria-describedby={[
-                'contador-descripcion',
-                errores.descripcion ? 'error-descripcion' : null,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            />
-            <p className="nueva-solicitud__contador" id="contador-descripcion">
-              {valores.descripcion.length} / {DESCRIPCION_MAX} · mín. {DESCRIPCION_MIN}
-            </p>
-            {errores.descripcion && (
-              <p className="nueva-solicitud__error" id="error-descripcion" role="alert">
-                {errores.descripcion}
-              </p>
-            )}
-          </div>
-
-          <FileUploader archivos={archivos} onChange={setArchivos} />
-        </div>
-
-        <div className="nueva-solicitud__acciones">
-          <Link className="nueva-solicitud__cancelar" to="/mis-solicitudes">
-            Cancelar
-          </Link>
-          <button type="submit" className="nueva-solicitud__enviar" disabled={!puedeEnviar}>
-            {enviando ? 'Enviando…' : 'Enviar'}
-          </button>
-        </div>
+        </fieldset>
       </form>
     </main>
   );

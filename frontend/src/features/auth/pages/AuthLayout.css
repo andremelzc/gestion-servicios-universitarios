@@ -1,0 +1,90 @@
+/* Pantallas de acceso (login y registro). Móvil: marca arriba y formulario en tarjeta.
+   Escritorio (≥ 960 px): dos paneles, marca a la izquierda y formulario a la derecha. */
+.auth-pagina {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5, 24px);
+  min-height: 100vh;
+  padding: var(--space-5, 24px) var(--space-4, 16px);
+}
+
+.auth-marca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3, 12px);
+}
+
+.auth-marca__lema {
+  display: none;
+  margin: 0;
+}
+
+.auth-tarjeta {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-5, 24px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius, 8px);
+  box-shadow: var(--shadow-card, 0 1px 2px rgb(17 24 39 / 0.06), 0 1px 3px rgb(17 24 39 / 0.1));
+}
+
+@media (max-width: 479px) {
+  .auth-pagina {
+    justify-content: flex-start;
+  }
+
+  .auth-tarjeta {
+    padding: var(--space-4, 16px);
+  }
+}
+
+@media (min-width: 960px) {
+  .auth-pagina {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 0;
+    padding: 0;
+  }
+
+  .auth-marca {
+    justify-content: center;
+    align-self: stretch;
+    gap: var(--space-4, 16px);
+    padding: var(--space-7, 48px);
+    background: linear-gradient(
+      160deg,
+      var(--color-primary, #1d4ed8) 0%,
+      var(--color-primary-hover, #1e40af) 100%
+    );
+    color: #ffffff;
+  }
+
+  .auth-marca .marca-gisu__sigla {
+    font-size: 4rem;
+    color: #ffffff;
+  }
+
+  .auth-marca .marca-gisu__nombre {
+    font-size: 1.125rem;
+    color: #dbeafe;
+  }
+
+  .auth-marca__lema {
+    display: block;
+    max-width: 22rem;
+    color: #dbeafe;
+    text-align: center;
+  }
+
+  .auth-tarjeta {
+    justify-self: center;
+    align-self: center;
+    max-width: 440px;
+    margin: var(--space-6, 32px) var(--space-4, 16px);
+    box-shadow: none;
+  }
+}

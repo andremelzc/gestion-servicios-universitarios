@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef, useEffect, useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import Modal from './Modal.jsx';
 
-function Ejemplo({ onClose = () => {} }) {
+function Ejemplo({ onClose = () => {}, role = 'dialog' }) {
   const [abierto, setAbierto] = useState(false);
   return (
     <>
@@ -14,6 +14,7 @@ function Ejemplo({ onClose = () => {} }) {
       <Modal
         isOpen={abierto}
         titulo="Asignar SOL-2026-0150"
+        role={role}
         onClose={() => {
           onClose();
           setAbierto(false);
@@ -28,6 +29,72 @@ function Ejemplo({ onClose = () => {} }) {
 }
 
 describe('Modal', () => {
+  it('el botón de cerrar solo está en los diálogos y cierra; las confirmaciones no lo llevan', async () => {
+    const alCerrar = vi.fn();
+    const usuario = userEvent.setup();
+    const { rerender } = render(
+      <Modal isOpen titulo="Formulario" onClose={alCerrar}>
+        <input aria-label="Campo" />
+      </Modal>,
+    );
+    // Está al final del DOM: el foco inicial sigue en el primer campo.
+    expect(screen.getByLabelText('Campo')).toHaveFocus();
+
+    await usuario.click(screen.getByRole('button', { name: 'Cerrar ventana' }));
+    expect(alCerrar).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Modal isOpen role="alertdialog" titulo="Confirmar" onClose={alCerrar}>
+        <button type="button">Aceptar</button>
+      </Modal>,
+    );
+    expect(screen.queryByRole('button', { name: 'Cerrar ventana' })).not.toBeInTheDocument();
+  });
+
+  it('cierra al hacer clic en el fondo, pero no al hacer clic dentro del cuadro', async () => {
+    const alCerrar = vi.fn();
+    const usuario = userEvent.setup();
+    render(<Ejemplo onClose={alCerrar} />);
+    await usuario.click(screen.getByRole('button', { name: 'Abrir' }));
+
+    await usuario.click(screen.getByRole('dialog'));
+    expect(alCerrar).not.toHaveBeenCalled();
+
+    await usuario.click(screen.getByRole('dialog').parentElement);
+    expect(alCerrar).toHaveBeenCalledTimes(1);
+  });
+
+  it('no cierra con el fondo si closeOnOverlay es false', async () => {
+    const alCerrar = vi.fn();
+    const usuario = userEvent.setup();
+    render(
+      <Modal isOpen titulo="Bloqueado" onClose={alCerrar} closeOnOverlay={false}>
+        contenido
+      </Modal>,
+    );
+
+    await usuario.click(screen.getByRole('dialog').parentElement);
+    expect(alCerrar).not.toHaveBeenCalled();
+  });
+
+  it('no cierra si el clic empieza dentro del cuadro y termina en el fondo', async () => {
+    const alCerrar = vi.fn();
+    const usuario = userEvent.setup();
+    render(
+      <Modal isOpen titulo="Arrastre" onClose={alCerrar}>
+        <input aria-label="Texto" />
+      </Modal>,
+    );
+    const dialogo = screen.getByRole('dialog');
+
+    fireEvent.mouseDown(dialogo);
+    fireEvent.mouseUp(dialogo.parentElement);
+    fireEvent.click(dialogo.parentElement);
+    expect(alCerrar).not.toHaveBeenCalled();
+    await usuario.keyboard('{Escape}');
+    expect(alCerrar).toHaveBeenCalledTimes(1);
+  });
+
   it('[UX §8] no renderiza nada mientras está cerrado', () => {
     render(
       <Modal isOpen={false} titulo="Título" onClose={() => {}}>
@@ -57,8 +124,10 @@ describe('Modal', () => {
     expect(screen.getByLabelText('Primero')).toHaveFocus();
   });
 
+  // En estas pruebas del trap se usa `alertdialog`, que no lleva botón de cerrar: así los extremos
+  // son los controles propios del ejemplo. El botón de cerrar se prueba aparte.
   it('[UX §8] Tab atrapa el foco: del último control vuelve al primero', async () => {
-    render(<Ejemplo />);
+    render(<Ejemplo role="alertdialog" />);
     await userEvent.click(screen.getByRole('button', { name: 'Abrir' }));
 
     screen.getByRole('button', { name: 'Último' }).focus();
@@ -68,7 +137,7 @@ describe('Modal', () => {
   });
 
   it('[UX §8] Shift+Tab atrapa el foco: del primer control salta al último', async () => {
-    render(<Ejemplo />);
+    render(<Ejemplo role="alertdialog" />);
     await userEvent.click(screen.getByRole('button', { name: 'Abrir' }));
 
     await userEvent.tab({ shift: true });
@@ -99,7 +168,7 @@ describe('Modal', () => {
 
   it('[UX §8] los extremos del trap ignoran input hidden, tabindex -1, deshabilitados y ocultos', async () => {
     render(
-      <Modal isOpen titulo="Extremos" onClose={() => {}}>
+      <Modal isOpen role="alertdialog" titulo="Extremos" onClose={() => {}}>
         <button type="button">A</button>
         <button type="button">Z</button>
         <input type="hidden" />
@@ -131,7 +200,7 @@ describe('Modal', () => {
 
   it('[UX §8] un elemento contenteditable cuenta como enfocable en el trap', async () => {
     render(
-      <Modal isOpen titulo="Con campo editable" onClose={() => {}}>
+      <Modal isOpen role="alertdialog" titulo="Con campo editable" onClose={() => {}}>
         <button type="button">A</button>
         <div contentEditable suppressContentEditableWarning aria-label="Editable">
           texto
@@ -150,10 +219,10 @@ describe('Modal', () => {
     const cierraHijo = vi.fn();
     render(
       <>
-        <Modal isOpen titulo="Padre" onClose={cierraPadre}>
+        <Modal isOpen role="alertdialog" titulo="Padre" onClose={cierraPadre}>
           <button type="button">Control del padre</button>
         </Modal>
-        <Modal isOpen titulo="Hijo" onClose={cierraHijo}>
+        <Modal isOpen role="alertdialog" titulo="Hijo" onClose={cierraHijo}>
           <button type="button">Control del hijo</button>
         </Modal>
       </>,

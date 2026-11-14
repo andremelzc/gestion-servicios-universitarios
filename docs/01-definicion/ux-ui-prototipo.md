@@ -150,6 +150,8 @@ graph TD
 | Administración | — | — | — | ✓ |
 | Perfil | ✓ | ✓ | ✓ | ✓ |
 
+> **Presentación (implementada):** menú lateral por rol, plegable a iconos en escritorio y como cajón en móvil. Se organiza en grupos — Solicitudes, Gestión, Administración (solo Admin, con sus cinco secciones: Usuarios, Áreas, Categorías, Prioridades y Estados) y Cuenta — y la barra superior conserva el menú de usuario.
+
 ---
 
 ## 4. Mapa de navegación y flujos
@@ -566,7 +568,7 @@ Mensajes claros, en español, que dicen **qué pasó y qué hacer**. Referencia 
 | Correo no institucional | "Debe usar correo institucional (@universidad.edu)." |
 | Contraseña débil | "Mínimo 8 caracteres, una mayúscula y un número." |
 | Registro exitoso | "Cuenta creada. ¡Bienvenido/a, {nombre}!" |
-| Solicitud registrada | "Tu solicitud **{código}** fue registrada. Te avisaremos cuando cambie de estado." |
+| Solicitud registrada | "Tu solicitud **{código}** fue registrada. Puedes ver su estado en Mis solicitudes." |
 | Archivo muy grande | "El archivo excede los 5 MB permitidos. Reduce su tamaño e inténtalo de nuevo." |
 | Tipo de archivo no permitido | "Solo se permiten imágenes JPG, PNG o archivos PDF." |
 | Descripción corta | "Describe el problema con al menos 15 caracteres ({n}/15)." |

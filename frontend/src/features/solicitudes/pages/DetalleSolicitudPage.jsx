@@ -5,14 +5,23 @@ import PrioridadTag from '../../../components/ui/PrioridadTag.jsx';
 import { etiquetaEstado } from '../../../components/ui/catalogos.js';
 import { apiClient } from '../../../services/apiClient.js';
 import { interpretarError } from '../../../services/errores.js';
+import { cerrar } from '../../../services/solicitudes.api.js';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import SlaIndicador from '../../gestion/components/SlaIndicador.jsx';
 import useAhora from '../../gestion/hooks/useAhora.js';
+import { PaginaCargando } from '../../../components/ui/Skeleton.jsx';
+import { useTituloPagina } from '../../../app/titulos.js';
+import Button from '../../../components/ui/Button.jsx';
+import EmptyState from '../../../components/ui/EmptyState.jsx';
+import Card from '../../../components/ui/Card.jsx';
+import { IconoFicha } from '../../../components/ui/Icon.jsx';
+import AccionesSolicitud from '../../gestion/components/AccionesSolicitud.jsx';
+import '../../admin/components/adminUi.css';
 import ComentariosPanel from '../components/ComentariosPanel.jsx';
 import './DetalleSolicitudPage.css';
 
 function fecha(valor) {
-  if (!valor) return '—';
+  if (!valor) return 'Sin fecha';
   const zona = /(Z|[+-]\d{2}:?\d{2})$/.test(valor) ? valor : `${valor}Z`;
   const instante = new Date(zona);
   return Number.isNaN(instante.getTime())
@@ -25,7 +34,8 @@ function fecha(valor) {
 }
 
 export function Timeline({ historial }) {
-  if (!historial.length) return <p>Esta solicitud aún no tiene movimientos.</p>;
+  if (!historial.length)
+    return <EmptyState compacto icono="clock" titulo="Esta solicitud aún no tiene movimientos." />;
   return (
     <ol className="detalle-solicitud__timeline">
       {historial.map((evento, indice) => (
@@ -54,7 +64,11 @@ function DetalleSolicitud({ id }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [errorDescarga, setErrorDescarga] = useState(null);
+  const [descargando, setDescargando] = useState(null);
   const [intento, setIntento] = useState(0);
+  const [cerrando, setCerrando] = useState(false);
+  useTituloPagina(datos?.codigo ?? 'Detalle de solicitud');
+  const [errorCierre, setErrorCierre] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,6 +97,7 @@ function DetalleSolicitud({ id }) {
   const descargar = useCallback(
     async (evidencia) => {
       setErrorDescarga(null);
+      setDescargando(evidencia.id);
       try {
         const blob = await apiClient.get(
           `/solicitudes/${encodeURIComponent(id)}/evidencias/${encodeURIComponent(evidencia.id)}`,
@@ -96,31 +111,49 @@ function DetalleSolicitud({ id }) {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch (fallo) {
         setErrorDescarga(interpretarError(fallo).general || 'No se pudo descargar la evidencia.');
+      } finally {
+        setDescargando(null);
       }
     },
     [id],
   );
 
-  if (cargando)
-    return (
-      <main>
-        <p role="status">Cargando solicitud…</p>
-      </main>
-    );
+  const cerrarSolicitud = useCallback(async () => {
+    setErrorCierre(null);
+    setCerrando(true);
+    try {
+      await cerrar(id);
+      setIntento((n) => n + 1);
+    } catch (fallo) {
+      setErrorCierre(interpretarError(fallo).general || 'No se pudo cerrar la solicitud.');
+    } finally {
+      setCerrando(false);
+    }
+  }, [id]);
+
+  if (cargando) return <PaginaCargando texto="Cargando solicitud…" tipo="detalle" />;
   if (error)
     return (
-      <main>
-        <p role="alert">{error}</p>
-        <button
-          type="button"
-          onClick={() => {
-            setCargando(true);
-            setError(null);
-            setIntento((n) => n + 1);
-          }}
-        >
-          Reintentar
-        </button>
+      <main className="detalle-solicitud">
+        <p role="alert" className="aviso-error">
+          {error}
+        </p>
+        <div className="detalle-solicitud__error-acciones">
+          <button
+            type="button"
+            className="admin-boton"
+            onClick={() => {
+              setCargando(true);
+              setError(null);
+              setIntento((n) => n + 1);
+            }}
+          >
+            Reintentar
+          </button>
+          <Link className="admin-boton" to="/">
+            Volver al inicio
+          </Link>
+        </div>
       </main>
     );
   const esEstudiante = usuario?.rol === 'ESTUDIANTE';
@@ -129,9 +162,15 @@ function DetalleSolicitud({ id }) {
 
   return (
     <main className="detalle-solicitud">
-      <Link to={esEstudiante ? '/mis-solicitudes' : '/bandeja'}>
+      <Button
+        como={Link}
+        variante="enlace"
+        icono="arrowLeft"
+        className="detalle-solicitud__volver"
+        to={esEstudiante ? '/mis-solicitudes' : '/bandeja'}
+      >
         {esEstudiante ? 'Volver a mis solicitudes' : 'Volver a la bandeja'}
-      </Link>
+      </Button>
       <h1>
         {datos.codigo} · {datos.titulo}
       </h1>
@@ -149,71 +188,99 @@ function DetalleSolicitud({ id }) {
           ahora={ahora}
         />
       </div>
-      <h2>Detalle</h2>
-      <dl className="detalle-solicitud__datos">
-        <div>
-          <dt>Descripción</dt>
-          <dd>{datos.descripcion}</dd>
+      <div className="detalle-solicitud__layout">
+        <div className="detalle-solicitud__principal">
+          <Card titulo="Detalle" icono="clipboard">
+            <dl className="detalle-solicitud__datos">
+              <div>
+                <dt>Descripción</dt>
+                <dd>{datos.descripcion}</dd>
+              </div>
+              <div>
+                <dt>Categoría</dt>
+                <dd>{datos.categoriaNombre || datos.categoria?.nombre || 'Sin categoría'}</dd>
+              </div>
+              <div>
+                <dt>Área</dt>
+                <dd>{datos.areaNombre || datos.area?.nombre || 'Sin área'}</dd>
+              </div>
+              <div>
+                <dt>Ubicación</dt>
+                <dd>
+                  {datos.ubicacionCampus} · {datos.ubicacionAmbiente}
+                </dd>
+              </div>
+              <div>
+                <dt>Solicitante</dt>
+                <dd>
+                  {datos.solicitanteNombreCompleto ||
+                    nombreCompleto(datos.solicitante) ||
+                    'Sin dato'}
+                </dd>
+              </div>
+              <div>
+                <dt>Técnico</dt>
+                <dd>
+                  {datos.tecnicoNombreCompleto || nombreCompleto(datos.tecnico) || 'Sin asignar'}
+                </dd>
+              </div>
+              <div>
+                <dt>Registrada</dt>
+                <dd>{fecha(datos.fechaRegistro)}</dd>
+              </div>
+              {datos.informeResolucion && (
+                <div>
+                  <dt>Informe de resolución</dt>
+                  <dd>{datos.informeResolucion}</dd>
+                </div>
+              )}
+            </dl>
+            {errorCierre && <p role="alert">{errorCierre}</p>}
+            <AccionesSolicitud
+              acciones={datos.accionesPermitidas?.filter((a) => a === 'CERRAR')}
+              accionEnCurso={cerrando ? 'CERRAR' : null}
+              onAccion={cerrarSolicitud}
+            />
+          </Card>
+          <ComentariosPanel
+            solicitudId={id}
+            rol={usuario?.rol}
+            puedeComentar={datos.accionesPermitidas?.includes('COMENTAR') ?? false}
+          />
         </div>
-        <div>
-          <dt>Categoría</dt>
-          <dd>{datos.categoriaNombre || datos.categoria?.nombre || '—'}</dd>
-        </div>
-        <div>
-          <dt>Área</dt>
-          <dd>{datos.areaNombre || datos.area?.nombre || '—'}</dd>
-        </div>
-        <div>
-          <dt>Ubicación</dt>
-          <dd>
-            {datos.ubicacionCampus} · {datos.ubicacionAmbiente}
-          </dd>
-        </div>
-        <div>
-          <dt>Solicitante</dt>
-          <dd>{datos.solicitanteNombreCompleto || nombreCompleto(datos.solicitante) || '—'}</dd>
-        </div>
-        <div>
-          <dt>Técnico</dt>
-          <dd>{datos.tecnicoNombreCompleto || nombreCompleto(datos.tecnico) || 'Sin asignar'}</dd>
-        </div>
-        <div>
-          <dt>Registrada</dt>
-          <dd>{fecha(datos.fechaRegistro)}</dd>
-        </div>
-        {datos.informeResolucion && (
-          <div>
-            <dt>Informe de resolución</dt>
-            <dd>{datos.informeResolucion}</dd>
-          </div>
-        )}
-      </dl>
-      <h2>Evidencias</h2>
-      {errorDescarga && <p role="alert">{errorDescarga}</p>}
-      {datos.evidencias?.length ? (
-        <ul>
-          {datos.evidencias.map((item) => (
-            <li key={item.id}>
-              <button type="button" onClick={() => descargar(item)}>
-                {item.nombre}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Sin evidencias.</p>
-      )}
-      <details className="detalle-solicitud__historial" open>
-        <summary>
-          <h2>Historial</h2>
-        </summary>
-        <Timeline historial={historial} />
-      </details>
-      <ComentariosPanel
-        solicitudId={id}
-        rol={usuario?.rol}
-        puedeComentar={datos.accionesPermitidas?.includes('COMENTAR') ?? false}
-      />
+        <aside className="detalle-solicitud__lateral">
+          <Card titulo="Evidencias" icono="paperclip" tono="violeta">
+            {errorDescarga && <p role="alert">{errorDescarga}</p>}
+            {datos.evidencias?.length ? (
+              <ul>
+                {datos.evidencias.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      aria-busy={descargando === item.id ? 'true' : undefined}
+                      disabled={descargando !== null}
+                      onClick={() => descargar(item)}
+                    >
+                      {descargando === item.id ? `Descargando ${item.nombre}…` : item.nombre}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState compacto icono="paperclip" titulo="Sin evidencias." />
+            )}
+          </Card>
+          <details className="detalle-solicitud__historial detalle-solicitud__seccion" open>
+            <summary>
+              <h2>
+                <IconoFicha nombre="clock" tono="neutro" />
+                Historial
+              </h2>
+            </summary>
+            <Timeline historial={historial} />
+          </details>
+        </aside>
+      </div>
     </main>
   );
 }

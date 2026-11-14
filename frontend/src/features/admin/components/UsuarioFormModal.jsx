@@ -1,8 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import LeyendaObligatorios from '../../../components/ui/LeyendaObligatorios.jsx';
 import Modal from '../../../components/ui/Modal.jsx';
 import { ROLES, ROLES_CON_AREA } from '../roles.js';
 import { validarUsuario } from '../validacion.usuario.js';
 import CampoAdmin from './CampoAdmin.jsx';
+import Select from '../../../components/ui/Select.jsx';
 import './adminUi.css';
 
 const CAMPOS = [
@@ -97,6 +99,7 @@ function Formulario({
 
   return (
     <form ref={formRef} className="admin-formulario" onSubmit={enviar} noValidate>
+      <LeyendaObligatorios />
       {campoTexto('codigoInstitucional', 'Código institucional', {
         soloAlta: true,
         maxLength: 20,
@@ -117,14 +120,14 @@ function Formulario({
           ayuda: 'Mínimo 8 caracteres, una mayúscula y un número.',
         })}
       <CampoAdmin id={`${id}-rol`} etiqueta="Rol" error={errores.rol}>
-        <select value={valores.rol} onChange={cambiarRol}>
+        <Select value={valores.rol} onChange={cambiarRol}>
           <option value="">Selecciona un rol</option>
           {ROLES.map((r) => (
             <option key={r.codigo} value={r.codigo}>
               {r.etiqueta}
             </option>
           ))}
-        </select>
+        </Select>
       </CampoAdmin>
       {pideArea && (
         <CampoAdmin
@@ -133,14 +136,14 @@ function Formulario({
           error={errores.idArea}
           ayuda="Obligatoria para técnicos y supervisores."
         >
-          <select value={valores.idArea} onChange={cambiar('idArea')}>
+          <Select value={valores.idArea} onChange={cambiar('idArea')}>
             <option value="">Selecciona un área</option>
             {areas.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.nombre}
               </option>
             ))}
-          </select>
+          </Select>
         </CampoAdmin>
       )}
       {sinAreasPorError && (

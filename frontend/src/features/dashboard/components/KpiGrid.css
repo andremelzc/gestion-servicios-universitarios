@@ -1,4 +1,4 @@
-/* Rejilla de KPIs, mobile-first (UX §2.3): 1 columna base, 2 en md, 5 en lg. */
+/* Rejilla de KPIs, mobile-first (UX §2.3): 1 columna base, 2 en md, 3 en lg (6 KPIs: dos filas parejas). */
 .kpi-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -13,6 +13,6 @@
 
 @media (min-width: 1024px) {
   .kpi-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

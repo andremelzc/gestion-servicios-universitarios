@@ -1,3 +1,4 @@
+import { PaginaCargando } from '../../../components/ui/Skeleton.jsx';
 import ForbiddenPage from '../../../components/layout/ForbiddenPage.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import BandejaSupervisorPage from './BandejaSupervisorPage.jsx';
@@ -10,11 +11,7 @@ import BandejaTecnicoPage from './BandejaTecnicoPage.jsx';
 export default function BandejaPage() {
   const { usuario, isLoading } = useAuth();
   if (isLoading) {
-    return (
-      <p role="status" className="bandeja-cargando">
-        Cargando…
-      </p>
-    );
+    return <PaginaCargando />;
   }
   switch (usuario?.rol) {
     case 'TECNICO':

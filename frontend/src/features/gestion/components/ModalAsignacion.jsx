@@ -1,6 +1,8 @@
 import { cloneElement, useEffect, useId, useRef, useState } from 'react';
+import LeyendaObligatorios from '../../../components/ui/LeyendaObligatorios.jsx';
 import Modal from '../../../components/ui/Modal.jsx';
 import { interpretarError } from '../../../services/errores.js';
+import Select from '../../../components/ui/Select.jsx';
 import './ModalAsignacion.css';
 
 const MAX_NOTA = 255;
@@ -95,10 +97,11 @@ function FormularioAsignacion(props) {
   return (
     <form className="modal-asignacion" onSubmit={enviar} noValidate>
       <p className="modal-asignacion__resumen">{solicitud.titulo}</p>
+      <LeyendaObligatorios />
 
       {prioridades.length > 0 && (
         <Campo id={`${id}-prioridad`} etiqueta="Prioridad definitiva" error={campos.idPrioridad}>
-          <select
+          <Select
             ref={prioridadRef}
             value={idPrioridad}
             onChange={(e) => setIdPrioridad(e.target.value)}
@@ -109,12 +112,12 @@ function FormularioAsignacion(props) {
                 {p.nombre}
               </option>
             ))}
-          </select>
+          </Select>
         </Campo>
       )}
 
       <Campo id={`${id}-tecnico`} etiqueta="Técnico" error={errorLocal ?? campos.idTecnico}>
-        <select
+        <Select
           ref={tecnicoRef}
           value={idTecnico}
           onChange={(e) => {
@@ -131,7 +134,7 @@ function FormularioAsignacion(props) {
               </option>
             );
           })}
-        </select>
+        </Select>
       </Campo>
 
       <Campo

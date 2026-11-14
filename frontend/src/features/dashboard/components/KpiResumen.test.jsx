@@ -17,7 +17,7 @@ describe('KpiResumen', () => {
     expect(cifra('Pendientes')).toHaveTextContent('45');
     expect(cifra('Atendidas')).toHaveTextContent('98');
     expect(cifra('% Resueltas')).toHaveTextContent('70.5%');
-    expect(cifra('MTTR')).toHaveTextContent('24.5h');
+    expect(cifra('Tiempo medio de resolución')).toHaveTextContent('24.5h');
     expect(cifra('Vencidas')).toHaveTextContent('7');
   });
 
@@ -40,7 +40,7 @@ describe('KpiResumen', () => {
       />,
     );
 
-    const mttr = screen.getByRole('group', { name: 'MTTR' });
+    const mttr = screen.getByRole('group', { name: 'Tiempo medio de resolución' });
     expect(within(mttr).getByText('—')).toBeInTheDocument();
     expect(within(mttr).getByText('Sin datos')).toBeInTheDocument();
     expect(

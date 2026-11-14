@@ -3,31 +3,18 @@
 .login {
   --login-text: var(--color-text, #111827);
   --login-muted: var(--color-text-muted, #4b5563);
-  --login-border: var(--color-border, #d1d5db);
+  --login-border: var(--color-border-control, #6b7280);
   --login-primary: var(--color-primary, #1d4ed8);
   --login-primary-hover: var(--color-primary-hover, #1e40af);
   --login-focus: var(--color-focus, #2563eb);
   --login-danger: var(--color-danger, #b91c1c);
   --login-radius: var(--radius, 8px);
   color: var(--login-text);
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 24px 16px;
 }
 
 .login__titulo {
   margin: 0 0 16px;
   font-size: 1.5rem;
-}
-
-.login__alerta {
-  margin: 0 0 16px;
-  padding: 10px 12px;
-  border: 1px solid var(--login-danger);
-  border-radius: var(--login-radius);
-  /* Tinte del color de peligro (#B91C1C al 8 %), sin depender de color-mix. */
-  background: rgb(185 28 28 / 8%);
-  color: var(--login-danger);
 }
 
 .login__form {
@@ -103,57 +90,6 @@
   outline-offset: 1px;
 }
 
-.login__enviar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  border: 0;
-  border-radius: var(--login-radius);
-  background: var(--login-primary);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.login__enviar:hover:not(:disabled) {
-  background: var(--login-primary-hover);
-}
-
-.login__enviar:focus-visible {
-  outline: 3px solid var(--login-focus);
-  outline-offset: 2px;
-}
-
-.login__enviar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Spinner del envío: decorativo (el texto del botón ya anuncia "Iniciando sesión…"). */
-.login__spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgb(255 255 255 / 45%);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: login-girar 0.8s linear infinite;
-}
-
-@keyframes login-girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Movimiento reducido: se conserva la señal visual con un giro mucho más lento. */
-@media (prefers-reduced-motion: reduce) {
-  .login__spinner {
-    animation-duration: 2.4s;
-  }
-}
-
 .login__pie {
   margin: 16px 0 0;
   font-size: 0.875rem;
@@ -162,4 +98,17 @@
 
 .login__pie a {
   color: var(--login-primary);
+}
+
+.login__enviar {
+  width: 100%;
+}
+
+.login__alerta {
+  margin: 0 0 16px;
+}
+
+/* El error de campo lleva icono además de color y texto (UX §2.4). */
+.login__error::before {
+  content: '⚠ ';
 }

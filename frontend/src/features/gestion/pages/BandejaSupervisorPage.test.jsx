@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -6,6 +7,7 @@ import { paginaDe, problema, resumenEjemplo } from '../../../test/handlers/gesti
 import { server } from '../../../test/server.js';
 import { restaurarAncho, simularAncho } from '../../../test/simularAncho.js';
 import BandejaSupervisorPage from './BandejaSupervisorPage.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 // Registra cada consulta que llega a `GET /solicitudes` y responde con la lista indicada.
 function espiarBandeja(respuesta = () => paginaDe([resumenEjemplo])) {
@@ -28,7 +30,11 @@ afterEach(restaurarAncho);
 describe('BandejaSupervisorPage', () => {
   it('lista la bandeja con prioridad, estado y SLA, y consulta primero "Por asignar"', async () => {
     const consultas = espiarBandeja();
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
 
     const fila = (await screen.findByText('SOL-2026-0150')).closest('tr');
     expect(within(fila).getByText('Proyector sin imagen')).toBeInTheDocument();
@@ -44,7 +50,11 @@ describe('BandejaSupervisorPage', () => {
 
   it('cambia de pestaña y consulta los estados de esa vista', async () => {
     const consultas = espiarBandeja();
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0150');
 
     await userEvent.click(screen.getByRole('tab', { name: 'En curso' }));
@@ -59,12 +69,16 @@ describe('BandejaSupervisorPage', () => {
 
   it('aplica los filtros de prioridad, categoría, técnico y vencidas', async () => {
     const consultas = espiarBandeja();
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0150');
 
-    await userEvent.selectOptions(await screen.findByLabelText('Prioridad'), 'Alta');
-    await userEvent.selectOptions(screen.getByLabelText('Categoría'), 'Equipos de Cómputo');
-    await userEvent.selectOptions(screen.getByLabelText('Técnico'), 'Carlos Ruiz');
+    await seleccionar(userEvent, await screen.findByLabelText('Prioridad'), 'Alta');
+    await seleccionar(userEvent, screen.getByLabelText('Categoría'), 'Equipos de Cómputo');
+    await seleccionar(userEvent, screen.getByLabelText('Técnico'), 'Carlos Ruiz');
     await userEvent.click(screen.getByLabelText('Solo vencidas'));
 
     await waitFor(() => expect(ultima(consultas).get('vencidas')).toBe('true'));
@@ -75,7 +89,11 @@ describe('BandejaSupervisorPage', () => {
 
   it('busca por código o título esperando a que se deje de escribir', async () => {
     const consultas = espiarBandeja();
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0150');
 
     await userEvent.type(screen.getByRole('searchbox', { name: 'Buscar' }), 'wifi');
@@ -92,7 +110,11 @@ describe('BandejaSupervisorPage', () => {
 
   it('pagina mostrando las filas de cada página y vuelve a la primera al cambiar de pestaña', async () => {
     const consultas = espiarBandeja(porPagina);
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findByText('SOL-2026-0200')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
@@ -111,7 +133,11 @@ describe('BandejaSupervisorPage', () => {
         ? paginaDe([], { page: 1, totalPages: 1, totalElements: 20 })
         : paginaDe([filaPagina(0)], { page: 0, totalPages: 2, totalElements: 21 }),
     );
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     await screen.findByText('SOL-2026-0200');
 
     await userEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
@@ -123,7 +149,11 @@ describe('BandejaSupervisorPage', () => {
 
   it('el contenido va dentro de un landmark <main> con el título como encabezado', async () => {
     espiarBandeja();
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     const principal = await screen.findByRole('main');
     expect(
       within(principal).getByRole('heading', { level: 1, name: 'Bandeja de solicitudes' }),
@@ -136,7 +166,11 @@ describe('BandejaSupervisorPage', () => {
         problema(500, 'interno', 'Error', 'fallo', '/api/v1/solicitudes'),
       ),
     );
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findByRole('alert')).toHaveTextContent('Ocurrió un error inesperado');
 
     server.use(
@@ -148,7 +182,11 @@ describe('BandejaSupervisorPage', () => {
 
   it('muestra un vacío con texto cuando la vista no tiene solicitudes', async () => {
     espiarBandeja(() => paginaDe([]));
-    render(<BandejaSupervisorPage />);
+    render(
+      <MemoryRouter>
+        <BandejaSupervisorPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findByText('No hay solicitudes en esta vista.')).toBeInTheDocument();
   });
 
@@ -188,7 +226,7 @@ describe('BandejaSupervisorPage', () => {
     async function abrir(codigo = 'SOL-2026-0150', verbo = 'Asignar') {
       await userEvent.click(await screen.findByRole('button', { name: `${verbo} ${codigo}` }));
       const dialogo = await screen.findByRole('dialog');
-      await userEvent.selectOptions(await within(dialogo).findByLabelText('Técnico'), '14');
+      await seleccionar(userEvent, await within(dialogo).findByLabelText('Técnico'), '14');
       return dialogo;
     }
     const enviar = (dialogo) =>
@@ -202,7 +240,11 @@ describe('BandejaSupervisorPage', () => {
           return HttpResponse.json({ id: Number(params.id) });
         },
       });
-      render(<BandejaSupervisorPage />);
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
+      );
       const dialogo = await abrir();
 
       await enviar(dialogo);
@@ -222,7 +264,11 @@ describe('BandejaSupervisorPage', () => {
     it('la región de avisos existe desde el inicio y se vacía al empezar otra acción', async () => {
       bandejaConEstado([resumenEjemplo, { ...resumenEjemplo, id: 151, codigo: 'SOL-2026-0151' }]);
       espiarAcciones();
-      render(<BandejaSupervisorPage />);
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
+      );
       expect(regionAviso()).toBeInTheDocument();
       expect(regionAviso()).toBeEmptyDOMElement();
       expect(regionAviso()).not.toHaveAttribute('aria-label');
@@ -237,12 +283,13 @@ describe('BandejaSupervisorPage', () => {
     it('en REGISTRADA permite cambiar la prioridad: evalúa antes de asignar', async () => {
       bandejaConEstado([registrada]);
       const llamadas = espiarAcciones();
-      render(<BandejaSupervisorPage />);
-      const dialogo = await abrir();
-      await userEvent.selectOptions(
-        within(dialogo).getByLabelText('Prioridad definitiva'),
-        'Media',
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
       );
+      const dialogo = await abrir();
+      await seleccionar(userEvent, within(dialogo).getByLabelText('Prioridad definitiva'), 'Media');
 
       await enviar(dialogo);
 
@@ -256,7 +303,11 @@ describe('BandejaSupervisorPage', () => {
     it('fuera de REGISTRADA no ofrece prioridad ni llama a evaluar (el API solo la admite ahí)', async () => {
       bandejaConEstado([resumenEjemplo]);
       const llamadas = espiarAcciones();
-      render(<BandejaSupervisorPage />);
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
+      );
       const dialogo = await abrir();
       expect(within(dialogo).queryByLabelText('Prioridad definitiva')).not.toBeInTheDocument();
 
@@ -269,7 +320,11 @@ describe('BandejaSupervisorPage', () => {
     it('permite reasignar una solicitud en atención', async () => {
       bandejaConEstado([{ ...resumenEjemplo, estadoCodigo: 'EN_ATENCION' }]);
       const llamadas = espiarAcciones();
-      render(<BandejaSupervisorPage />);
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
+      );
 
       await enviar(await abrir('SOL-2026-0150', 'Reasignar'));
 
@@ -282,9 +337,14 @@ describe('BandejaSupervisorPage', () => {
       async function fallarAsignando() {
         const { consultas } = bandejaConEstado([registrada]);
         const llamadas = espiarAcciones({ asignar: falla });
-        render(<BandejaSupervisorPage />);
+        render(
+          <MemoryRouter>
+            <BandejaSupervisorPage />
+          </MemoryRouter>,
+        );
         const dialogo = await abrir();
-        await userEvent.selectOptions(
+        await seleccionar(
+          userEvent,
           within(dialogo).getByLabelText('Prioridad definitiva'),
           'Media',
         );
@@ -309,7 +369,7 @@ describe('BandejaSupervisorPage', () => {
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
         const otro = await abrir();
-        await userEvent.selectOptions(within(otro).getByLabelText('Prioridad definitiva'), 'Media');
+        await seleccionar(userEvent, within(otro).getByLabelText('Prioridad definitiva'), 'Media');
         await enviar(otro);
 
         await waitFor(() => expect(llamadas.filter(([a]) => a === 'evaluar')).toHaveLength(2));
@@ -321,7 +381,11 @@ describe('BandejaSupervisorPage', () => {
       espiarAcciones({
         asignar: () => problema(409, 'transicion-invalida', 'Conflicto', 'Ya fue asignada.', '/x'),
       });
-      render(<BandejaSupervisorPage />);
+      render(
+        <MemoryRouter>
+          <BandejaSupervisorPage />
+        </MemoryRouter>,
+      );
       const dialogo = await abrir();
 
       await enviar(dialogo);

@@ -4,11 +4,6 @@
   padding: var(--space-4, 16px);
 }
 
-.bandeja-supervisor h1 {
-  margin: 0;
-  font-size: var(--font-size-h2, 1.5rem);
-}
-
 .bandeja-supervisor .data-table__acciones button {
   min-width: 44px;
   min-height: 44px;

@@ -68,6 +68,23 @@ describe('useCrud · listado', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('acepta el sobre real de Spring (`number` en vez de `page`) sin NaN (AUD-21)', async () => {
+    server.use(
+      http.get(`${BASE}/categorias`, () =>
+        HttpResponse.json({
+          content: [{ id: 1, nombre: 'Fila' }],
+          number: 2,
+          size: 20,
+          totalElements: 50,
+          totalPages: 3,
+        }),
+      ),
+    );
+    const { result } = montar();
+    await cargado(result);
+    expect(result.current.page.page).toBe(2);
+  });
+
   it('onPageChange pide la página indicada y conserva la anterior mientras carga', async () => {
     const consultas = simularListado();
     const { result } = montar();

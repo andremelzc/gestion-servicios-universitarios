@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { solicitudDetalleEjemplo } from '../../../test/handlers/gestion.js';
 import ModalAsignacion from './ModalAsignacion.jsx';
+import { seleccionar, opcionesDe } from '../../../test/seleccionar.js';
 
 // Forma real de api-rest §3.2: `area` es un objeto y `prioridad` el código ("ALTA").
 const solicitud = solicitudDetalleEjemplo;
@@ -44,16 +45,19 @@ describe('ModalAsignacion', () => {
 
     expect(screen.getByRole('dialog', { name: 'Asignar SOL-2026-0150' })).toBeInTheDocument();
     expect(screen.getByText('Proyector sin imagen')).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Carlos Ruiz · 3 en curso' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Lucía Vega · 6 en curso' })).toBeInTheDocument();
+    const etiquetas = opcionesDe(selectorTecnico()).map((o) => o.etiqueta);
+    expect(etiquetas).toContain('Carlos Ruiz · 3 en curso');
+    expect(etiquetas).toContain('Lucía Vega · 6 en curso');
   });
 
   it('[US-08 CA-4] con la forma real de la API deshabilita inactivos y técnicos de otra área', () => {
     renderModal();
 
-    expect(screen.getByRole('option', { name: 'Marta Paz · inactivo' })).toBeDisabled();
-    expect(screen.getByRole('option', { name: 'Raúl Soto · otra área' })).toBeDisabled();
-    expect(screen.getByRole('option', { name: 'Carlos Ruiz · 3 en curso' })).toBeEnabled();
+    const opciones = opcionesDe(selectorTecnico());
+    const de = (etiqueta) => opciones.find((o) => o.etiqueta === etiqueta);
+    expect(de('Marta Paz · inactivo').deshabilitada).toBe(true);
+    expect(de('Raúl Soto · otra área').deshabilitada).toBe(true);
+    expect(de('Carlos Ruiz · 3 en curso').deshabilitada).toBe(false);
   });
 
   it('[US-08 CA-8] al reasignar marca al técnico actual como "(actual)" y no se puede elegir', () => {
@@ -61,17 +65,17 @@ describe('ModalAsignacion', () => {
       solicitud: { ...solicitud, tecnico: { id: 14, nombre: 'Carlos', apellido: 'Ruiz' } },
     });
 
-    expect(
-      screen.getByRole('option', { name: 'Carlos Ruiz · 3 en curso (actual)' }),
-    ).toBeDisabled();
-    expect(screen.getByRole('option', { name: 'Lucía Vega · 6 en curso' })).toBeEnabled();
+    const opciones = opcionesDe(selectorTecnico());
+    const de = (etiqueta) => opciones.find((o) => o.etiqueta === etiqueta);
+    expect(de('Carlos Ruiz · 3 en curso (actual)').deshabilitada).toBe(true);
+    expect(de('Lucía Vega · 6 en curso').deshabilitada).toBe(false);
   });
 
   it('[US-08 CA-1] sin tocar la prioridad envía técnico y nota, sin idPrioridad', async () => {
     const { onSubmit } = renderModal();
-    expect(selectorPrioridad()).toHaveValue('3');
+    expect(selectorPrioridad()).toHaveAttribute('data-valor', '3');
 
-    await userEvent.selectOptions(selectorTecnico(), '15');
+    await seleccionar(userEvent, selectorTecnico(), '15');
     await userEvent.type(campoNota(), ' Urgente ');
     expect(campoNota()).toHaveAttribute('maxlength', '255');
     expect(screen.getByText('9 de 255 caracteres')).toBeInTheDocument();
@@ -85,8 +89,8 @@ describe('ModalAsignacion', () => {
   it('[US-23 CA-6] si cambia la prioridad incluye idPrioridad para que el contenedor evalúe', async () => {
     const { onSubmit } = renderModal();
 
-    await userEvent.selectOptions(selectorPrioridad(), '2');
-    await userEvent.selectOptions(selectorTecnico(), '14');
+    await seleccionar(userEvent, selectorPrioridad(), '2');
+    await seleccionar(userEvent, selectorTecnico(), '14');
     await asignar();
 
     expect(onSubmit).toHaveBeenCalledWith({ idTecnico: 14, nota: undefined, idPrioridad: 2 });
@@ -95,9 +99,11 @@ describe('ModalAsignacion', () => {
   it('[US-23 CA-6] si no puede resolver la prioridad actual muestra un marcador y no elige ninguna', async () => {
     const { onSubmit } = renderModal({ solicitud: { ...solicitud, prioridad: 'DESCONOCIDA' } });
 
-    expect(selectorPrioridad()).toHaveValue('');
-    expect(screen.getByRole('option', { name: 'Selecciona una prioridad' })).toBeInTheDocument();
-    await userEvent.selectOptions(selectorTecnico(), '14');
+    expect(selectorPrioridad()).toHaveAttribute('data-valor', '');
+    expect(opcionesDe(selectorPrioridad()).map((o) => o.etiqueta)).toContain(
+      'Selecciona una prioridad',
+    );
+    await seleccionar(userEvent, selectorTecnico(), '14');
     await asignar();
 
     expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('idPrioridad');
@@ -106,7 +112,7 @@ describe('ModalAsignacion', () => {
   it('[US-08 CA-1] sin lista de prioridades no muestra el selector ni envía idPrioridad', async () => {
     const { onSubmit } = renderModal({ prioridades: [] });
 
-    await userEvent.selectOptions(selectorTecnico(), '14');
+    await seleccionar(userEvent, selectorTecnico(), '14');
     await asignar();
 
     expect(screen.queryByLabelText('Prioridad definitiva')).not.toBeInTheDocument();

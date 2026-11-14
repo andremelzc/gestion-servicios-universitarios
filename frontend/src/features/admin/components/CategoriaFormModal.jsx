@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Modal from '../../../components/ui/Modal.jsx';
 import { validarCategoria } from '../validacionCatalogos.js';
 import CampoAdmin from './CampoAdmin.jsx';
+import Select from '../../../components/ui/Select.jsx';
 import './adminUi.css';
 
 const CAMPOS = ['nombre', 'descripcion', 'idArea', 'tiempoSlaHoras'];
@@ -60,7 +61,7 @@ function Formulario({ categoria, areas, onClose, onSubmit, isSaving, errorCampos
         />
       </CampoAdmin>
       <CampoAdmin id={`${id}-area`} etiqueta="Área responsable" error={errores.idArea}>
-        <select value={valores.idArea} onChange={cambiar('idArea')}>
+        <Select value={valores.idArea} onChange={cambiar('idArea')}>
           <option value="">Selecciona un área</option>
           {sinArea && <option value={categoria.idArea}>{categoria.area}</option>}
           {areas.map((area) => (
@@ -68,7 +69,7 @@ function Formulario({ categoria, areas, onClose, onSubmit, isSaving, errorCampos
               {area.nombre}
             </option>
           ))}
-        </select>
+        </Select>
       </CampoAdmin>
       <CampoAdmin
         id={`${id}-sla`}

@@ -6,6 +6,7 @@ import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -38,12 +39,12 @@ describe('UsuariosPage: fallo al cargar las áreas', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Nuevo usuario' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nuevo usuario' }));
 
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'TECNICO');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'TECNICO');
 
     expect(dialogo.getByRole('button', { name: 'Guardar' })).toBeDisabled();
     expect(dialogo.getByText(/no se pudieron cargar las áreas/i)).toBeVisible();
 
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'ESTUDIANTE');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'ESTUDIANTE');
 
     expect(dialogo.getByRole('button', { name: 'Guardar' })).toBeEnabled();
   });
@@ -54,7 +55,7 @@ describe('UsuariosPage: fallo al cargar las áreas', () => {
     await screen.findByRole('alert');
     await userEvent.click(screen.getByRole('button', { name: 'Nuevo usuario' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Nuevo usuario' }));
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'SUPERVISOR');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'SUPERVISOR');
 
     await userEvent.click(dialogo.getByRole('button', { name: 'Reintentar' }));
 

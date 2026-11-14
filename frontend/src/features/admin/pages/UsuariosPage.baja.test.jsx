@@ -6,6 +6,7 @@ import { reiniciarUsuarios } from '../../../test/handlers/admin.usuarios.js';
 import { problema } from '../../../test/handlers/gestion.js';
 import { server } from '../../../test/server.js';
 import { renderizarUsuarios } from '../../../test/renderUsuarios.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 beforeEach(() => reiniciarUsuarios());
 
@@ -124,7 +125,7 @@ describe('UsuariosPage: desactivar y reactivar (US-34, RN-22)', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Editar Carlos Admin' }));
     const dialogo = within(screen.getByRole('dialog', { name: 'Editar usuario Carlos Admin' }));
 
-    await userEvent.selectOptions(dialogo.getByLabelText('Rol'), 'ESTUDIANTE');
+    await seleccionar(userEvent, dialogo.getByLabelText('Rol'), 'ESTUDIANTE');
     await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }));
 
     expect(await dialogo.findByRole('alert')).toHaveTextContent(

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { server } from '../../../test/server.js';
 import { AuthProvider, STORAGE_KEY } from '../../auth/AuthContext.jsx';
 import DashboardPage from './DashboardPage.jsx';
+import { seleccionar, esperarOpcion } from '../../../test/seleccionar.js';
 
 afterEach(() => {
   server.events.removeAllListeners();
@@ -74,11 +75,11 @@ describe('DashboardPage', () => {
 
     expect(screen.getAllByRole('status').map((a) => a.textContent)).toEqual([
       'Cargando Indicadores clave…',
-      'Cargando solicitudes vencidas…',
       'Cargando Solicitudes por categoría…',
       'Cargando Solicitudes por prioridad…',
       'Cargando Solicitudes por responsable…',
       'Cargando Solicitudes por estado…',
+      'Cargando Solicitudes vencidas…',
     ]);
     await esperarCarga();
   });
@@ -111,7 +112,9 @@ describe('DashboardPage', () => {
     renderizar();
     await esperarCarga();
 
-    expect(within(screen.getByRole('group', { name: 'MTTR' })).getByText('—')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('group', { name: 'Tiempo medio de resolución' })).getByText('—'),
+    ).toBeInTheDocument();
   });
 
   it('[US-12 CA-10] si un widget falla, solo ese muestra el error y los demás siguen', async () => {
@@ -284,8 +287,8 @@ describe('DashboardPage', () => {
     it('[DASH-15 CA-4] ADMIN ve el filtro Área con las áreas de GET /areas', async () => {
       renderizar('ADMIN');
 
-      expect(await screen.findByRole('option', { name: 'Infraestructura' })).toBeInTheDocument();
-      expect(screen.getByLabelText('Área')).toHaveValue('');
+      await esperarOpcion(await screen.findByLabelText('Área'), 'Infraestructura');
+      expect(screen.getByLabelText('Área')).toHaveAttribute('data-valor', '');
       await esperarCarga();
     });
 
@@ -307,7 +310,7 @@ describe('DashboardPage', () => {
       const urls = registrarPeticiones();
       renderizar('ADMIN');
       await esperarCarga();
-      await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
+      await seleccionar(userEvent, await screen.findByLabelText('Área'), 'Infraestructura');
       urls.length = 0;
 
       await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
@@ -321,7 +324,7 @@ describe('DashboardPage', () => {
       renderizar('ADMIN');
       await esperarCarga();
 
-      await userEvent.selectOptions(await screen.findByLabelText('Área'), 'Infraestructura');
+      await seleccionar(userEvent, await screen.findByLabelText('Área'), 'Infraestructura');
       expect(screen.getByText('Mostrando: últimos 30 días')).toBeInTheDocument();
 
       await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
@@ -335,7 +338,7 @@ describe('DashboardPage', () => {
       const urls = registrarPeticiones();
       renderizar('ADMIN');
       await esperarCarga();
-      expect(await screen.findByRole('option', { name: 'Infraestructura' })).toBeInTheDocument();
+      await esperarOpcion(await screen.findByLabelText('Área'), 'Infraestructura');
 
       await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
       await esperarCarga();

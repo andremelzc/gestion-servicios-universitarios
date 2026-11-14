@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { PantallaCarga } from '../ui/Skeleton.jsx';
 import { useAuth } from '../../features/auth/AuthContext.jsx';
 
 /**
@@ -14,11 +15,7 @@ export default function ProtectedRoute() {
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <p role="status" className="sr-only">
-        Cargando sesión…
-      </p>
-    );
+    return <PantallaCarga texto="Cargando sesión…" />;
   }
 
   if (!isAuthenticated) {

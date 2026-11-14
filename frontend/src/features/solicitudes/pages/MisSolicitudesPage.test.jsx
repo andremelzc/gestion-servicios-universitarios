@@ -11,6 +11,7 @@ import {
 import { restaurarAncho, simularAncho } from '../../../test/simularAncho.js';
 import { server } from '../../../test/server.js';
 import MisSolicitudesPage from './MisSolicitudesPage.jsx';
+import { seleccionar } from '../../../test/seleccionar.js';
 
 const RUTA_API = '*/api/v1/solicitudes/mis-solicitudes';
 
@@ -104,7 +105,7 @@ describe('MisSolicitudesPage', () => {
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
     await waitFor(() => expect(consultas.at(-1)).toMatchObject({ page: '1' }));
 
-    await user.selectOptions(screen.getByLabelText('Estado'), 'CERRADA');
+    await seleccionar(user, screen.getByLabelText('Estado'), 'CERRADA');
     await waitFor(() => expect(consultas.at(-1)).toMatchObject({ page: '0', estado: 'CERRADA' }));
     await waitFor(() => expect(filasActuales()).toHaveLength(4));
     expect(within(tablaActual()).getByText(misSolicitudesEjemplo[5].codigo)).toBeInTheDocument();
@@ -113,7 +114,7 @@ describe('MisSolicitudesPage', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Siguiente' })).not.toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText('Estado'), '');
+    await seleccionar(user, screen.getByLabelText('Estado'), '');
     await waitFor(() => expect(consultas.at(-1)).toEqual({ page: '0', size: '20' }));
     await waitFor(() => expect(filasActuales()).toHaveLength(20));
   });

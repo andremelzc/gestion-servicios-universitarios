@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import './DataTable.css';
+import { IconoFicha } from './Icon.jsx';
 import useMediaQuery from './useMediaQuery.js';
 
 /**
@@ -129,10 +130,12 @@ function Tabla({ caption, columns, data, rowKey, renderActions, actionsHeader, e
           {data.map((fila) => (
             <tr key={fila[rowKey]}>
               {columns.map((c) => (
-                <td key={c.key}>{celda(c, fila, etiquetas)}</td>
+                <td key={c.key} className={`data-table__celda--${c.key}`}>
+                  {celda(c, fila, etiquetas)}
+                </td>
               ))}
               {renderActions && (
-                <td>
+                <td className="data-table__celda--acciones">
                   <div className="data-table__acciones">{renderActions(fila)}</div>
                 </td>
               )}
@@ -175,6 +178,7 @@ function Barra({ search, onSearchChange, includeInactive, onIncludeInactiveChang
           <input
             type="search"
             className="data-table__control"
+            placeholder="Escribe para buscar"
             value={search ?? ''}
             onChange={(e) => onSearchChange(e.target.value)}
           />
@@ -275,6 +279,7 @@ export default function DataTable({
   } else if (error) {
     contenido = (
       <div role="alert" className="data-table__mensaje data-table__mensaje--error">
+        <IconoFicha nombre="alert" tono="peligro" />
         <p>{textoDeError(error)}</p>
         {onRetry && (
           <button type="button" className="data-table__boton" onClick={onRetry}>
@@ -286,6 +291,7 @@ export default function DataTable({
   } else if (data.length === 0) {
     contenido = (
       <div className="data-table__mensaje">
+        <IconoFicha nombre={search ? 'search' : 'inbox'} tono="neutro" />
         <p role="status">{search ? textoSinResultados(appliedSearch) : emptyMessage}</p>
         {emptyAction}
       </div>

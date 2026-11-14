@@ -1,7 +1,7 @@
 .kpi-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1, 4px);
+  gap: var(--space-2, 8px);
   min-width: 0;
   padding: var(--space-4, 16px);
   background: var(--color-surface, #ffffff);
@@ -14,9 +14,10 @@
 .kpi-card__cabecera {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-3, 12px);
   color: var(--color-text-muted, #4b5563);
   font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .kpi-card__titulo {
@@ -42,4 +43,13 @@
   margin: 0;
   color: var(--color-text-muted, #4b5563);
   font-size: 0.875rem;
+}
+
+/* Vencidas con valor: borde y cifra en color de peligro; el texto del título sigue siendo la señal. */
+.kpi-card--alerta {
+  border-color: var(--color-danger, #b91c1c);
+}
+
+.kpi-card--alerta .kpi-card__valor {
+  color: var(--color-danger, #b91c1c);
 }

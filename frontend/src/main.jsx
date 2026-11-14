@@ -1,3 +1,4 @@
+import '@fontsource-variable/inter'; // Inter (UX §2.2), autoalojada: la CSP solo permite fuentes del mismo origen.
 import { createRoot } from 'react-dom/client';
 import App from './app/App.jsx';
 import { aplicarTema } from './features/preferencias/PreferenciasContext.jsx';
