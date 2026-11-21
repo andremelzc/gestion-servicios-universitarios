@@ -142,6 +142,8 @@ Cada casilla se marca con **enlace a su evidencia** (ver [Calendario §6](../04-
 
 ### 5.1 Secuencia y tiempos
 
+Consulta el [guion operativo con tiempos y responsables](guion-demostracion.md) y la [presentación de apoyo](presentacion-demostracion.pptx).
+
 | # | Min | Bloque | Qué se muestra (en vivo) | Expone |
 |:-:|:-:|:---|:---|:---:|
 | 1 | 1 | **Problema** | Los 7 problemas P1–P7 que resuelve el sistema (1 diapositiva) | R1 |
