@@ -23,7 +23,7 @@ El sistema exhibe un alto nivel de madurez técnica, cumpliendo con la totalidad
 - **Control de Acceso y Aislamiento:** La suite parametrizada `AuthAuthorizationIT` ejecutó la matriz completa de 4 roles institucionales contra todos los endpoints REST, certificando que los incidentes de Broken Object Level Authorization (IDOR) se neutralizan devolviendo HTTP `404 Not Found` en lugar de `403 Forbidden`, evitando la enumeración de recursos no autorizados.
 - **Rendimiento bajo Carga Nominal:** En el escenario de 50 usuarios concurrentes (RNF-02), el percentil 95 (P95) de tiempo de respuesta se situó en **218 ms** para endpoints operativos, **84 ms** para catálogos y **195 ms** para dashboards, con una tasa de error del **0.00 %**.
 - **Observabilidad de Extremo a Extremo:** La instrumentación con `TraceIdFilter`, correlación en SLF4J MDC, propagación en cabecera HTTP `X-Trace-Id` y formato estructurado RFC 7807 garantiza la trazabilidad completa ante anomalías, sin fuga de información sensible.
-- **Usabilidad Excepcional:** Las pruebas con usuarios ajenos al equipo arrojaron una puntuación promedio en la escala SUS de **82.5 / 100** (calificación "A" / Excelente).
+- **Usabilidad:** El estudio documentado con seis participantes externos obtuvo una media SUS de **83.33 / 100**, por encima del umbral de 70 ([resultados y cálculo](#53-resultados-del-cuestionario-sus-system-usability-scale)).
 
 ### 1.3 Calificación y Recomendación Oficial
 
@@ -269,10 +269,12 @@ Fórmula de Cálculo:
 | Evaluador 4  | Docente / Solicitante  |      16       |     15      |       31       |    **77.5**    |     Bueno (B)     |
 | Evaluador 5  | Personal Soporte TI    |      18       |     16      |       34       |    **85.0**    |   Excelente (A)   |
 | Evaluador 6  | Supervisor Operaciones |      18       |     18      |       36       |    **90.0**    | Excepcional (A+)  |
-| **PROMEDIO** | **Global**             |   **17.0**    |  **16.3**   |    **33.3**    | **82.5 / 100** | **EXCELENTE (A)** |
+| **PROMEDIO** | **Global**             |   **17.0**    |  **16.3**   |    **33.3**    | **83.33 / 100** |                   |
+
+Las seis puntuaciones individuales suman 500 puntos. La media se calcula dividiendo 500 entre 6 y se redondea a dos decimales. Los resultados publicados superan los dos umbrales de [QA-21 / #182](https://github.com/andremelzc/gestion-servicios-universitarios/issues/182): al menos cinco participantes y una media SUS de 70 o más.
 
 > [!NOTE]
-> **Criterio de Aceptación RNF-05 Cumplido:** El umbral contractual exigía un puntaje SUS medio **≥ 70 puntos**. La puntuación alcanzada de **82.5** ubica al software en el 10 % superior de usabilidad de aplicaciones de gestión según los percentiles globales de Bangor, Kortum & Miller.
+> El cálculo se verificó con los subtotales y puntajes anonimizados del informe incorporado en el [PR #360](https://github.com/andremelzc/gestion-servicios-universitarios/pull/360). Los cuestionarios originales y las fichas de sesión no están adjuntos a ese informe. La verificación cubre la aritmética de las cifras publicadas.
 
 ### 5.4 Verificación Automatizada de Accesibilidad y Responsive
 
