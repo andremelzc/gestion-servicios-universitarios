@@ -35,3 +35,9 @@ logging:
   level:
     root: WARN
     edu.universidad.servicios: INFO
+
+# En producción, CORS nunca hereda orígenes de desarrollo ni usa "*".
+# Si ALLOWED_ORIGINS no está definida, la lista de orígenes permitidos queda vacía.
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:}
